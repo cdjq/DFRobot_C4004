@@ -1,0 +1,269 @@
+/*!
+ * @file setAllParam.ino
+ * @brief Configure and read back major DFRobot C4004 parameters.
+ * @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
+ * @license The MIT License (MIT)
+ * @author JiaLi(zhixin.liu@dfrobot.com)
+ * @version V1.0.0
+ * @date 2026-05-22
+ * @url https://github.com/DFRobot/DFRobot_C4004
+ */
+
+#include "DFRobot_C4004.h"
+
+#if defined(ESP8266) || defined(ARDUINO_AVR_UNO)
+SoftwareSerial mySerial(4, 5);
+DFRobot_C4004 c4004(&mySerial, 115200);
+#elif defined(ESP32)
+DFRobot_C4004 c4004(&Serial1, 115200, /*D2*/ D2, /*D3*/ D3);
+#else
+DFRobot_C4004 c4004(&Serial1, 115200);
+#endif
+
+void setup()
+{
+  Serial.begin(115200);
+
+  while (!c4004.begin()) {
+    Serial.println(F("DFRobot C4004 begin failed, retrying..."));
+    delay(1000);
+  }
+  Serial.println(F("DFRobot C4004 begin success."));
+  Serial.println(F("===================ProductInfo===================="));
+
+  Serial.print(F("Current product model: "));
+  Serial.println(c4004.getProductModel());
+  Serial.print(F("Current product ID: "));
+  Serial.println(c4004.getProductID(), HEX);
+  Serial.print(F("Current hardware version: "));
+  Serial.println(c4004.getHardwareVersion());
+  Serial.print(F("Current firmware version: "));
+  Serial.println(c4004.getFirmwareVersion());
+
+  Serial.println(F("==================FeatureSwitch==================="));
+  if (c4004.setPresenceEnable(true)) {
+    Serial.println(F("Set presence enable success!"));
+  } else {
+    Serial.println(F("Set presence enable failed!"));
+  }
+  delay(50);
+
+  bool presenceEnable = false;
+  if (c4004.getPresenceEnable(&presenceEnable)) {
+    Serial.print(F("Current presence enable: "));
+    Serial.println(presenceEnable ? F("ON") : F("OFF"));
+  } else {
+    Serial.println(F("Read current presence enable failed."));
+  }
+
+  if (c4004.setTrajectoryTrackEnable(true)) {
+    Serial.println(F("Set trajectory track enable success!"));
+  } else {
+    Serial.println(F("Set trajectory track enable failed!"));
+  }
+  delay(50);
+
+  bool trackEnable = false;
+  if (c4004.getTrajectoryTrackEnable(&trackEnable)) {
+    Serial.print(F("Current trajectory tracking function enable: "));
+    Serial.println(trackEnable ? F("ON") : F("OFF"));
+  } else {
+    Serial.println(F("Read current trajectory tracking function enable failed."));
+  }
+
+  if (c4004.setMotionLed(true)) {
+    Serial.println(F("Set motion LED success!"));
+  } else {
+    Serial.println(F("Set motion LED failed!"));
+  }
+  delay(50);
+
+  if (c4004.setTrajectoryLed(true)) {
+    Serial.println(F("Set trajectory LED success!"));
+  } else {
+    Serial.println(F("Set trajectory LED failed!"));
+  }
+  delay(50);
+
+  Serial.print(F("Current motion LED: "));
+  Serial.println(c4004.getMotionLed() ? F("ON") : F("OFF"));
+  Serial.print(F("Current trajectory LED: "));
+  Serial.println(c4004.getTrajectoryLed() ? F("ON") : F("OFF"));
+
+  sBoundaryDetectionRange_t range;
+  range.mode = eRangeFourSideBoundary;
+  range.xPositiveCm = 300;
+  range.xNegativeCm = -300;
+  range.yPositiveCm = 500;
+  range.yNegativeCm = 0;
+
+  Serial.println(F("====================RangeParam===================="));
+  // Set the boundary detection range
+  if (c4004.setBoundaryDetectionRange(range)) {
+    Serial.println(F("Set boundary detection range success!"));
+  } else {
+    Serial.println(F("Set boundary detection range failed!"));
+  }
+  delay(50);
+
+  eDetectionRangeMode_t mode = c4004.getDetectionRangeMode();
+  Serial.print(F("Current detection mode: "));
+  if (mode == eRangeFourSideBoundary) {
+    Serial.println(F("Four-side boundary"));
+  } else if (mode == eRangeTrajectory) {
+    Serial.println(F("Trajectory"));
+  } else {
+    Serial.println(F("Other"));
+  }
+
+  if (mode == eRangeFourSideBoundary) {
+    sBoundaryDetectionRange_t currentRange;
+    if (c4004.getBoundaryDetectionRange(&currentRange)) {
+      Serial.print(F("Current boundary x+/x-/y+/y- (cm): "));
+      Serial.print(currentRange.xPositiveCm);
+      Serial.print(F("/"));
+      Serial.print(currentRange.xNegativeCm);
+      Serial.print(F("/"));
+      Serial.print(currentRange.yPositiveCm);
+      Serial.print(F("/"));
+      Serial.println(currentRange.yNegativeCm);
+    } else {
+      Serial.println(F("Read current boundary range failed."));
+    }
+  } else {
+    Serial.println(F("Current mode is not four-side boundary, skip boundary range check."));
+  }
+
+  // Set the trajectory detection range mode
+  // if (c4004.setTrajectoryDetectionRange(false)) { // Setting it to false means using this mode and not performing trajectory learning
+  //   Serial.println(F("Set trajectory detection range mode success!"));
+  // } else {
+  //   Serial.println(F("Set trajectory detection range mode failed!"));
+  // }
+  // delay(50);
+
+  // sPoint_t points[MAX_POINTS];
+  // uint16_t pointCount = 0;
+  // if (c4004.getTrajectoryDetectionRange(points, &pointCount)) {
+  //   Serial.println(F("Current trajectory range query success."));
+  //   Serial.print(F("Current trajectory points: "));
+  //   Serial.println(pointCount);
+  //   for (uint16_t i = 0; i < pointCount; i++) {
+  //     Serial.print(F("#"));
+  //     Serial.print(i);
+  //     Serial.print(F(" x/y="));
+  //     Serial.print(points[i].x);
+  //     Serial.print(F("/"));
+  //     Serial.println(points[i].y);
+  //   }
+  // } else {
+  //   Serial.println(F("Current trajectory range query failed."));
+  // }
+
+  // Set multi-point config by config-file mode points
+  // sPoint_t cfgPoints[4];
+  // cfgPoints[0].x = 200;  cfgPoints[0].y = 0;
+  // cfgPoints[1].x = 200;  cfgPoints[1].y = 400;
+  // cfgPoints[2].x = -200; cfgPoints[2].y = 400;
+  // cfgPoints[3].x = -200; cfgPoints[3].y = 0;
+  // if (c4004.setConfigFileModePoints(cfgPoints, 4)) {
+  //   Serial.println(F("Set multi-point config points success!"));
+  // } else {
+  //   Serial.println(F("Set multi-point config points failed!"));
+  // }
+  // delay(50);
+
+  // sPoint_t points[MAX_POINTS];
+  // uint16_t pointCount = 0;
+  // if (c4004.getConfigFileModePoints(points, &pointCount)) {
+  //   Serial.println(F("Current multi-point config query success."));
+  //   Serial.print(F("Current multi-point config points: "));
+  //   Serial.println(pointCount);
+  //   for (uint16_t i = 0; i < pointCount; i++) {
+  //     Serial.print(F("#"));
+  //     Serial.print(i);
+  //     Serial.print(F(" x/y="));
+  //     Serial.print(points[i].x);
+  //     Serial.print(F("/"));
+  //     Serial.println(points[i].y);
+  //   }
+  // } else {
+  //   Serial.println(F("Current multi-point config query failed."));
+  // }
+
+
+  Serial.println(F("=================PeopleCountParam================="));
+  if (c4004.setPeopleReportInterval(5)) {
+    Serial.println(F("Set people report interval success!"));
+  } else {
+    Serial.println(F("Set people report interval failed!"));
+  }
+  delay(50);
+
+  if (c4004.setTrajectoryGenerateDistance(50)) {
+    Serial.println(F("Set trajectory generate distance success!"));
+  } else {
+    Serial.println(F("Set trajectory generate distance failed!"));
+  }
+  delay(50);
+
+  if (c4004.setTrajectoryHoldTime(10)) {
+    Serial.println(F("Set trajectory hold time success!"));
+  } else {
+    Serial.println(F("Set trajectory hold time failed!"));
+  }
+  delay(50);
+
+  if (c4004.setNoPersonDelay(30)) {
+    Serial.println(F("Set no person delay success!"));
+  } else {
+    Serial.println(F("Set no person delay failed!"));
+  }
+  delay(50);
+
+  if (c4004.clearPeopleCount()) {
+    Serial.println(F("Clear people count success!"));
+  } else {
+    Serial.println(F("Clear people count failed!"));
+  }
+  delay(50);
+
+  Serial.print(F("Current people report interval(s): "));
+  uint32_t peopleInterval = 0;
+  if (c4004.getPeopleReportInterval(&peopleInterval)) {
+    Serial.println(peopleInterval);
+  } else {
+    Serial.println(F("Read current people report interval failed."));
+  }
+  Serial.print(F("Current trajectory generate distance(cm): "));
+  uint32_t trajectoryDistance = 0;
+  if (c4004.getTrajectoryGenerateDistance(&trajectoryDistance)) {
+    Serial.println(trajectoryDistance);
+  } else {
+    Serial.println(F("Read current trajectory generate distance failed."));
+  }
+  Serial.print(F("Current trajectory hold time(s): "));
+  uint32_t holdTime = 0;
+  if (c4004.getTrajectoryHoldTime(&holdTime)) {
+    Serial.println(holdTime);
+  } else {
+    Serial.println(F("Read current trajectory hold time failed."));
+  }
+  Serial.print(F("Current no person delay(s): "));
+  uint32_t noPersonDelay = 0;
+  if (c4004.getNoPersonDelay(&noPersonDelay)) {
+    Serial.println(noPersonDelay);
+  } else {
+    Serial.println(F("Read current no person delay failed."));
+  }
+
+  Serial.print(F("Current people count(active): "));
+  Serial.println(c4004.getPeopleCountInfo(eGetDataActive));
+
+  Serial.println(F("=======================Done======================="));
+}
+
+void loop()
+{
+  delay(1000);
+}

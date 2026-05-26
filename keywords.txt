@@ -1,0 +1,137 @@
+############################################
+# Syntax Map For DFRobot_C4004
+############################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+DFRobot_C4004	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin	KEYWORD2
+isConnected	KEYWORD2
+reset	KEYWORD2
+factoryReset	KEYWORD2
+getHeartbeat	KEYWORD2
+getReportedInfo	KEYWORD2
+getProductModel	KEYWORD2
+getProductID	KEYWORD2
+getHardwareVersion	KEYWORD2
+getFirmwareVersion	KEYWORD2
+setInstallInfo	KEYWORD2
+getInstallInfo	KEYWORD2
+setPresenceEnable	KEYWORD2
+getPresenceEnable	KEYWORD2
+getPresenceState	KEYWORD2
+getMotionState	KEYWORD2
+setTrajectoryTrackEnable	KEYWORD2
+getTrajectoryTrackEnable	KEYWORD2
+getTargetInfo	KEYWORD2
+getTargetList	KEYWORD2
+getTargetCount	KEYWORD2
+setTrajectoryLed	KEYWORD2
+setMotionLed	KEYWORD2
+getTrajectoryLed	KEYWORD2
+getMotionLed	KEYWORD2
+getTags	KEYWORD2
+setTag	KEYWORD2
+clearTag	KEYWORD2
+clearAllTags	KEYWORD2
+setTagsFromConfig	KEYWORD2
+getTagInfo	KEYWORD2
+setBoundaryDetectionRange	KEYWORD2
+getBoundaryDetectionRange	KEYWORD2
+setTrajectoryDetectionRange	KEYWORD2
+getTrajectoryDetectionRange	KEYWORD2
+setConfigFileModePoints	KEYWORD2
+getConfigFileModePoints	KEYWORD2
+getDetectionRangeMode	KEYWORD2
+getPeopleCountInfo	KEYWORD2
+setPeopleReportInterval	KEYWORD2
+getPeopleReportInterval	KEYWORD2
+clearPeopleCount	KEYWORD2
+setTrajectoryGenerateDistance	KEYWORD2
+getTrajectoryGenerateDistance	KEYWORD2
+setTrajectoryHoldTime	KEYWORD2
+getTrajectoryHoldTime	KEYWORD2
+setNoPersonDelay	KEYWORD2
+getNoPersonDelay	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+MAX_TARGETS	LITERAL1
+MAX_TAGS	LITERAL1
+MAX_POINTS	LITERAL1
+
+eEventNone	LITERAL1
+eEventTrajectory	LITERAL1
+eEventPresence	LITERAL1
+eEventMotion	LITERAL1
+eEventTag	LITERAL1
+eEventHeartbeat	LITERAL1
+eEventInitFinished	LITERAL1
+eEventPeopleCount	LITERAL1
+eEventUnknown	LITERAL1
+eEventError	LITERAL1
+
+eGetDataActive	LITERAL1
+eGetDataReport	LITERAL1
+
+eInstallModeUnknown	LITERAL1
+eInstallModeSide	LITERAL1
+eInstallModeTop	LITERAL1
+
+eNoPresence	LITERAL1
+ePresence	LITERAL1
+ePresenceUnknown	LITERAL1
+
+eMotionNone	LITERAL1
+eMotionStatic	LITERAL1
+eMotionActive	LITERAL1
+eMotionUnknown	LITERAL1
+
+eStatic	LITERAL1
+eMotion	LITERAL1
+eUncertain	LITERAL1
+eUnknown	LITERAL1
+
+eTagTypeNone	LITERAL1
+eTagTypeEnterExit	LITERAL1
+eTagTypeApproachAway	LITERAL1
+eTagTypeMotionStatic	LITERAL1
+eTagTypeNoise	LITERAL1
+
+eTagRangeCircle	LITERAL1
+eTagRangeRectangle	LITERAL1
+
+eTagSetCommError	LITERAL1
+eTagSetSuccess	LITERAL1
+eTagSetTrackCountError	LITERAL1
+eTagSetAlreadyUsed	LITERAL1
+eTagSetIndexOutOfRange	LITERAL1
+
+eTrajRangeErrComm	LITERAL1
+eTrajRangeOk	LITERAL1
+eTrajRangeErrParam	LITERAL1
+eTrajRangeErrMode	LITERAL1
+eTrajRangeErrRes	LITERAL1
+eTrajRangeErrData	LITERAL1
+
+eRangeSideDefault	LITERAL1
+eRangeSideLeftEdge	LITERAL1
+eRangeSideRightEdge	LITERAL1
+eRangeHotelCorridor	LITERAL1
+eRangeFourSideBoundary	LITERAL1
+eRangeTrajectory	LITERAL1
+eRangeConfigFile	LITERAL1
+eRangeNoBoundary	LITERAL1
+eRangeTopDefault	LITERAL1
+eRangeTopLeftEdge	LITERAL1
+eRangeTopRightEdge	LITERAL1
+eRangeUnknown	LITERAL1

@@ -1,0 +1,133 @@
+/*!
+ * @file readTargetTrajectory.ino
+ * @brief Enable trajectory tracking and print target trajectory information.
+ * @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
+ * @license The MIT License (MIT)
+ * @author JiaLi(zhixin.liu@dfrobot.com)
+ * @version V1.0.0
+ * @date 2026-05-22
+ * @url https://github.com/DFRobot/DFRobot_C4004
+ */
+
+#include "DFRobot_C4004.h"
+
+#if defined(ESP8266) || defined(ARDUINO_AVR_UNO)
+SoftwareSerial mySerial(4, 5);
+DFRobot_C4004 c4004(&mySerial, 115200);
+#elif defined(ESP32)
+DFRobot_C4004 c4004(&Serial1, 115200, /*D2*/ D2, /*D3*/ D3);
+#else
+DFRobot_C4004 c4004(&Serial1, 115200);
+#endif
+
+const char *targetFeatureToString(eTargetFeature_t feature)
+{
+  if (feature == eStatic) {
+    return "Static";
+  } else if (feature == eMotion) {
+    return "Motion";
+  } else {
+    return "Unknown";
+  }
+}
+
+void printTrajectoryData(eGetDataMode_t dataMode)
+{
+  const char *title = NULL;
+  const char *modeText = NULL;
+  sTargetInfo_t targets[MAX_TARGETS];
+  uint8_t count = c4004.getTargetList(targets, MAX_TARGETS, dataMode);
+
+  if (dataMode == eGetDataActive) {
+    title = "======================TrajectoryActive=======================";
+    modeText = "Active Query";
+  } else {
+    title = "======================TrajectoryReport=======================";
+    modeText = "Passive Report";
+  }
+  Serial.println(title);
+  Serial.print("Mode: ");
+  Serial.println(modeText);
+  Serial.print("Target Count: ");
+  Serial.println(count);
+  if (count == 0) {
+    Serial.println("No target.");
+  } else {
+    Serial.println("Row\tID\tSize\tFeature\tX\tY\tHeight\tSpeed");
+    for (uint8_t i = 0; i < count; i++) {
+      Serial.print(i);
+      Serial.print("\t");
+      Serial.print(targets[i].index);
+      Serial.print("\t");
+      Serial.print(targets[i].targetSize);
+      Serial.print("\t");
+      Serial.print(targetFeatureToString(targets[i].targetFeature));
+      Serial.print("\t");
+      Serial.print(targets[i].x);
+      Serial.print("\t");
+      Serial.print(targets[i].y);
+      Serial.print("\t");
+      Serial.print(targets[i].height);
+      Serial.print("\t");
+      Serial.println(targets[i].speed);
+    }
+  }
+  Serial.println();
+}
+
+void setup()
+{
+  Serial.begin(115200);
+
+  while (!c4004.begin()) {
+    Serial.println("DFRobot C4004 begin failed, retrying...");
+    delay(1000);
+  }
+
+  sBoundaryDetectionRange_t range;
+  range.mode = eRangeFourSideBoundary;
+  range.xPositiveCm = 300;
+  range.xNegativeCm = -300;
+  range.yPositiveCm = 500;
+  range.yNegativeCm = 0;
+  if (c4004.setBoundaryDetectionRange(range)) {
+    Serial.println("Set boundary detection range success.");
+  } else {
+    Serial.println("Set boundary detection range failed.");
+  }
+
+  if (c4004.setTrajectoryTrackEnable(true)) {
+    Serial.println("Set trajectory track enable success.");
+  } else {
+    Serial.println("Set trajectory track enable failed.");
+  }
+
+  if (c4004.setMotionLed(true)) {
+    Serial.println("Set motion LED success.");
+  } else {
+    Serial.println("Set motion LED failed.");
+  }
+
+  if (c4004.setTrajectoryLed(true)) {
+    Serial.println("Set trajectory LED success.");
+  } else {
+    Serial.println("Set trajectory LED failed.");
+  }
+}
+
+void loop()
+{
+  eReportedEvent_t event = c4004.getReportedInfo(100);
+
+  // Passively obtain the trajectory
+  if (event == eEventTrajectory) {
+    printTrajectoryData(eGetDataReport);
+  }
+
+  // Actively obtain the trajectory
+  static uint32_t lastQuery = 0;
+  if (millis() - lastQuery > 4000) {
+    lastQuery = millis();
+    printTrajectoryData(eGetDataActive);
+  }
+}
