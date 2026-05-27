@@ -24,6 +24,8 @@ getHardwareVersion	KEYWORD2
 getFirmwareVersion	KEYWORD2
 setInstallInfo	KEYWORD2
 getInstallInfo	KEYWORD2
+setInstallHigh	KEYWORD2
+getInstallHigh	KEYWORD2
 setPresenceEnable	KEYWORD2
 getPresenceEnable	KEYWORD2
 getPresenceState	KEYWORD2

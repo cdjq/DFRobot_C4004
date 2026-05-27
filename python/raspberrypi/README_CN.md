@@ -117,6 +117,25 @@ RX         | TXD
       @return True or False
     '''
 
+  def set_install_high(self, hight):
+    '''!
+      @brief 设置安装高度。
+      @param hight: 安装高度(cm)
+      @return True or False
+    '''
+
+  def get_install_high(self):
+    '''!
+      @brief 读取安装高度。
+      @return 安装高度(cm)，失败时返回 0。
+    '''
+
+  def set_install_height(self, height_cm):
+    '''! @brief set_install_high 的拼写修正别名。 '''
+
+  def get_install_height(self):
+    '''! @brief get_install_high 的拼写修正别名。 '''
+
   def set_presence_enable(self, enable):
     '''!
       @brief 开启或关闭存在检测。

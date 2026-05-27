@@ -117,6 +117,25 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
       @return True or False
     '''
 
+  def set_install_high(self, hight):
+    '''!
+      @brief Set installation height.
+      @param hight: installation height in cm
+      @return True or False
+    '''
+
+  def get_install_high(self):
+    '''!
+      @brief Get installation height.
+      @return installation height in cm. Returns 0 on failure.
+    '''
+
+  def set_install_height(self, height_cm):
+    '''! @brief Alias of set_install_high with corrected spelling. '''
+
+  def get_install_height(self):
+    '''! @brief Alias of get_install_high with corrected spelling. '''
+
   def set_presence_enable(self, enable):
     '''!
       @brief Enable or disable presence detection.

@@ -437,6 +437,35 @@ class DFRobot_C4004(object):
     info.mode = packet.data[0]
     return True
 
+  def set_install_high(self, hight):
+    '''!
+      @brief Set installation height.
+      @param hight Installation height in cm.
+      @return true if succeeded, otherwise false.
+    '''
+    hight = int(hight)
+    if hight < 0 or hight > 0xFFFF:
+      return False
+    return self._request_frame(self.CTRL_INSTALL_INFO, self.CMD_INSTALL_SET_HEIGHT, self._u16_bytes(hight)) is not None
+
+  def get_install_high(self):
+    '''!
+      @brief Query installation height.
+      @return Installation height in cm. Returns 0 on failure.
+    '''
+    packet = self._request_frame(self.CTRL_INSTALL_INFO, self.CMD_INSTALL_QUERY_HEIGHT, [self.QUERY_DATA])
+    if packet is None or len(packet.data) < 2:
+      return 0
+    return self._u16(packet.data, 0)
+
+  def set_install_height(self, height_cm):
+    '''! @brief Alias of set_install_high with corrected spelling. '''
+    return self.set_install_high(height_cm)
+
+  def get_install_height(self):
+    '''! @brief Alias of get_install_high with corrected spelling. '''
+    return self.get_install_high()
+
   def set_presence_enable(self, enable):
     '''!
       @brief Enable or disable presence detection.
@@ -1273,4 +1302,3 @@ class DFRobot_C4004(object):
   def _u32_bytes(value):
     value &= 0xFFFFFFFF
     return [(value >> 24) & 0xFF, (value >> 16) & 0xFF, (value >> 8) & 0xFF, value & 0xFF]
-

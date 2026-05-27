@@ -268,6 +268,36 @@ bool DFRobot_C4004::getInstallInfo(sInstallInfo_t *info)
   return true;
 }
 
+bool DFRobot_C4004::setInstallHigh(int hight)
+{
+  uint8_t heightData[2];
+  sPacket_t packet;
+
+  if (hight < 0 || hight > 0xFFFF) {
+    return false;
+  }
+
+  writeUint16(heightData, (uint16_t)hight);
+  return requestFrame(CTRL_INSTALL_INFO, CMD_INSTALL_SET_HEIGHT, heightData, sizeof(heightData), &packet);
+}
+
+bool DFRobot_C4004::getInstallHigh(int *hight)
+{
+  uint8_t data = QUERY_DATA;
+  sPacket_t packet;
+
+  if (hight == NULL) {
+    return false;
+  }
+
+  if (!requestFrame(CTRL_INSTALL_INFO, CMD_INSTALL_QUERY_HEIGHT, &data, 1, &packet) || packet.len < 2) {
+    return false;
+  }
+
+  *hight = (int)readUint16(packet.data);
+  return true;
+}
+
 bool DFRobot_C4004::setPresenceEnable(bool enable)
 {
   if (setByte(CTRL_PRESENCE, CMD_PRESENCE_SET_ENABLE, enable ? 1 : 0)) {
@@ -1338,4 +1368,3 @@ void DFRobot_C4004::writeUint32(uint8_t *data, uint32_t value) const
   data[2] = (uint8_t)((value >> 8) & 0xFF);
   data[3] = (uint8_t)(value & 0xFF);
 }
-

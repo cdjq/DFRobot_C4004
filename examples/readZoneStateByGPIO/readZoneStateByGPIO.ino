@@ -2,6 +2,7 @@
  * @file readZoneStateByGPIO.ino
  * @brief Configure tag zones and read local GPIO presence states.
  * @details This demo reads user-selected GPIO pins and prints zone presence every 1 second.
+ * @n GPIO 1 is the whole area output. GPIO 2-6 are divided zone outputs.
  * @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
  * @license The MIT License (MIT)
  * @author JiaLi(zhixin.liu@dfrobot.com)
@@ -133,12 +134,19 @@ void loop()
   if (millis() - lastPrint > 1000) {
     lastPrint = millis();
     Serial.println("=============================================");
-    Serial.println("GPIO zone presence (HIGH=Presence, LOW=None):");
+    Serial.println("GPIO presence (LOW=Presence, HIGH=None):");
+    Serial.println("GPIO 1 = Whole area, GPIO 2-6 = Divided zones");
     for (uint8_t i = 0; i < 6; i++) {
-      bool hasPresence = (digitalRead(zonePins[i]) == HIGH);
-      Serial.print("Zone ");
-      Serial.print(i);
-      Serial.print(": ");
+      bool hasPresence = (digitalRead(zonePins[i]) == LOW);
+      Serial.print("GPIO ");
+      Serial.print(i + 1);
+      if (i == 0) {
+        Serial.print(" (Whole area): ");
+      } else {
+        Serial.print(" (Zone ");
+        Serial.print(i);
+        Serial.print("): ");
+      }
       Serial.println(hasPresence ? "Presence" : "None");
     }
     Serial.println("=============================================");

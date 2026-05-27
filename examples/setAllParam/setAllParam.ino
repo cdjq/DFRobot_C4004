@@ -29,7 +29,7 @@ void setup()
     delay(1000);
   }
   Serial.println(F("DFRobot C4004 begin success."));
-  Serial.println(F("===================ProductInfo===================="));
+  Serial.println(F("===================Product Info==================="));
 
   Serial.print(F("Current product model: "));
   Serial.println(c4004.getProductModel());
@@ -40,7 +40,23 @@ void setup()
   Serial.print(F("Current firmware version: "));
   Serial.println(c4004.getFirmwareVersion());
 
-  Serial.println(F("==================FeatureSwitch==================="));
+  Serial.println(F("=================Set install info================="));
+  if (c4004.setInstallHigh(180)) {
+      Serial.println(F("Set install high success!"));
+  } else {
+    Serial.println(F("Set install high failed!"));
+  }
+  delay(50);
+
+  int deviceHigh = 0;
+  if (c4004.getInstallHigh(&deviceHigh)) {
+    Serial.print(F("Current install high(cm): "));
+    Serial.println(deviceHigh);
+  } else {
+    Serial.println(F("Read current install high failed."));
+  }
+
+  Serial.println(F("==================Feature Switch=================="));
   if (c4004.setPresenceEnable(true)) {
     Serial.println(F("Set presence enable success!"));
   } else {
@@ -97,7 +113,7 @@ void setup()
   range.yPositiveCm = 500;
   range.yNegativeCm = 0;
 
-  Serial.println(F("====================RangeParam===================="));
+  Serial.println(F("====================Range Param==================="));
   // Set the boundary detection range
   if (c4004.setBoundaryDetectionRange(range)) {
     Serial.println(F("Set boundary detection range success!"));
@@ -191,8 +207,7 @@ void setup()
   //   Serial.println(F("Current multi-point config query failed."));
   // }
 
-
-  Serial.println(F("=================PeopleCountParam================="));
+  Serial.println(F("================People Count Param================"));
   if (c4004.setPeopleReportInterval(5)) {
     Serial.println(F("Set people report interval success!"));
   } else {

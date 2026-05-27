@@ -450,6 +450,22 @@ public:
   bool getInstallInfo(sInstallInfo_t *info);
 
   /**
+   * @fn setInstallHigh
+   * @brief Set the installation height of the DFRobot C4004 sensor.
+   * @param hight: Installation height, in cm.
+   * @return true: Set succeeded, false: Set failed.
+  */
+  bool setInstallHigh(int hight);
+
+  /**
+   * @fn getInstallHigh
+   * @brief Get the installation height of the DFRobot C4004 sensor.
+   * @param hight: Pointer to receive installation height, in cm.
+   * @return true: Get succeeded, false: Get failed.
+  */
+  bool getInstallHigh(int *hight);
+
+  /**
    * @fn setPresenceEnable
    * @brief Enable or disable the presence detection function of the sensor.
    * @param enable: Enable or disable the presence detection function.

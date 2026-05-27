@@ -29,13 +29,26 @@ def main():
     time.sleep(1)
   print('DFRobot C4004 begin success.')
 
-  print('===================ProductInfo====================')
+  print('===================Product Info===================')
   print('Current product model:', c4004.get_product_model())
   print('Current product ID:', hex(c4004.get_product_id()))
   print('Current hardware version:', c4004.get_hardware_version())
   print('Current firmware version:', c4004.get_firmware_version())
 
-  print('==================FeatureSwitch===================')
+  print('=================Set install info=================')
+  if c4004.set_install_high(180):
+    print('Set install high success!')
+  else:
+    print('Set install high failed!')
+  time.sleep(0.05)
+
+  device_high = c4004.get_install_high()
+  if device_high > 0:
+    print('Current install high(cm):', device_high)
+  else:
+    print('Read current install high failed.')
+
+  print('==================Feature Switch==================')
   if c4004.set_presence_enable(True):
     print('Set presence enable success!')
   else:
@@ -82,7 +95,7 @@ def main():
   range_info.y_positive_cm = 500
   range_info.y_negative_cm = 0
 
-  print('====================RangeParam====================')
+  print('====================Range Param===================')
   if c4004.set_boundary_detection_range(range_info):
     print('Set boundary detection range success!')
   else:
@@ -134,7 +147,7 @@ def main():
   # else:
   #   print('Current multi-point config query failed.')
 
-  print('=================PeopleCountParam=================')
+  print('================People Count Param================')
   if c4004.set_people_report_interval(5):
     print('Set people report interval success!')
   else:

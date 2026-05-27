@@ -2,6 +2,7 @@
 '''!
   @file read_zone_state_by_gpio.py
   @brief Configure tag zones and read local GPIO presence states.
+  @details GPIO 1 is the whole area output. GPIO 2-6 are divided zone outputs.
   @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
   @license The MIT License (MIT)
   @author JiaLi(zhixin.liu@dfrobot.com)
@@ -129,13 +130,18 @@ def main():
       if time.time() - last_print > 1:
         last_print = time.time()
         print('=============================================')
-        print('GPIO zone presence (HIGH=Presence, LOW=None):')
+        print('GPIO presence (LOW=Presence, HIGH=None):')
+        print('GPIO 1 = Whole area, GPIO 2-6 = Divided zones')
         if GPIO is None:
           print('RPi.GPIO is not available.')
         else:
           for i, pin in enumerate(ZONE_PINS):
-            has_presence = GPIO.input(pin) == GPIO.HIGH
-            print('Zone %d: %s' % (i, 'Presence' if has_presence else 'None'))
+            has_presence = GPIO.input(pin) == GPIO.LOW
+            if i == 0:
+              label = 'GPIO 1 (Whole area)'
+            else:
+              label = 'GPIO %d (Zone %d)' % (i + 1, i)
+            print('%s: %s' % (label, 'Presence' if has_presence else 'None'))
         print('=============================================')
   finally:
     if GPIO is not None:

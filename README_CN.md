@@ -148,8 +148,24 @@ pip3 install pyserial
    * @n          heightCm: DFRobot C4004 安装高度，单位为 cm。
    * @n          zAngle: DFRobot C4004 安装 Z 轴角度，单位为度。
    * @return true: 获取成功，false: 获取失败。
-   */
+  */
   bool getInstallInfo(sInstallInfo_t *info);
+
+  /**
+   * @fn setInstallHigh
+   * @brief 设置 DFRobot C4004 传感器的安装高度。
+   * @param hight: 安装高度，单位为 cm。
+   * @return true: 设置成功，false: 设置失败。
+  */
+  bool setInstallHigh(int hight);
+
+  /**
+   * @fn getInstallHigh
+   * @brief 获取 DFRobot C4004 传感器的安装高度。
+   * @param hight: 接收安装高度的指针，单位为 cm。
+   * @return true: 获取成功，false: 获取失败。
+  */
+  bool getInstallHigh(int *hight);
 
   /**
    * @fn setPresenceEnable
