@@ -307,9 +307,9 @@ void processTagEvent()
     return;
   }
 
-  if (tagInfo.index == TAG_LIVING_ROOM && tagInfo.type == eTagTypePeopleCounting) {
+  if (tagInfo.tagIndex == TAG_LIVING_ROOM && tagInfo.tagType == eTagTypePeopleCounting) {
     processLivingRoomTag(tagInfo);
-  } else if (tagInfo.index == TAG_KITCHEN_DOOR && tagInfo.type == eTagTypeApproachAway) {
+  } else if (tagInfo.tagIndex == TAG_KITCHEN_DOOR && tagInfo.tagType == eTagTypeApproachAway) {
     if (tagInfo.motionDir == 0) {
       startDoorSession();
     } else if (tagInfo.motionDir == 1) {
@@ -334,13 +334,13 @@ void setup()
     Serial.println(F("Set presence enable failed."));
   }
 
-  sBoundaryDetectionRange_t range;
+  sFourSidedRange range;
   range.mode = eRangeFourSideBoundary;
   range.xPositiveCm = 200;
   range.xNegativeCm = -200;
-  range.yPositiveCm = 600;
+  range.yPositiveCm = 700;
   range.yNegativeCm = 0;
-  if (c4004.setBoundaryDetectionRange(range)) {
+  if (c4004.setFourSidedRangeMode(range)) {
     Serial.println(F("Set boundary detection range success."));
   } else {
     Serial.println(F("Set boundary detection range failed."));
@@ -354,29 +354,29 @@ void setup()
 
   sTagConfig_t tags[3];
 
-  tags[0].index = TAG_LIVING_ROOM;
-  tags[0].type = eTagTypePeopleCounting;
-  tags[0].rangeType = eTagRangeRectangle;
+  tags[0].tagIndex = TAG_LIVING_ROOM;
+  tags[0].tagType = eTagTypePeopleCounting;
+  tags[0].scopeType = eTagRangeRectangle;
   tags[0].centerX = LIVING_ROOM_CENTER_X_CM;
   tags[0].centerY = LIVING_ROOM_CENTER_Y_CM;
-  tags[0].xSize = LIVING_ROOM_SIZE_X_CM;
-  tags[0].ySize = LIVING_ROOM_SIZE_Y_CM;
+  tags[0].width = LIVING_ROOM_SIZE_X_CM;
+  tags[0].height = LIVING_ROOM_SIZE_Y_CM;
 
-  tags[1].index = TAG_KITCHEN;
-  tags[1].type = eTagTypePeopleCounting;
-  tags[1].rangeType = eTagRangeRectangle;
+  tags[1].tagIndex = TAG_KITCHEN;
+  tags[1].tagType = eTagTypePeopleCounting;
+  tags[1].scopeType = eTagRangeRectangle;
   tags[1].centerX = KITCHEN_CENTER_X_CM;
   tags[1].centerY = KITCHEN_CENTER_Y_CM;
-  tags[1].xSize = KITCHEN_SIZE_X_CM;
-  tags[1].ySize = KITCHEN_SIZE_Y_CM;
+  tags[1].width = KITCHEN_SIZE_X_CM;
+  tags[1].height = KITCHEN_SIZE_Y_CM;
 
-  tags[2].index = TAG_KITCHEN_DOOR;
-  tags[2].type = eTagTypeApproachAway;
-  tags[2].rangeType = eTagRangeRectangle;
+  tags[2].tagIndex = TAG_KITCHEN_DOOR;
+  tags[2].tagType = eTagTypeApproachAway;
+  tags[2].scopeType = eTagRangeRectangle;
   tags[2].centerX = DOOR_CENTER_X_CM;
   tags[2].centerY = DOOR_CENTER_Y_CM;
-  tags[2].xSize = DOOR_SIZE_X_CM;
-  tags[2].ySize = DOOR_SIZE_Y_CM;
+  tags[2].width = DOOR_SIZE_X_CM;
+  tags[2].height = DOOR_SIZE_Y_CM;
 
   if (c4004.setTagsFromConfig(tags, 3)) {
     Serial.println(F("Set living/kitchen/door tags success."));

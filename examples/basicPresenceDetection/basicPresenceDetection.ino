@@ -42,13 +42,13 @@ void setup()
     Serial.println("Set trajectory LED failed.");
   }
 
-  sBoundaryDetectionRange_t range;
+  sFourSidedRange range;
   range.mode = eRangeFourSideBoundary;
-  range.xPositiveCm = 300;
-  range.xNegativeCm = -300;
-  range.yPositiveCm = 500;
+  range.xPositiveCm = 200;
+  range.xNegativeCm = -200;
+  range.yPositiveCm = 700;
   range.yNegativeCm = 0;
-  if (c4004.setBoundaryDetectionRange(range)) {
+  if (c4004.setFourSidedRangeMode(range)) {
     Serial.println("Set boundary detection range success.");
   } else {
     Serial.println("Set boundary detection range failed.");
@@ -79,11 +79,11 @@ void setup()
 
 void loop()
 {
-  eReportedEvent_t event = c4004.getReportedInfo(100);
+  eReportedEvent_t event = c4004.getReportedInfo(50);
 
   if (event == eEventPresence) {
     ePresenceState_t presence = c4004.getPresenceState();
-    Serial.print("Target presence state: ");
+    Serial.print("Human presence state: ");
     if (presence == eNoPresence) {
       Serial.println("None");
     } else if (presence == ePresence) {
@@ -91,7 +91,7 @@ void loop()
     }
   } else if (event == eEventMotion) {
     uint8_t motion = c4004.getMotionState();
-    Serial.print("Target motion state: ");
+    Serial.print("Motion state: ");
     if (motion == eMotionStatic) {
       Serial.println("Static");
     } else if (motion == eMotionActive) {
@@ -101,19 +101,19 @@ void loop()
     }
   } else if (event == eEventPeopleCount) {
     uint8_t count = c4004.getPeopleCountInfo(eGetDataReport);
-    Serial.print("People count: ");
+    Serial.print("Number of trajectories: ");
     Serial.println(count);
   }
 
   static uint32_t lastQuery = 0;
   if (millis() - lastQuery > 2000) {
     lastQuery = millis();
-    Serial.print("Query people count: ");
+    Serial.print("Number of trajectories: ");
     //Serial.println(c4004.getPeopleCountInfo(eGetDataActive)); // Query active data
     Serial.println(c4004.getPeopleCountInfo(eGetDataReport)); // Query report data
 
     ePresenceState_t queryPresence = c4004.getPresenceState();
-    Serial.print("Query target presence state: ");
+    Serial.print("Human presence state: ");
     if (queryPresence == eNoPresence) {
       Serial.println("None");
     } else if (queryPresence == ePresence) {
@@ -121,7 +121,7 @@ void loop()
     }
 
     eMotionState_t queryMotion = c4004.getMotionState();
-    Serial.print("Query target motion state: ");
+    Serial.print("Motion state: ");
     if (queryMotion == eMotionNone) {
       Serial.println("None");
     } else if (queryMotion == eMotionStatic) {

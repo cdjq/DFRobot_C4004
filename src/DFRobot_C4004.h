@@ -20,7 +20,7 @@
 #include <HardwareSerial.h>
 #endif
 
-//#define ENABLE_DBG
+// #define ENABLE_DBG
 #ifdef ENABLE_DBG
 #define DBG(...)                    \
   {                                 \
@@ -37,8 +37,8 @@
 
 #define MAX_TARGETS           8
 #define MAX_TAGS              12
-#define MAX_POINTS            12
-#define MAX_PAYLOAD           180
+#define MAX_POINTS            64
+#define MAX_PAYLOAD           (3 + MAX_POINTS * 4)
 #define QUERY_DATA            0x0F
 #define FRAME_HEAD1           0x53
 #define FRAME_HEAD2           0x59
@@ -265,7 +265,7 @@ typedef struct {
  */
 typedef struct {
   uint8_t index;
-  uint8_t targetSize;
+  uint8_t kinesia;
   eTargetFeature_t targetFeature;
   int16_t x;
   int16_t y;
@@ -287,13 +287,13 @@ typedef struct {
  * @brief Tag configuration used by tag query and batch config APIs.
  */
 typedef struct {
-  uint8_t index;
-  eTagType_t type;
-  eTagRangeType_t rangeType;
+  uint8_t tagIndex;
+  eTagType_t tagType;
+  eTagRangeType_t scopeType;
   int16_t centerX;
   int16_t centerY;
-  uint16_t xSize;
-  uint16_t ySize;
+  uint16_t width;
+  uint16_t height;
 } sTagConfig_t;
 
 /**
@@ -301,8 +301,8 @@ typedef struct {
  * @brief Last tag event decoded from an active report.
  */
 typedef struct {
-  uint8_t index;
-  eTagType_t type;
+  uint8_t tagIndex;
+  eTagType_t tagType;
   int16_t centerX;
   int16_t centerY;
   uint8_t enterExit;
@@ -312,7 +312,7 @@ typedef struct {
 } sTagInfo_t;
 
 /**
- * @struct sBoundaryDetectionRange_t
+ * @struct sFourSidedRange
  * @brief Four-side detection boundary settings.
  */
 typedef struct {
@@ -321,7 +321,7 @@ typedef struct {
   int16_t xNegativeCm;
   int16_t yPositiveCm;
   int16_t yNegativeCm;
-} sBoundaryDetectionRange_t;
+} sFourSidedRange;
 
 /**
  * @struct sPacket_t
@@ -455,7 +455,7 @@ public:
    * @param hight: Installation height, in cm.
    * @return true: Set succeeded, false: Set failed.
   */
-  bool setInstallHigh(int hight);
+  bool setInstallHigh(int32_t hight);
 
   /**
    * @fn getInstallHigh
@@ -596,11 +596,11 @@ public:
    * @fn setTag
    * @brief Set one tag using size mode.
    * @param tag: Tag configuration.
-   * @n          index: Tag index.
-   * @n          type: Tag type.
-   * @n          rangeType: Tag range type.
-   * @n          xSize: Tag x-size, in cm.
-   * @n          ySize: Tag y-size, in cm.
+   * @n          tagIndex: Tag index.
+   * @n          tagType: Tag type.
+   * @n          scopeType: Tag range type.
+   * @n          width: Tag width or circle radius, in cm.
+   * @n          height: Tag height, in cm.
    * @return eTagSetStatus_t: Tag set status.
    * @n          eTagSetCommError: Communication failed or response mismatch.
    * @n          eTagSetSuccess: Tag set succeeded.
@@ -649,7 +649,7 @@ public:
   bool getTagInfo(sTagInfo_t *tagInfo);
 
   /**
-   * @fn setBoundaryDetectionRange
+   * @fn setFourSidedRangeMode
    * @brief Set four-side boundary detection range.
    * @param range: Boundary range settings.
    * @n          xPositiveCm: Positive x boundary, in cm.
@@ -658,34 +658,34 @@ public:
    * @n          yNegativeCm: Negative y boundary, in cm.
    * @return true: Set succeeded, false: Set failed.
   */
-  bool setBoundaryDetectionRange(sBoundaryDetectionRange_t &range);
+  bool setFourSidedRangeMode(sFourSidedRange &range);
 
   /**
-   * @fn getBoundaryDetectionRange
+   * @fn getFourSidedRangeMode
    * @brief Query and get four-side boundary detection range.
    * @param range: Pointer to receive boundary range settings.
    * @return true: Get succeeded, false: Get failed.
   */
-  bool getBoundaryDetectionRange(sBoundaryDetectionRange_t *range);
+  bool getFourSidedRangeMode(sFourSidedRange *range);
 
   /**
-   * @fn setTrajectoryDetectionRange
+   * @fn setTrajectoryRangeMode
    * @brief Enable or disable trajectory-range mode.
    * @param enable: Enable or disable trajectory-range mode.
    * @n          true: Enable, false: Disable.
    * @return true: Set succeeded, false: Set failed.
   */
-  bool setTrajectoryDetectionRange(bool enable);
+  bool setTrajectoryRangeMode(bool enable);
 
   /**
-   * @fn getTrajectoryDetectionRange
+   * @fn getTrajectoryRangeMode
    * @brief Query and get range points in trajectory mode (mode 0x05).
    * @param points: Pointer to receive trajectory-mode points.
    * @param pointCount: Pointer to receive point count.
    * @return true: Query succeeded, false: Query failed.
    * @note The points buffer must be able to hold at least MAX_POINTS points.
   */
-  bool getTrajectoryDetectionRange(sPoint_t *points, uint16_t *pointCount);
+  bool getTrajectoryRangeMode(sPoint_t *points, uint16_t *pointCount);
 
   /**
    * @fn setConfigFileModePoints
@@ -854,7 +854,7 @@ private:
   uint8_t _tagCount;
   sTagInfo_t _tagInfo;
   bool _tagInfoValid;
-  sBoundaryDetectionRange_t _rangeInfo;
+  sFourSidedRange _rangeInfo;
   uint8_t _peopleCount;
 };
 

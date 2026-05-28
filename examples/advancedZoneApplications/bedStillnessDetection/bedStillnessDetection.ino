@@ -2,10 +2,10 @@
  * @file bedStillnessDetection.ino
  * @brief Bed-zone stillness lighting control using active polling APIs.
  * @details Rule summary:
- * @n 1) If any static person exists in bed area for over 30s, turn room light OFF.
+ * @n 1) If any static person exists in bed area for over 5s, turn room light OFF.
  * @n 2) While rule 1 is active, new people entering room keeps light OFF.
  * @n 3) If bed area has no static person, keep light ON when room has people.
- * @n 4) After room transitions from occupied to empty, wait 30s then turn light OFF.
+ * @n 4) After room transitions from occupied to empty, wait 5s then turn light OFF.
  * @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
  * @license The MIT License (MIT)
  * @author JiaLi(zhixin.liu@dfrobot.com)
@@ -30,8 +30,9 @@ const uint8_t BEDROOM_TAG_INDEX = 1;
 const uint8_t BEDROOM_DOOR_TAG_INDEX = 2;
 const uint8_t LIGHT_CTRL_PIN = 3;
 
-const uint32_t BED_STATIC_HOLD_MS = 30000;
-const uint32_t BEDROOM_EMPTY_HOLD_MS = 30000;
+// Users can adjust these times according to their own preferences, needs, application scenarios, etc. The default time is 5 seconds.
+const uint32_t BED_STATIC_HOLD_MS = 5000; // The time required to maintain a transition from other states to rest.
+const uint32_t BEDROOM_EMPTY_HOLD_MS = 5000; // The time required to maintain a transition from other states to empty.
 
 const uint8_t LIGHT_OFF_LEVEL = HIGH;
 const uint8_t LIGHT_ON_LEVEL = LOW;
@@ -64,13 +65,13 @@ void setup()
     Serial.println(F("Set presence enable failed."));
   }
 
-  sBoundaryDetectionRange_t range;
+  sFourSidedRange range;
   range.mode = eRangeFourSideBoundary;
-  range.xPositiveCm = 500;
-  range.xNegativeCm = -500;
-  range.yPositiveCm = 800;
+  range.xPositiveCm = 200;
+  range.xNegativeCm = -200;
+  range.yPositiveCm = 700;
   range.yNegativeCm = 0;
-  if (c4004.setBoundaryDetectionRange(range)) {
+  if (c4004.setFourSidedRangeMode(range)) {
     Serial.println(F("Set boundary detection range success."));
   } else {
     Serial.println(F("Set boundary detection range failed."));
@@ -84,29 +85,29 @@ void setup()
 
   sTagConfig_t setTags[3];
 
-  setTags[0].index = BED_TAG_INDEX;
-  setTags[0].type = eTagTypePeopleCounting;
-  setTags[0].rangeType = eTagRangeRectangle;
-  setTags[0].centerX = 150;
+  setTags[0].tagIndex = BED_TAG_INDEX;
+  setTags[0].tagType = eTagTypePeopleCounting;
+  setTags[0].scopeType = eTagRangeRectangle;
+  setTags[0].centerX = -50;
   setTags[0].centerY = 300;
-  setTags[0].xSize = 300;
-  setTags[0].ySize = 300;
+  setTags[0].width = 300;
+  setTags[0].height = 250;
 
-  setTags[1].index = BEDROOM_TAG_INDEX;
-  setTags[1].type = eTagTypePeopleCounting;
-  setTags[1].rangeType = eTagRangeRectangle;
+  setTags[1].tagIndex = BEDROOM_TAG_INDEX;
+  setTags[1].tagType = eTagTypePeopleCounting;
+  setTags[1].scopeType = eTagRangeRectangle;
   setTags[1].centerX = 0;
-  setTags[1].centerY = 400;
-  setTags[1].xSize = 600;
-  setTags[1].ySize = 700;
+  setTags[1].centerY = 350;
+  setTags[1].width = 400;
+  setTags[1].height = 700;
 
-  setTags[2].index = BEDROOM_DOOR_TAG_INDEX;
-  setTags[2].type = eTagTypeApproachAway;
-  setTags[2].rangeType = eTagRangeRectangle;
+  setTags[2].tagIndex = BEDROOM_DOOR_TAG_INDEX;
+  setTags[2].tagType = eTagTypeApproachAway;
+  setTags[2].scopeType = eTagRangeRectangle;
   setTags[2].centerX = 100;
   setTags[2].centerY = 700;
-  setTags[2].xSize = 80;
-  setTags[2].ySize = 40;
+  setTags[2].width = 80;
+  setTags[2].height = 40;
 
   if (c4004.setTagsFromConfig(setTags, 3)) {
     Serial.println(F("Set bed/bedroom/door tags success."));
@@ -116,10 +117,10 @@ void setup()
 
   Serial.println(F("============================================================"));
   Serial.println(F("Bed stillness light control started."));
-  Serial.println(F("Rule A: bed static(any person) over 30s => LIGHT OFF."));
+  Serial.println(F("Rule A: bed static(any person) over 5s => LIGHT OFF."));
   Serial.println(F("Rule B: if rule A active, bedroom new entry still keeps OFF."));
   Serial.println(F("Rule C: if rule A inactive, bedroom people>0 => LIGHT ON."));
-  Serial.println(F("Rule D: bedroom occupied->empty over 30s => LIGHT OFF."));
+  Serial.println(F("Rule D: bedroom occupied->empty over 5s => LIGHT OFF."));
   Serial.println(F("============================================================"));
 }
 
@@ -129,11 +130,11 @@ void updatePeopleCountsFromTagReport()
     eReportedEvent_t event = c4004.getReportedInfo(5);
     if (event == eEventTag) {
       sTagInfo_t tagInfo;
-      if (c4004.getTagInfo(&tagInfo) && tagInfo.type == eTagTypePeopleCounting) {
-        if (tagInfo.index == BED_TAG_INDEX) {
+      if (c4004.getTagInfo(&tagInfo) && tagInfo.tagType == eTagTypePeopleCounting) {
+        if (tagInfo.tagIndex == BED_TAG_INDEX) {
           bedMotionCount = tagInfo.motionNum;
           bedStaticCount = tagInfo.staticNum;
-        } else if (tagInfo.index == BEDROOM_TAG_INDEX) {
+        } else if (tagInfo.tagIndex == BEDROOM_TAG_INDEX) {
           bedroomMotionCount = tagInfo.motionNum;
           bedroomStaticCount = tagInfo.staticNum;
         }

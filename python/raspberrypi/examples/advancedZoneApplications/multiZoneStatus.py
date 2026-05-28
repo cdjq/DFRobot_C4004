@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*
 '''!
   @file multiZoneStatus.py
-  @brief Configure multi-zone tags and print tag event status for living-room scene linkage.
-  @details This routine configures 5 monitoring tags and 2 noise tags, keeps the last event
-  @n result for each tag, prints a summary table every 3 seconds or when a tag event arrives,
-  @n and drives outputs based on game-area and sofa-area people counting results.
+  @brief Read multi-zone tag events and print living-room scene linkage status.
+  @details This routine can use tags configured by the PC tool or optionally configure
+  @n tags in code. It keeps the last event result for each tag, prints a summary table
+  @n every 3 seconds or when a tag event arrives, and drives outputs based on
+  @n game-area and sofa-area people counting results.
   @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
   @license The MIT License (MIT)
   @author JiaLi(zhixin.liu@dfrobot.com)
   @version V1.0.0
-  @date 2026-05-25
+  @date 2026-05-22
   @url https://github.com/DFRobot/DFRobot_C4004
 '''
 import os
@@ -23,7 +24,7 @@ while cur_path != os.path.dirname(cur_path):
     break
   cur_path = os.path.dirname(cur_path)
 
-from DFRobot_C4004 import DFRobot_C4004, TagConfig, BoundaryDetectionRange
+from DFRobot_C4004 import DFRobot_C4004, TagConfig, FourSidedRange
 
 try:
   import RPi.GPIO as GPIO
@@ -45,10 +46,12 @@ TAG_CURTAIN = 5
 TAG_PLANT = 6
 TAG_TOTAL = 7
 
-GAME_NO_PERSON_DELAY_S = 60.0
-SOFA_STATIC_DELAY_S = 30.0
-SOFA_MOTION_DELAY_S = 10.0
-SOFA_EMPTY_DELAY_S = 30.0
+# Users can adjust these times according to their own preferences, needs,
+# application scenarios, etc. The default time is 5 seconds.
+GAME_NO_PERSON_DELAY_S = 5.0   # Delay before the game area is treated as empty.
+SOFA_STATIC_DELAY_S = 5.0      # Delay before the sofa area is treated as static.
+SOFA_MOTION_DELAY_S = 5.0      # Delay before the sofa area is treated as motion.
+SOFA_EMPTY_DELAY_S = 5.0       # Delay before the sofa area is treated as empty.
 LIGHT_PWM_LOW = 0
 LIGHT_PWM_DIM = 150
 LIGHT_PWM_HIGH = 255
@@ -84,8 +87,8 @@ def tag_type_to_text(tag_type):
 
 def make_empty_cache(index):
   return {
-    'index': index,
-    'type': c4004.TAG_TYPE_NONE,
+    'tag_index': index,
+    'tag_type': c4004.TAG_TYPE_NONE,
     'center_x': 0,
     'center_y': 0,
     'enter_exit': 0,
@@ -99,15 +102,22 @@ def init_tag_cache_from_config(tags):
   global tag_cache
   tag_cache = [make_empty_cache(i) for i in range(TAG_TOTAL)]
   for tag in tags:
-    index = tag.index
+    index = tag.tag_index
     if index < 0 or index >= TAG_TOTAL:
       continue
-    tag_cache[index]['index'] = index
-    tag_cache[index]['type'] = tag.type
+    tag_cache[index]['tag_index'] = index
+    tag_cache[index]['tag_type'] = tag.tag_type
     tag_cache[index]['center_x'] = tag.center_x
     tag_cache[index]['center_y'] = tag.center_y
     if index in (TAG_HOME_DOOR, TAG_KITCHEN_DOOR):
       tag_cache[index]['motion_dir'] = 1
+
+
+def init_tag_cache_from_device():
+  tags = c4004.get_tags()
+  init_tag_cache_from_config(tags)
+  print('Read tag config count: %d' % len(tags))
+  return len(tags) > 0
 
 
 def setup_gpio():
@@ -150,16 +160,35 @@ def setup_sensor_and_tags():
   else:
     print('Set presence enable failed.')
 
-  range_info = BoundaryDetectionRange()
+  range_info = FourSidedRange()
   range_info.mode = c4004.RANGE_FOUR_SIDE_BOUNDARY
-  range_info.x_positive_cm = 500
-  range_info.x_negative_cm = -500
-  range_info.y_positive_cm = 800
+  range_info.x_positive_cm = 200
+  range_info.x_negative_cm = -200
+  range_info.y_positive_cm = 700
   range_info.y_negative_cm = 0
-  if c4004.set_boundary_detection_range(range_info):
+  if c4004.set_four_sided_range_mode(range_info):
     print('Set boundary detection range success.')
   else:
     print('Set boundary detection range failed.')
+
+  # Tag configuration note:
+  # If the tags have already been configured by the PC tool, you do not need
+  # to configure them again here. In that case, keep the following tag setup
+  # code commented out.
+  #
+  # If you want this example to configure tags automatically, uncomment the
+  # clear_all_tags(), tags list, and set_tags_from_config(tags) code below.
+  # init_tag_cache_from_device() reads the actual tag list from the sensor and
+  # uses it to initialize the local print cache.
+  #
+  # Field meaning:
+  #   tag_index : Tag index. It must be unique for each tag.
+  #   tag_type  : Tag function, such as PeopleCounting, ApproachAway, or Noise.
+  #   scope_type: Tag shape. Use TAG_RANGE_RECTANGLE or TAG_RANGE_CIRCLE.
+  #   center_x  : Tag center X coordinate, in cm.
+  #   center_y  : Tag center Y coordinate, in cm.
+  #   width     : Rectangle width, or circle radius, in cm.
+  #   height    : Rectangle height, in cm. Not used for circle tags.
 
   if c4004.clear_all_tags():
     print('Clear all tags success.')
@@ -169,73 +198,73 @@ def setup_sensor_and_tags():
   tags = []
 
   tag = TagConfig()
-  tag.index = TAG_GAME
-  tag.type = c4004.TAG_TYPE_PEOPLE_COUNTING
-  tag.range_type = c4004.TAG_RANGE_CIRCLE
-  tag.center_x = 50
-  tag.center_y = 450
-  tag.x_size = 100
-  tag.y_size = 0
-  tags.append(tag)
-
-  tag = TagConfig()
-  tag.index = TAG_SOFA
-  tag.type = c4004.TAG_TYPE_PEOPLE_COUNTING
-  tag.range_type = c4004.TAG_RANGE_RECTANGLE
-  tag.center_x = 300
+  tag.tag_index = TAG_GAME
+  tag.tag_type = c4004.TAG_TYPE_PEOPLE_COUNTING
+  tag.scope_type = c4004.TAG_RANGE_CIRCLE
+  tag.center_x = -100
   tag.center_y = 550
-  tag.x_size = 100
-  tag.y_size = 300
+  tag.width = 80
+  tag.height = 0
   tags.append(tag)
 
   tag = TagConfig()
-  tag.index = TAG_HOME_DOOR
-  tag.type = c4004.TAG_TYPE_APPROACH_AWAY
-  tag.range_type = c4004.TAG_RANGE_RECTANGLE
+  tag.tag_index = TAG_SOFA
+  tag.tag_type = c4004.TAG_TYPE_PEOPLE_COUNTING
+  tag.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag.center_x = 100
+  tag.center_y = 450
+  tag.width = 100
+  tag.height = 300
+  tags.append(tag)
+
+  tag = TagConfig()
+  tag.tag_index = TAG_HOME_DOOR
+  tag.tag_type = c4004.TAG_TYPE_APPROACH_AWAY
+  tag.scope_type = c4004.TAG_RANGE_RECTANGLE
   tag.center_x = 100
   tag.center_y = 700
-  tag.x_size = 80
-  tag.y_size = 40
+  tag.width = 80
+  tag.height = 40
   tags.append(tag)
 
   tag = TagConfig()
-  tag.index = TAG_KITCHEN_DOOR
-  tag.type = c4004.TAG_TYPE_APPROACH_AWAY
-  tag.range_type = c4004.TAG_RANGE_RECTANGLE
+  tag.tag_index = TAG_KITCHEN_DOOR
+  tag.tag_type = c4004.TAG_TYPE_APPROACH_AWAY
+  tag.scope_type = c4004.TAG_RANGE_RECTANGLE
   tag.center_x = -100
   tag.center_y = 700
-  tag.x_size = 80
-  tag.y_size = 40
+  tag.width = 80
+  tag.height = 40
   tags.append(tag)
 
   tag = TagConfig()
-  tag.index = TAG_DINING
-  tag.type = c4004.TAG_TYPE_PEOPLE_COUNTING
-  tag.range_type = c4004.TAG_RANGE_RECTANGLE
-  tag.center_x = 150
-  tag.center_y = 200
-  tag.x_size = 400
-  tag.y_size = 200
+  tag.tag_index = TAG_DINING
+  tag.tag_type = c4004.TAG_TYPE_PEOPLE_COUNTING
+  tag.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag.center_x = 50
+  tag.center_y = 150
+  tag.width = 300
+  tag.height = 150
   tags.append(tag)
 
   tag = TagConfig()
-  tag.index = TAG_CURTAIN
-  tag.type = c4004.TAG_TYPE_NOISE
-  tag.range_type = c4004.TAG_RANGE_RECTANGLE
-  tag.center_x = -250
+  tag.tag_index = TAG_CURTAIN
+  tag.tag_type = c4004.TAG_TYPE_NOISE
+  tag.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag.center_x = -150
+  tag.center_y = 300
+  tag.width = 50
+  tag.height = 300
+  tags.append(tag)
+
+  tag = TagConfig()
+  tag.tag_index = TAG_PLANT
+  tag.tag_type = c4004.TAG_TYPE_NOISE
+  tag.scope_type = c4004.TAG_RANGE_CIRCLE
+  tag.center_x = -50
   tag.center_y = 400
-  tag.x_size = 50
-  tag.y_size = 400
-  tags.append(tag)
-
-  tag = TagConfig()
-  tag.index = TAG_PLANT
-  tag.type = c4004.TAG_TYPE_NOISE
-  tag.range_type = c4004.TAG_RANGE_CIRCLE
-  tag.center_x = -200
-  tag.center_y = 650
-  tag.x_size = 40
-  tag.y_size = 0
+  tag.width = 40
+  tag.height = 0
   tags.append(tag)
 
   if c4004.set_tags_from_config(tags):
@@ -243,12 +272,15 @@ def setup_sensor_and_tags():
   else:
     print('Set 7 tags from config failed.')
 
-  init_tag_cache_from_config(tags)
+  if init_tag_cache_from_device():
+    print('Init tag cache from device config success.')
+  else:
+    print('No device tag config read, tag cache uses default empty values.')
 
   print('===================================================================')
   print('Room occupancy inference started.')
-  print('Rule 1: Game area has person -> TV IO HIGH immediately; no person for 60s -> LOW.')
-  print('Rule 2: Sofa static-only for 30s -> Light PWM 150; motion for 10s -> 0; no person for 30s -> 255.')
+  print('Rule 1: Game area has person -> TV IO HIGH immediately; no person for 5s -> LOW.')
+  print('Rule 2: Sofa static-only for 5s -> Light PWM 150; motion for 5s -> 0; no person for 5s -> 255.')
   print('===================================================================')
 
 
@@ -259,12 +291,12 @@ def print_tag_cache_table():
   for i in range(TAG_TOTAL):
     info = tag_cache[i]
     name = TAG_NAMES[i]
-    type_text = tag_type_to_text(info['type'])
+    type_text = tag_type_to_text(info['tag_type'])
 
-    motion_num = info['motion_num'] if info['type'] == c4004.TAG_TYPE_PEOPLE_COUNTING else 0
-    static_num = info['static_num'] if info['type'] == c4004.TAG_TYPE_PEOPLE_COUNTING else 0
-    motion_dir = str(info['motion_dir']) if info['type'] == c4004.TAG_TYPE_APPROACH_AWAY else '-'
-    enter_exit = str(info['enter_exit']) if info['type'] == c4004.TAG_TYPE_ENTER_EXIT else '-'
+    motion_num = info['motion_num'] if info['tag_type'] == c4004.TAG_TYPE_PEOPLE_COUNTING else 0
+    static_num = info['static_num'] if info['tag_type'] == c4004.TAG_TYPE_PEOPLE_COUNTING else 0
+    motion_dir = str(info['motion_dir']) if info['tag_type'] == c4004.TAG_TYPE_APPROACH_AWAY else '-'
+    enter_exit = str(info['enter_exit']) if info['tag_type'] == c4004.TAG_TYPE_ENTER_EXIT else '-'
 
     line = '%d\t%s' % (i, name)
     if len(name) < 8:
@@ -306,10 +338,12 @@ def main():
 
       if event == c4004.EVENT_TAG:
         info = c4004.get_tag_info()
-        if info is not None and 0 <= info.index < TAG_TOTAL:
-          cache = tag_cache[info.index]
-          cache['index'] = info.index
-          cache['type'] = info.type
+        if info is not None and 0 <= info.tag_index < TAG_TOTAL:
+          cache = tag_cache[info.tag_index]
+          cache['tag_index'] = info.tag_index
+          cache['tag_type'] = info.tag_type
+          cache['center_x'] = info.center_x
+          cache['center_y'] = info.center_y
           cache['enter_exit'] = info.enter_exit
           cache['motion_dir'] = info.motion_dir
           cache['motion_num'] = info.motion_num

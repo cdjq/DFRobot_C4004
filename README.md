@@ -157,7 +157,7 @@ pip3 install pyserial
    * @param hight: Installation height, in cm.
    * @return true: Set succeeded, false: Set failed.
   */
-  bool setInstallHigh(int hight);
+  bool setInstallHigh(int32_t hight);
 
   /**
    * @fn getInstallHigh
@@ -298,11 +298,11 @@ pip3 install pyserial
    * @fn setTag
    * @brief Set one tag using size mode.
    * @param tag: Tag configuration.
-   * @n          index: Tag index.
-   * @n          type: Tag type.
-   * @n          rangeType: Tag range type.
-   * @n          xSize: Tag x-size, in cm.
-   * @n          ySize: Tag y-size, in cm.
+   * @n          tagIndex: Tag index.
+   * @n          tagType: Tag type.
+   * @n          scopeType: Tag range type.
+   * @n          width: Tag width or circle radius, in cm.
+   * @n          height: Tag height, in cm.
    * @return eTagSetStatus_t: Tag set status.
    * @n          eTagSetCommError: Communication failed or response mismatch.
    * @n          eTagSetSuccess: Tag set succeeded.
@@ -351,7 +351,7 @@ pip3 install pyserial
   bool getTagInfo(sTagInfo_t *tagInfo);
 
   /**
-   * @fn setBoundaryDetectionRange
+   * @fn setFourSidedRangeMode
    * @brief Set four-side boundary detection range.
    * @param range: Boundary range settings.
    * @n          xPositiveCm: Positive x boundary, in cm.
@@ -360,34 +360,34 @@ pip3 install pyserial
    * @n          yNegativeCm: Negative y boundary, in cm.
    * @return true: Set succeeded, false: Set failed.
   */
-  bool setBoundaryDetectionRange(sBoundaryDetectionRange_t &range);
+  bool setFourSidedRangeMode(sFourSidedRange &range);
 
   /**
-   * @fn getBoundaryDetectionRange
+   * @fn getFourSidedRangeMode
    * @brief Query and get four-side boundary detection range.
    * @param range: Pointer to receive boundary range settings.
    * @return true: Get succeeded, false: Get failed.
   */
-  bool getBoundaryDetectionRange(sBoundaryDetectionRange_t *range);
+  bool getFourSidedRangeMode(sFourSidedRange *range);
 
   /**
-   * @fn setTrajectoryDetectionRange
+   * @fn setTrajectoryRangeMode
    * @brief Enable or disable trajectory-range mode.
    * @param enable: Enable or disable trajectory-range mode.
    * @n          true: Enable, false: Disable.
    * @return true: Set succeeded, false: Set failed.
   */
-  bool setTrajectoryDetectionRange(bool enable);
+  bool setTrajectoryRangeMode(bool enable);
 
   /**
-   * @fn getTrajectoryDetectionRange
+   * @fn getTrajectoryRangeMode
    * @brief Query and get range points in trajectory mode (mode 0x05).
    * @param points: Pointer to receive trajectory-mode points.
    * @param pointCount: Pointer to receive point count.
    * @return true: Query succeeded, false: Query failed.
    * @note The points buffer must be able to hold at least MAX_POINTS points.
   */
-  bool getTrajectoryDetectionRange(sPoint_t *points, uint16_t *pointCount);
+  bool getTrajectoryRangeMode(sPoint_t *points, uint16_t *pointCount);
 
   /**
    * @fn setConfigFileModePoints

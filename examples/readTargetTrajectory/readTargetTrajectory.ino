@@ -53,21 +53,19 @@ void printTrajectoryData(eGetDataMode_t dataMode)
   if (count == 0) {
     Serial.println("No target.");
   } else {
-    Serial.println("Row\tID\tSize\tFeature\tX\tY\tHeight\tSpeed");
+    Serial.println("Row\tID\tKinesia\tFeature\tX\tY\tSpeed");
     for (uint8_t i = 0; i < count; i++) {
       Serial.print(i);
       Serial.print("\t");
       Serial.print(targets[i].index);
       Serial.print("\t");
-      Serial.print(targets[i].targetSize);
+      Serial.print(targets[i].kinesia);
       Serial.print("\t");
       Serial.print(targetFeatureToString(targets[i].targetFeature));
       Serial.print("\t");
       Serial.print(targets[i].x);
       Serial.print("\t");
       Serial.print(targets[i].y);
-      Serial.print("\t");
-      Serial.print(targets[i].height);
       Serial.print("\t");
       Serial.println(targets[i].speed);
     }
@@ -84,13 +82,13 @@ void setup()
     delay(1000);
   }
 
-  sBoundaryDetectionRange_t range;
+  sFourSidedRange range;
   range.mode = eRangeFourSideBoundary;
-  range.xPositiveCm = 300;
-  range.xNegativeCm = -300;
-  range.yPositiveCm = 500;
+  range.xPositiveCm = 200;
+  range.xNegativeCm = -200;
+  range.yPositiveCm = 700;
   range.yNegativeCm = 0;
-  if (c4004.setBoundaryDetectionRange(range)) {
+  if (c4004.setFourSidedRangeMode(range)) {
     Serial.println("Set boundary detection range success.");
   } else {
     Serial.println("Set boundary detection range failed.");

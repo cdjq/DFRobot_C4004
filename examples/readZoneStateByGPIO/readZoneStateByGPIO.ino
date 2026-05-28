@@ -37,13 +37,13 @@ void setup()
     delay(1000);
   }
 
-  sBoundaryDetectionRange_t range;
+  sFourSidedRange range;
   range.mode = eRangeFourSideBoundary;
-  range.xPositiveCm = 400;
-  range.xNegativeCm = -400;
-  range.yPositiveCm = 600;
+  range.xPositiveCm = 200;
+  range.xNegativeCm = -200;
+  range.yPositiveCm = 700;
   range.yNegativeCm = 0;
-  if (c4004.setBoundaryDetectionRange(range)) {
+  if (c4004.setFourSidedRangeMode(range)) {
     Serial.println("Set boundary detection range success.");
   } else {
     Serial.println("Set boundary detection range failed.");
@@ -57,55 +57,55 @@ void setup()
 
   sTagConfig_t setTags[5];
 
-  // Set tag 0, type is None, range is Rectangle, center is (0, 80), size is (180, 120)
-  setTags[0].index = 0;
-  setTags[0].type = eTagTypeNone;
-  setTags[0].rangeType = eTagRangeRectangle;
+  // Set tag 0, type is PeopleCounting, range is Rectangle, center is (0, 100), width/height is (120, 120)
+  setTags[0].tagIndex = 0;
+  setTags[0].tagType = eTagTypePeopleCounting;
+  setTags[0].scopeType = eTagRangeRectangle;
   setTags[0].centerX = 0;
-  setTags[0].centerY = 80;
-  setTags[0].xSize = 180;
-  setTags[0].ySize = 120;
+  setTags[0].centerY = 100;
+  setTags[0].width = 120;
+  setTags[0].height = 120;
 
-  // Set tag 1, type is EnterExit, range is Rectangle, center is (180, 160), size is (200, 140)
-  setTags[1].index = 1;
-  setTags[1].type = eTagTypeEnterExit;
-  setTags[1].rangeType = eTagRangeRectangle;
-  setTags[1].centerX = 180;
-  setTags[1].centerY = 160;
-  setTags[1].xSize = 200;
-  setTags[1].ySize = 140;
+  // Set tag 1, type is PeopleCounting, range is Rectangle, center is (100, 220), width/height is (120, 120)
+  setTags[1].tagIndex = 1;
+  setTags[1].tagType = eTagTypePeopleCounting;
+  setTags[1].scopeType = eTagRangeRectangle;
+  setTags[1].centerX = 100;
+  setTags[1].centerY = 220;
+  setTags[1].width = 120;
+  setTags[1].height = 120;
 
-  // Set tag 2, type is ApproachAway, range is Circle, center is (-180, 240), size is (160, 160)
-  setTags[2].index = 2;
-  setTags[2].type = eTagTypeApproachAway;
-  setTags[2].rangeType = eTagRangeCircle;
-  setTags[2].centerX = -180;
-  setTags[2].centerY = 240;
-  setTags[2].xSize = 160;
-  setTags[2].ySize = 160;
+  // Set tag 2, type is PeopleCounting, range is Circle, center is (-80, 350), radius is 80
+  setTags[2].tagIndex = 2;
+  setTags[2].tagType = eTagTypePeopleCounting;
+  setTags[2].scopeType = eTagRangeCircle;
+  setTags[2].centerX = -80;
+  setTags[2].centerY = 350;
+  setTags[2].width = 80;
+  setTags[2].height = 0;
   /**
-   * Note: When the label type is a circle, X is the radius of the circle
-   * and Y is not used. When the range type is a rectangle, X and Y
-   * correspond to the width and height of the rectangle respectively.
+   * Note: When the label type is a circle, width is the radius of the circle
+   * and height is not used. When the range type is a rectangle, width and
+   * height correspond to the rectangle dimensions respectively.
   */
 
-  // Set tag 3, type is PeopleCounting, range is Rectangle, center is (80, 260), size is (220, 150)
-  setTags[3].index = 3;
-  setTags[3].type = eTagTypePeopleCounting;
-  setTags[3].rangeType = eTagRangeRectangle;
-  setTags[3].centerX = 80;
-  setTags[3].centerY = 260;
-  setTags[3].xSize = 220;
-  setTags[3].ySize = 150;
+  // Set tag 3, type is PeopleCounting, range is Rectangle, center is (0, 500), width/height is (160, 160)
+  setTags[3].tagIndex = 3;
+  setTags[3].tagType = eTagTypePeopleCounting;
+  setTags[3].scopeType = eTagRangeRectangle;
+  setTags[3].centerX = 0;
+  setTags[3].centerY = 500;
+  setTags[3].width = 160;
+  setTags[3].height = 160;
 
-  // Set tag 4, type is Noise, range is Rectangle, center is (-220, 360), size is (260, 180)
-  setTags[4].index = 4;
-  setTags[4].type = eTagTypeNoise;
-  setTags[4].rangeType = eTagRangeRectangle;
-  setTags[4].centerX = -220;
-  setTags[4].centerY = 360;
-  setTags[4].xSize = 260;
-  setTags[4].ySize = 180;
+  // Set tag 4, type is PeopleCounting, range is Rectangle, center is (-100, 620), width/height is (100, 120)
+  setTags[4].tagIndex = 4;
+  setTags[4].tagType = eTagTypePeopleCounting;
+  setTags[4].scopeType = eTagRangeRectangle;
+  setTags[4].centerX = -100;
+  setTags[4].centerY = 620;
+  setTags[4].width = 100;
+  setTags[4].height = 120;
 
   if (c4004.setTagsFromConfig(setTags, 5)) {
     Serial.println("Set 5 tags from config success.");
@@ -134,10 +134,10 @@ void loop()
   if (millis() - lastPrint > 1000) {
     lastPrint = millis();
     Serial.println("=============================================");
-    Serial.println("GPIO presence (LOW=Presence, HIGH=None):");
+    Serial.println("GPIO presence (HIGH=Presence, LOW=None):");
     Serial.println("GPIO 1 = Whole area, GPIO 2-6 = Divided zones");
     for (uint8_t i = 0; i < 6; i++) {
-      bool hasPresence = (digitalRead(zonePins[i]) == LOW);
+      bool hasPresence = (digitalRead(zonePins[i]) == HIGH);
       Serial.print("GPIO ");
       Serial.print(i + 1);
       if (i == 0) {
@@ -152,4 +152,3 @@ void loop()
     Serial.println("=============================================");
   }
 }
-

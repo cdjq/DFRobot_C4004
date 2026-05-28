@@ -19,7 +19,7 @@ while cur_path != os.path.dirname(cur_path):
     sys.path.insert(0, cur_path)
     break
   cur_path = os.path.dirname(cur_path)
-from DFRobot_C4004 import DFRobot_C4004, TagConfig, BoundaryDetectionRange
+from DFRobot_C4004 import DFRobot_C4004, TagConfig, FourSidedRange
 
 try:
   import RPi.GPIO as GPIO
@@ -40,13 +40,13 @@ def main():
     print('DFRobot C4004 begin failed, retrying...')
     time.sleep(1)
 
-  range_info = BoundaryDetectionRange()
+  range_info = FourSidedRange()
   range_info.mode = c4004.RANGE_FOUR_SIDE_BOUNDARY
-  range_info.x_positive_cm = 400
-  range_info.x_negative_cm = -400
-  range_info.y_positive_cm = 600
+  range_info.x_positive_cm = 200
+  range_info.x_negative_cm = -200
+  range_info.y_positive_cm = 700
   range_info.y_negative_cm = 0
-  if c4004.set_boundary_detection_range(range_info):
+  if c4004.set_four_sided_range_mode(range_info):
     print('Set boundary detection range success.')
   else:
     print('Set boundary detection range failed.')
@@ -59,53 +59,53 @@ def main():
   set_tags = []
 
   tag0 = TagConfig()
-  tag0.index = 0
-  tag0.type = c4004.TAG_TYPE_NONE
-  tag0.range_type = c4004.TAG_RANGE_RECTANGLE
+  tag0.tag_index = 0
+  tag0.tag_type = c4004.TAG_TYPE_PEOPLE_COUNTING
+  tag0.scope_type = c4004.TAG_RANGE_RECTANGLE
   tag0.center_x = 0
-  tag0.center_y = 80
-  tag0.x_size = 180
-  tag0.y_size = 120
+  tag0.center_y = 100
+  tag0.width = 120
+  tag0.height = 120
   set_tags.append(tag0)
 
   tag1 = TagConfig()
-  tag1.index = 1
-  tag1.type = c4004.TAG_TYPE_ENTER_EXIT
-  tag1.range_type = c4004.TAG_RANGE_RECTANGLE
-  tag1.center_x = 180
-  tag1.center_y = 160
-  tag1.x_size = 200
-  tag1.y_size = 140
+  tag1.tag_index = 1
+  tag1.tag_type = c4004.TAG_TYPE_PEOPLE_COUNTING
+  tag1.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag1.center_x = 100
+  tag1.center_y = 220
+  tag1.width = 120
+  tag1.height = 120
   set_tags.append(tag1)
 
   tag2 = TagConfig()
-  tag2.index = 2
-  tag2.type = c4004.TAG_TYPE_APPROACH_AWAY
-  tag2.range_type = c4004.TAG_RANGE_CIRCLE
-  tag2.center_x = -180
-  tag2.center_y = 240
-  tag2.x_size = 160
-  tag2.y_size = 160
+  tag2.tag_index = 2
+  tag2.tag_type = c4004.TAG_TYPE_PEOPLE_COUNTING
+  tag2.scope_type = c4004.TAG_RANGE_CIRCLE
+  tag2.center_x = -80
+  tag2.center_y = 350
+  tag2.width = 80
+  tag2.height = 0
   set_tags.append(tag2)
 
   tag3 = TagConfig()
-  tag3.index = 3
-  tag3.type = c4004.TAG_TYPE_PEOPLE_COUNTING
-  tag3.range_type = c4004.TAG_RANGE_RECTANGLE
-  tag3.center_x = 80
-  tag3.center_y = 260
-  tag3.x_size = 220
-  tag3.y_size = 150
+  tag3.tag_index = 3
+  tag3.tag_type = c4004.TAG_TYPE_PEOPLE_COUNTING
+  tag3.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag3.center_x = 0
+  tag3.center_y = 500
+  tag3.width = 160
+  tag3.height = 160
   set_tags.append(tag3)
 
   tag4 = TagConfig()
-  tag4.index = 4
-  tag4.type = c4004.TAG_TYPE_NOISE
-  tag4.range_type = c4004.TAG_RANGE_RECTANGLE
-  tag4.center_x = -220
-  tag4.center_y = 360
-  tag4.x_size = 260
-  tag4.y_size = 180
+  tag4.tag_index = 4
+  tag4.tag_type = c4004.TAG_TYPE_PEOPLE_COUNTING
+  tag4.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag4.center_x = -100
+  tag4.center_y = 620
+  tag4.width = 100
+  tag4.height = 120
   set_tags.append(tag4)
 
   if c4004.set_tags_from_config(set_tags):
@@ -130,13 +130,13 @@ def main():
       if time.time() - last_print > 1:
         last_print = time.time()
         print('=============================================')
-        print('GPIO presence (LOW=Presence, HIGH=None):')
+        print('GPIO presence (HIGH=Presence, LOW=None):')
         print('GPIO 1 = Whole area, GPIO 2-6 = Divided zones')
         if GPIO is None:
           print('RPi.GPIO is not available.')
         else:
           for i, pin in enumerate(ZONE_PINS):
-            has_presence = GPIO.input(pin) == GPIO.LOW
+            has_presence = GPIO.input(pin) == GPIO.HIGH
             if i == 0:
               label = 'GPIO 1 (Whole area)'
             else:
@@ -150,4 +150,3 @@ def main():
 
 if __name__ == '__main__':
   main()
-

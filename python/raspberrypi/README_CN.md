@@ -272,21 +272,21 @@ RX         | TXD
       @return TagInfo 对象；若无有效事件则返回 None。
     '''
 
-  def set_boundary_detection_range(self, range_info):
+  def set_four_sided_range_mode(self, range_info):
     '''!
       @brief 设置四边探测范围（模式 0x04）。
-      @param range_info: BoundaryDetectionRange 对象
+      @param range_info: FourSidedRange 对象
       @return True or False
     '''
 
-  def get_boundary_detection_range(self, range_info):
+  def get_four_sided_range_mode(self, range_info):
     '''!
       @brief 读取四边探测范围。
       @param range_info: 范围输出对象
       @return True or False
     '''
 
-  def set_trajectory_detection_range(self, enable):
+  def set_trajectory_range_mode(self, enable):
     '''!
       @brief 开启或关闭轨迹探测范围模式（模式 0x05）。
       @param enable: True/False
@@ -301,7 +301,7 @@ RX         | TXD
       @n   数据格式: 0x06 + 2B 点数 + n*(2B X + 2B Y)
     '''
 
-  def get_trajectory_detection_range(self, points, point_count):
+  def get_trajectory_range_mode(self, points, point_count):
     '''!
       @brief 读取轨迹模式点位（模式 0x05）。
       @param points: 点位输出 list

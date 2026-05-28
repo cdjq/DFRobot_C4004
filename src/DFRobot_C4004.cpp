@@ -268,12 +268,12 @@ bool DFRobot_C4004::getInstallInfo(sInstallInfo_t *info)
   return true;
 }
 
-bool DFRobot_C4004::setInstallHigh(int hight)
+bool DFRobot_C4004::setInstallHigh(int32_t hight)
 {
   uint8_t heightData[2];
   sPacket_t packet;
 
-  if (hight < 0 || hight > 0xFFFF) {
+  if (hight < 0 || hight > 0xFFFFL) {
     return false;
   }
 
@@ -491,11 +491,11 @@ eTagSetStatus_t DFRobot_C4004::setTag(const sTagConfig_t &tag)
   uint8_t data[7];
   sPacket_t packet;
 
-  data[0] = tag.index;
-  data[1] = (uint8_t)tag.type;
-  data[2] = (uint8_t)tag.rangeType;
-  writeUint16(&data[3], tag.xSize);
-  writeUint16(&data[5], tag.ySize);
+  data[0] = tag.tagIndex;
+  data[1] = (uint8_t)tag.tagType;
+  data[2] = (uint8_t)tag.scopeType;
+  writeUint16(&data[3], tag.width);
+  writeUint16(&data[5], tag.height);
 
   if (!requestFrame(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_SET_TAG, data, sizeof(data), &packet)) {
     return eTagSetCommError;
@@ -503,7 +503,7 @@ eTagSetStatus_t DFRobot_C4004::setTag(const sTagConfig_t &tag)
   if (packet.len < 4) {
     return eTagSetCommError;
   }
-  if (packet.data[0] != tag.index) {
+  if (packet.data[0] != tag.tagIndex) {
     return eTagSetCommError;
   }
 
@@ -568,22 +568,22 @@ bool DFRobot_C4004::setTagsFromConfig(const sTagConfig_t *tags, uint8_t tagCount
   writeUint16(&data[offset], tagCount);
   offset += 2;
   for (uint8_t i = 0; i < tagCount; i++) {
-    data[offset++] = tags[i].index;
-    data[offset++] = (uint8_t)tags[i].type;
-    data[offset++] = (uint8_t)tags[i].rangeType;
+    data[offset++] = tags[i].tagIndex;
+    data[offset++] = (uint8_t)tags[i].tagType;
+    data[offset++] = (uint8_t)tags[i].scopeType;
     writeSignBitInt16(&data[offset], tags[i].centerX);
     offset += 2;
     writeSignBitInt16(&data[offset], tags[i].centerY);
     offset += 2;
-    writeUint16(&data[offset], tags[i].xSize);
+    writeUint16(&data[offset], tags[i].width);
     offset += 2;
-    writeUint16(&data[offset], tags[i].ySize);
+    writeUint16(&data[offset], tags[i].height);
     offset += 2;
   }
   return requestFrame(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_SET_TAGS_FROM_CONFIG, data, offset, &packet);
 }
 
-bool DFRobot_C4004::setBoundaryDetectionRange(sBoundaryDetectionRange_t &range)
+bool DFRobot_C4004::setFourSidedRangeMode(sFourSidedRange &range)
 {
   uint8_t data[9];
   sPacket_t packet;
@@ -602,7 +602,7 @@ bool DFRobot_C4004::setBoundaryDetectionRange(sBoundaryDetectionRange_t &range)
   return true;
 }
 
-bool DFRobot_C4004::getBoundaryDetectionRange(sBoundaryDetectionRange_t *range)
+bool DFRobot_C4004::getFourSidedRangeMode(sFourSidedRange *range)
 {
   uint8_t data = QUERY_DATA;
   sPacket_t packet;
@@ -617,18 +617,43 @@ bool DFRobot_C4004::getBoundaryDetectionRange(sBoundaryDetectionRange_t *range)
   return true;
 }
 
-bool DFRobot_C4004::setTrajectoryDetectionRange(bool enable)
+bool DFRobot_C4004::setTrajectoryRangeMode(bool enable)
 {
   uint8_t data[2];
   sPacket_t packet;
+  uint32_t startTime = 0;
 
   data[0] = eRangeTrajectory;
   data[1] = enable ? 1 : 0;
-  if (!requestFrame(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_SET_RANGE, data, sizeof(data), &packet)) {
+
+  flushInput();
+  if (!sendCommand(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_SET_RANGE, data, sizeof(data))) {
     return false;
   }
-  _rangeInfo.mode = eRangeTrajectory;
-  return true;
+
+  startTime = millis();
+  while ((uint32_t)(millis() - startTime) < DEFAULT_TIMEOUT) {
+    uint16_t elapsed = (uint16_t)(millis() - startTime);
+    uint16_t leftTime = DEFAULT_TIMEOUT - elapsed;
+
+    if (!readFrame(&packet, leftTime)) {
+      continue;
+    }
+    handlePacket(&packet);
+
+    if (packet.control != CTRL_DETECTION_RANGE) {
+      continue;
+    }
+    if (packet.cmd == CMD_DETECTION_RANGE_SET_RANGE) {
+      _rangeInfo.mode = eRangeTrajectory;
+      return true;
+    }
+    if (packet.cmd == CMD_DETECTION_RANGE_QUERY_RANGE && packet.len > 0 && (eDetectionRangeMode_t)packet.data[0] == eRangeTrajectory) {
+      _rangeInfo.mode = eRangeTrajectory;
+      return true;
+    }
+  }
+  return false;
 }
 
 bool DFRobot_C4004::setConfigFileModePoints(const sPoint_t *points, uint16_t pointCount)
@@ -672,7 +697,7 @@ bool DFRobot_C4004::setConfigFileModePoints(const sPoint_t *points, uint16_t poi
   return true;
 }
 
-bool DFRobot_C4004::getTrajectoryDetectionRange(sPoint_t *points, uint16_t *pointCount)
+bool DFRobot_C4004::getTrajectoryRangeMode(sPoint_t *points, uint16_t *pointCount)
 {
   uint8_t data = QUERY_DATA;
   sPacket_t packet;
@@ -974,6 +999,9 @@ bool DFRobot_C4004::readFrame(sPacket_t *packet, uint16_t timeoutMs)
     packet->len |= value;
 
     if (packet->len > MAX_PAYLOAD) {
+#ifdef ENABLE_DBG
+      DBG(String("payload too long, len=") + String(packet->len) + String(" max=") + String(MAX_PAYLOAD));
+#endif
       flushInput();
       return false;
     }
@@ -1209,7 +1237,7 @@ void DFRobot_C4004::parseTargets(const uint8_t *data, uint16_t len)
   for (uint8_t i = 0; i < count; i++) {
     uint16_t offset = i * targetLen;
     _targets[i].index = data[offset];
-    _targets[i].targetSize = data[offset + 1];
+    _targets[i].kinesia = data[offset + 1];
     _targets[i].targetFeature = (eTargetFeature_t)data[offset + 2];
     _targets[i].x = readSignBitInt16(&data[offset + 3]);
     _targets[i].y = readSignBitInt16(&data[offset + 5]);
@@ -1240,13 +1268,13 @@ void DFRobot_C4004::parseTagList(const uint8_t *data, uint16_t len)
 
   for (uint8_t i = 0; i < count; i++) {
     uint16_t offset = 2 + i * 11;
-    _tags[i].index = data[offset];
-    _tags[i].type = (eTagType_t)data[offset + 1];
-    _tags[i].rangeType = (eTagRangeType_t)data[offset + 2];
+    _tags[i].tagIndex = data[offset];
+    _tags[i].tagType = (eTagType_t)data[offset + 1];
+    _tags[i].scopeType = (eTagRangeType_t)data[offset + 2];
     _tags[i].centerX = readSignBitInt16(&data[offset + 3]);
     _tags[i].centerY = readSignBitInt16(&data[offset + 5]);
-    _tags[i].xSize = readUint16(&data[offset + 7]);
-    _tags[i].ySize = readUint16(&data[offset + 9]);
+    _tags[i].width = readUint16(&data[offset + 7]);
+    _tags[i].height = readUint16(&data[offset + 9]);
   }
 }
 
@@ -1258,15 +1286,15 @@ void DFRobot_C4004::parseTagEvent(const uint8_t *data, uint16_t len)
   }
 
   memset(&_tagInfo, 0, sizeof(_tagInfo));
-  _tagInfo.index = data[0];
-  _tagInfo.type = (eTagType_t)data[1];
+  _tagInfo.tagIndex = data[0];
+  _tagInfo.tagType = (eTagType_t)data[1];
   _tagInfo.centerX = readSignBitInt16(&data[2]);
   _tagInfo.centerY = readSignBitInt16(&data[4]);
-  if (_tagInfo.type == eTagTypeEnterExit) {
+  if (_tagInfo.tagType == eTagTypeEnterExit) {
     _tagInfo.enterExit = data[6];
-  } else if (_tagInfo.type == eTagTypeApproachAway) {
+  } else if (_tagInfo.tagType == eTagTypeApproachAway) {
     _tagInfo.motionDir = data[6];
-  } else if (_tagInfo.type == eTagTypePeopleCounting) {
+  } else if (_tagInfo.tagType == eTagTypePeopleCounting) {
     _tagInfo.motionNum = (data[6] >> 4) & 0x0F;
     _tagInfo.staticNum = data[6] & 0x0F;
   }

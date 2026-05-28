@@ -157,7 +157,7 @@ pip3 install pyserial
    * @param hight: 安装高度，单位为 cm。
    * @return true: 设置成功，false: 设置失败。
   */
-  bool setInstallHigh(int hight);
+  bool setInstallHigh(int32_t hight);
 
   /**
    * @fn getInstallHigh
@@ -298,11 +298,11 @@ pip3 install pyserial
    * @fn setTag
    * @brief 使用尺寸模式设置一个标签。
    * @param tag: 标签配置。
-   * @n          index: 标签索引。
-   * @n          type: 标签类型。
-   * @n          rangeType: 标签范围类型。
-   * @n          xSize: 标签 X 轴尺寸，单位为 cm。
-   * @n          ySize: 标签 Y 轴尺寸，单位为 cm。
+   * @n          tagIndex: 标签索引。
+   * @n          tagType: 标签类型。
+   * @n          scopeType: 标签范围类型。
+   * @n          width: 标签宽度或圆形半径，单位为 cm。
+   * @n          height: 标签高度，单位为 cm。
    * @return eTagSetStatus_t: 标签设置状态。
    * @n          eTagSetCommError: 通信失败或响应不匹配。
    * @n          eTagSetSuccess: 标签设置成功。
@@ -351,7 +351,7 @@ pip3 install pyserial
   bool getTagInfo(sTagInfo_t *tagInfo);
 
   /**
-   * @fn setBoundaryDetectionRange
+   * @fn setFourSidedRangeMode
    * @brief 设置四边边界检测范围。
    * @param range: 边界范围设置。
    * @n          xPositiveCm: X 轴正方向边界，单位为 cm。
@@ -360,34 +360,34 @@ pip3 install pyserial
    * @n          yNegativeCm: Y 轴负方向边界，单位为 cm。
    * @return true: 设置成功，false: 设置失败。
    */
-  bool setBoundaryDetectionRange(sBoundaryDetectionRange_t &range);
+  bool setFourSidedRangeMode(sFourSidedRange &range);
 
   /**
-   * @fn getBoundaryDetectionRange
+   * @fn getFourSidedRangeMode
    * @brief 查询并获取四边边界检测范围。
    * @param range: 接收边界范围设置的指针。
    * @return true: 获取成功，false: 获取失败。
    */
-  bool getBoundaryDetectionRange(sBoundaryDetectionRange_t *range);
+  bool getFourSidedRangeMode(sFourSidedRange *range);
 
   /**
-   * @fn setTrajectoryDetectionRange
+   * @fn setTrajectoryRangeMode
    * @brief 启用或禁用轨迹范围模式。
    * @param enable: 启用或禁用轨迹范围模式。
    * @n          true: 启用，false: 禁用。
    * @return true: 设置成功，false: 设置失败。
    */
-  bool setTrajectoryDetectionRange(bool enable);
+  bool setTrajectoryRangeMode(bool enable);
 
   /**
-   * @fn getTrajectoryDetectionRange
+   * @fn getTrajectoryRangeMode
    * @brief 查询并获取轨迹模式（模式 0x05）下的范围点。
    * @param points: 接收轨迹模式点的指针。
    * @param pointCount: 接收点数量的指针。
    * @return true: 查询成功，false: 查询失败。
    * @note points 缓冲区必须能够容纳至少 MAX_POINTS 个点。
    */
-  bool getTrajectoryDetectionRange(sPoint_t *points, uint16_t *pointCount);
+  bool getTrajectoryRangeMode(sPoint_t *points, uint16_t *pointCount);
 
   /**
    * @fn setConfigFileModePoints

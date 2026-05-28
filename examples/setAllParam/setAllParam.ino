@@ -33,8 +33,6 @@ void setup()
 
   Serial.print(F("Current product model: "));
   Serial.println(c4004.getProductModel());
-  Serial.print(F("Current product ID: "));
-  Serial.println(c4004.getProductID(), HEX);
   Serial.print(F("Current hardware version: "));
   Serial.println(c4004.getHardwareVersion());
   Serial.print(F("Current firmware version: "));
@@ -106,16 +104,16 @@ void setup()
   Serial.print(F("Current trajectory LED: "));
   Serial.println(c4004.getTrajectoryLed() ? F("ON") : F("OFF"));
 
-  sBoundaryDetectionRange_t range;
+  Serial.println(F("====================Range Param==================="));
+  sFourSidedRange range;
   range.mode = eRangeFourSideBoundary;
-  range.xPositiveCm = 300;
-  range.xNegativeCm = -300;
-  range.yPositiveCm = 500;
+  range.xPositiveCm = 200;
+  range.xNegativeCm = -200;
+  range.yPositiveCm = 700;
   range.yNegativeCm = 0;
 
-  Serial.println(F("====================Range Param==================="));
   // Set the boundary detection range
-  if (c4004.setBoundaryDetectionRange(range)) {
+  if (c4004.setFourSidedRangeMode(range)) {
     Serial.println(F("Set boundary detection range success!"));
   } else {
     Serial.println(F("Set boundary detection range failed!"));
@@ -133,8 +131,8 @@ void setup()
   }
 
   if (mode == eRangeFourSideBoundary) {
-    sBoundaryDetectionRange_t currentRange;
-    if (c4004.getBoundaryDetectionRange(&currentRange)) {
+    sFourSidedRange currentRange;
+    if (c4004.getFourSidedRangeMode(&currentRange)) {
       Serial.print(F("Current boundary x+/x-/y+/y- (cm): "));
       Serial.print(currentRange.xPositiveCm);
       Serial.print(F("/"));
@@ -151,7 +149,7 @@ void setup()
   }
 
   // Set the trajectory detection range mode
-  // if (c4004.setTrajectoryDetectionRange(false)) { // Setting it to false means using this mode and not performing trajectory learning
+  // if (c4004.setTrajectoryRangeMode(false)) { // Setting it to false means using this mode and not performing trajectory learning
   //   Serial.println(F("Set trajectory detection range mode success!"));
   // } else {
   //   Serial.println(F("Set trajectory detection range mode failed!"));
@@ -160,7 +158,7 @@ void setup()
 
   // sPoint_t points[MAX_POINTS];
   // uint16_t pointCount = 0;
-  // if (c4004.getTrajectoryDetectionRange(points, &pointCount)) {
+  // if (c4004.getTrajectoryRangeMode(points, &pointCount)) {
   //   Serial.println(F("Current trajectory range query success."));
   //   Serial.print(F("Current trajectory points: "));
   //   Serial.println(pointCount);

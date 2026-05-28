@@ -18,7 +18,7 @@ while cur_path != os.path.dirname(cur_path):
     sys.path.insert(0, cur_path)
     break
   cur_path = os.path.dirname(cur_path)
-from DFRobot_C4004 import DFRobot_C4004, BoundaryDetectionRange, Point
+from DFRobot_C4004 import DFRobot_C4004, FourSidedRange, Point
 
 c4004 = DFRobot_C4004('/dev/ttyAMA0', 115200)
 
@@ -31,7 +31,6 @@ def main():
 
   print('===================Product Info===================')
   print('Current product model:', c4004.get_product_model())
-  print('Current product ID:', hex(c4004.get_product_id()))
   print('Current hardware version:', c4004.get_hardware_version())
   print('Current firmware version:', c4004.get_firmware_version())
 
@@ -88,15 +87,15 @@ def main():
   print('Current motion LED:', 'ON' if c4004.get_motion_led() else 'OFF')
   print('Current trajectory LED:', 'ON' if c4004.get_trajectory_led() else 'OFF')
 
-  range_info = BoundaryDetectionRange()
+  range_info = FourSidedRange()
   range_info.mode = c4004.RANGE_FOUR_SIDE_BOUNDARY
-  range_info.x_positive_cm = 300
-  range_info.x_negative_cm = -300
-  range_info.y_positive_cm = 500
+  range_info.x_positive_cm = 200
+  range_info.x_negative_cm = -200
+  range_info.y_positive_cm = 700
   range_info.y_negative_cm = 0
 
   print('====================Range Param===================')
-  if c4004.set_boundary_detection_range(range_info):
+  if c4004.set_four_sided_range_mode(range_info):
     print('Set boundary detection range success!')
   else:
     print('Set boundary detection range failed!')
@@ -112,8 +111,8 @@ def main():
     print('Other')
 
   if mode == c4004.RANGE_FOUR_SIDE_BOUNDARY:
-    current_range = BoundaryDetectionRange()
-    if c4004.get_boundary_detection_range(current_range):
+    current_range = FourSidedRange()
+    if c4004.get_four_sided_range_mode(current_range):
       print('Current boundary x+/x-/y+/y- (cm): %d/%d/%d/%d' % (
         current_range.x_positive_cm,
         current_range.x_negative_cm,

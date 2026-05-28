@@ -45,10 +45,10 @@ clearTag	KEYWORD2
 clearAllTags	KEYWORD2
 setTagsFromConfig	KEYWORD2
 getTagInfo	KEYWORD2
-setBoundaryDetectionRange	KEYWORD2
-getBoundaryDetectionRange	KEYWORD2
-setTrajectoryDetectionRange	KEYWORD2
-getTrajectoryDetectionRange	KEYWORD2
+setFourSidedRangeMode	KEYWORD2
+getFourSidedRangeMode	KEYWORD2
+setTrajectoryRangeMode	KEYWORD2
+getTrajectoryRangeMode	KEYWORD2
 setConfigFileModePoints	KEYWORD2
 getConfigFileModePoints	KEYWORD2
 getDetectionRangeMode	KEYWORD2

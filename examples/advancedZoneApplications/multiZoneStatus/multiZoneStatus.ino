@@ -1,9 +1,10 @@
 /*! 
  * @file multiZoneStatus.ino
- * @brief Configure multi-zone tags and print tag event status for living-room scene linkage.
- * @details This routine configures 5 monitoring tags and 2 noise tags, keeps the last event
- * @n result for each tag, prints a summary table every 3 seconds or when a tag event arrives,
- * @n and drives IO based on game-area and sofa-area people counting results.
+ * @brief Read multi-zone tag events and print living-room scene linkage status.
+ * @details This routine can use tags configured by the PC tool or optionally configure
+ * @n tags in code. It keeps the last event result for each tag, prints a summary table
+ * @n every 3 seconds or when a tag event arrives, and drives outputs based on
+ * @n game-area and sofa-area people counting results.
  * @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
  * @license The MIT License (MIT)
  * @author JiaLi(zhixin.liu@dfrobot.com)
@@ -35,10 +36,12 @@ const uint8_t TAG_CURTAIN = 5;
 const uint8_t TAG_PLANT = 6;
 const uint8_t TAG_TOTAL = 7;
 
-const uint32_t GAME_NO_PERSON_DELAY_MS = 60000;
-const uint32_t SOFA_STATIC_DELAY_MS = 30000;
-const uint32_t SOFA_MOTION_DELAY_MS = 10000;
-const uint32_t SOFA_EMPTY_DELAY_MS = 30000;
+// Users can adjust these times according to their own preferences, needs, application scenarios, etc. The default time is 5 seconds
+const uint32_t GAME_NO_PERSON_DELAY_MS = 5000;   // The game area becomes a time for no one to delay
+const uint32_t SOFA_STATIC_DELAY_MS = 5000;      // The sofa area becomes a static delay area
+const uint32_t SOFA_MOTION_DELAY_MS = 5000;      // The sofa area becomes a motion delay area
+const uint32_t SOFA_EMPTY_DELAY_MS = 5000;       // The sofa area becomes an empty delay area
+
 const uint8_t LIGHT_PWM_LOW = 0;
 const uint8_t LIGHT_PWM_DIM = 150;
 const uint8_t LIGHT_PWM_HIGH = 255;
@@ -74,23 +77,35 @@ void initTagCacheFromConfig(const sTagConfig_t *tags, uint8_t count)
 {
   for (uint8_t i = 0; i < TAG_TOTAL; i++) {
     memset(&tagCache[i], 0, sizeof(sTagInfo_t));
-    tagCache[i].index = i;
-    tagCache[i].type = eTagTypeNone;
+    tagCache[i].tagIndex = i;
+    tagCache[i].tagType = eTagTypeNone;
   }
 
-  for (uint8_t i = 0; i < count && i < TAG_TOTAL; i++) {
-    uint8_t index = tags[i].index;
+  for (uint8_t i = 0; i < count; i++) {
+    uint8_t index = tags[i].tagIndex;
     if (index >= TAG_TOTAL) {
       continue;
     }
-    tagCache[index].index = tags[i].index;
-    tagCache[index].type = tags[i].type;
+    tagCache[index].tagIndex = tags[i].tagIndex;
+    tagCache[index].tagType = tags[i].tagType;
     tagCache[index].centerX = tags[i].centerX;
     tagCache[index].centerY = tags[i].centerY;
     if (index == TAG_HOME_DOOR || index == TAG_KITCHEN_DOOR) {
       tagCache[index].motionDir = 1;
     }
   }
+}
+
+bool initTagCacheFromDevice()
+{
+  sTagConfig_t tags[MAX_TAGS];
+  uint8_t count = c4004.getTags(tags, MAX_TAGS);
+
+  initTagCacheFromConfig(tags, count);
+
+  Serial.print(F("Read tag config count: "));
+  Serial.println(count);
+  return count > 0;
 }
 
 void setup()
@@ -114,81 +129,99 @@ void setup()
     Serial.println(F("Set presence enable failed."));
   }
 
-  sBoundaryDetectionRange_t range;
+  sFourSidedRange range;
   range.mode = eRangeFourSideBoundary;
-  range.xPositiveCm = 500;
-  range.xNegativeCm = -500;
-  range.yPositiveCm = 800;
+  range.xPositiveCm = 200;
+  range.xNegativeCm = -200;
+  range.yPositiveCm = 700;
   range.yNegativeCm = 0;
-  if (c4004.setBoundaryDetectionRange(range)) {
+  if (c4004.setFourSidedRangeMode(range)) {
     Serial.println(F("Set boundary detection range success."));
   } else {
     Serial.println(F("Set boundary detection range failed."));
   }
 
+  sTagConfig_t tags[TAG_TOTAL];
+
+/**
+ * Tag configuration note:
+ * If the tags have already been configured by the PC tool, you do not need
+ * to configure them again here. In that case, keep the following tag setup
+ * code commented out.
+ *
+ * If you want this example to configure tags automatically, uncomment the
+ * clearAllTags(), sTagConfig_t tags[], and setTagsFromConfig() code below.
+ *
+ * Field meaning:
+ *   tagIndex : Tag index. It must be unique for each tag.
+ *   tagType  : Tag function, such as PeopleCounting, ApproachAway, or Noise.
+ *   scopeType: Tag shape. Use eTagRangeRectangle or eTagRangeCircle.
+ *   centerX  : Tag center X coordinate, in cm.
+ *   centerY  : Tag center Y coordinate, in cm.
+ *   width    : Rectangle width, or circle radius, in cm.
+ *   height   : Rectangle height, in cm. Not used for circle tags.
+ */
   if (c4004.clearAllTags()) {
     Serial.println(F("Clear all tags success."));
   } else {
     Serial.println(F("Clear all tags failed."));
   }
 
-  sTagConfig_t tags[TAG_TOTAL];
+  tags[0].tagIndex = TAG_GAME;
+  tags[0].tagType = eTagTypePeopleCounting;
+  tags[0].scopeType = eTagRangeCircle;
+  tags[0].centerX = -100;
+  tags[0].centerY = 550;
+  tags[0].width = 80;
+  tags[0].height = 0;
 
-  tags[0].index = TAG_GAME;
-  tags[0].type = eTagTypePeopleCounting;
-  tags[0].rangeType = eTagRangeCircle;
-  tags[0].centerX = 50;
-  tags[0].centerY = 450;
-  tags[0].xSize = 100;
-  tags[0].ySize = 0;
+  tags[1].tagIndex = TAG_SOFA;
+  tags[1].tagType = eTagTypePeopleCounting;
+  tags[1].scopeType = eTagRangeRectangle;
+  tags[1].centerX = 100;
+  tags[1].centerY = 450;
+  tags[1].width = 100;
+  tags[1].height = 300;
 
-  tags[1].index = TAG_SOFA;
-  tags[1].type = eTagTypePeopleCounting;
-  tags[1].rangeType = eTagRangeRectangle;
-  tags[1].centerX = 300;
-  tags[1].centerY = 550;
-  tags[1].xSize = 100;
-  tags[1].ySize = 300;
-
-  tags[2].index = TAG_HOME_DOOR;
-  tags[2].type = eTagTypeApproachAway;
-  tags[2].rangeType = eTagRangeRectangle;
+  tags[2].tagIndex = TAG_HOME_DOOR;
+  tags[2].tagType = eTagTypeApproachAway;
+  tags[2].scopeType = eTagRangeRectangle;
   tags[2].centerX = 100;
   tags[2].centerY = 700;
-  tags[2].xSize = 80;
-  tags[2].ySize = 40;
+  tags[2].width = 80;
+  tags[2].height = 40;
 
-  tags[3].index = TAG_KITCHEN_DOOR;
-  tags[3].type = eTagTypeApproachAway;
-  tags[3].rangeType = eTagRangeRectangle;
+  tags[3].tagIndex = TAG_KITCHEN_DOOR;
+  tags[3].tagType = eTagTypeApproachAway;
+  tags[3].scopeType = eTagRangeRectangle;
   tags[3].centerX = -100;
   tags[3].centerY = 700;
-  tags[3].xSize = 80;
-  tags[3].ySize = 40;
+  tags[3].width = 80;
+  tags[3].height = 40;
 
-  tags[4].index = TAG_DINING;
-  tags[4].type = eTagTypePeopleCounting;
-  tags[4].rangeType = eTagRangeRectangle;
-  tags[4].centerX = 150;
-  tags[4].centerY = 200;
-  tags[4].xSize = 400;
-  tags[4].ySize = 200;
+  tags[4].tagIndex = TAG_DINING;
+  tags[4].tagType = eTagTypePeopleCounting;
+  tags[4].scopeType = eTagRangeRectangle;
+  tags[4].centerX = 50;
+  tags[4].centerY = 150;
+  tags[4].width = 300;
+  tags[4].height = 150;
 
-  tags[5].index = TAG_CURTAIN;
-  tags[5].type = eTagTypeNoise;
-  tags[5].rangeType = eTagRangeRectangle;
-  tags[5].centerX = -250;
-  tags[5].centerY = 400;
-  tags[5].xSize = 50;
-  tags[5].ySize = 400;
+  tags[5].tagIndex = TAG_CURTAIN;
+  tags[5].tagType = eTagTypeNoise;
+  tags[5].scopeType = eTagRangeRectangle;
+  tags[5].centerX = -150;
+  tags[5].centerY = 300;
+  tags[5].width = 50;
+  tags[5].height = 300;
 
-  tags[6].index = TAG_PLANT;
-  tags[6].type = eTagTypeNoise;
-  tags[6].rangeType = eTagRangeCircle;
-  tags[6].centerX = -200;
-  tags[6].centerY = 650;
-  tags[6].xSize = 40;
-  tags[6].ySize = 0;
+  tags[6].tagIndex = TAG_PLANT;
+  tags[6].tagType = eTagTypeNoise;
+  tags[6].scopeType = eTagRangeCircle;
+  tags[6].centerX = -50;
+  tags[6].centerY = 400;
+  tags[6].width = 40;
+  tags[6].height = 0;
 
   if (c4004.setTagsFromConfig(tags, TAG_TOTAL)) {
     Serial.println(F("Set 7 tags from config success."));
@@ -196,12 +229,16 @@ void setup()
     Serial.println(F("Set 7 tags from config failed."));
   }
 
-  initTagCacheFromConfig(tags, TAG_TOTAL);
+  if (initTagCacheFromDevice()) {
+    Serial.println(F("Init tag cache from device config success."));
+  } else {
+    Serial.println(F("No device tag config read, tag cache uses default empty values."));
+  }
 
   Serial.println(F("==================================================================="));
   Serial.println(F("Room occupancy inference started."));
-  Serial.println(F("Rule 1: Game area has person -> TV IO HIGH immediately; no person for 60s -> LOW."));
-  Serial.println(F("Rule 2: Sofa static-only for 30s -> Light PWM 150; motion for 10s -> 0; no person for 30s -> 255."));
+  Serial.println(F("Rule 1: Game area has person -> TV IO HIGH immediately; no person for 5s -> LOW."));
+  Serial.println(F("Rule 2: Sofa static-only for 5s -> Light PWM 150; motion for 5s -> 0; no person for 5s -> 255."));
   Serial.println(F("==================================================================="));
 }
 
@@ -212,13 +249,15 @@ void loop()
 
   if (event == eEventTag) {
     sTagInfo_t tagInfo;
-    if (c4004.getTagInfo(&tagInfo) && tagInfo.index < TAG_TOTAL) {
-      tagCache[tagInfo.index].index = tagInfo.index;
-      tagCache[tagInfo.index].type = tagInfo.type;
-      tagCache[tagInfo.index].enterExit = tagInfo.enterExit;
-      tagCache[tagInfo.index].motionDir = tagInfo.motionDir;
-      tagCache[tagInfo.index].motionNum = tagInfo.motionNum;
-      tagCache[tagInfo.index].staticNum = tagInfo.staticNum;
+    if (c4004.getTagInfo(&tagInfo) && tagInfo.tagIndex < TAG_TOTAL) {
+      tagCache[tagInfo.tagIndex].tagIndex = tagInfo.tagIndex;
+      tagCache[tagInfo.tagIndex].centerX = tagInfo.centerX;
+      tagCache[tagInfo.tagIndex].centerY = tagInfo.centerY;
+      tagCache[tagInfo.tagIndex].tagType = tagInfo.tagType;
+      tagCache[tagInfo.tagIndex].enterExit = tagInfo.enterExit;
+      tagCache[tagInfo.tagIndex].motionDir = tagInfo.motionDir;
+      tagCache[tagInfo.tagIndex].motionNum = tagInfo.motionNum;
+      tagCache[tagInfo.tagIndex].staticNum = tagInfo.staticNum;
       tagPrintPending = true;
     }
   }
@@ -289,7 +328,7 @@ void loop()
       }
       Serial.print(F("\t"));
 
-      const char *typeText = tagTypeToText(tagCache[i].type);
+      const char *typeText = tagTypeToText(tagCache[i].tagType);
       Serial.print(typeText);
       if (strlen(typeText) < 8) {
         Serial.print(F("\t"));
@@ -300,28 +339,28 @@ void loop()
       Serial.print(tagCache[i].centerY);
       Serial.print(F("\t"));
 
-      if (tagCache[i].type == eTagTypePeopleCounting) {
+      if (tagCache[i].tagType == eTagTypePeopleCounting) {
         Serial.print(tagCache[i].motionNum);
       } else {
         Serial.print(0);
       }
       Serial.print(F("\t"));
 
-      if (tagCache[i].type == eTagTypePeopleCounting) {
+      if (tagCache[i].tagType == eTagTypePeopleCounting) {
         Serial.print(tagCache[i].staticNum);
       } else {
         Serial.print(0);
       }
       Serial.print(F("\t"));
 
-      if (tagCache[i].type == eTagTypeApproachAway) {
+      if (tagCache[i].tagType == eTagTypeApproachAway) {
         Serial.print(tagCache[i].motionDir);
       } else {
         Serial.print(F("-"));
       }
       Serial.print(F("\t"));
 
-      if (tagCache[i].type == eTagTypeEnterExit) {
+      if (tagCache[i].tagType == eTagTypeEnterExit) {
         Serial.println(tagCache[i].enterExit);
       } else {
         Serial.println(F("-"));

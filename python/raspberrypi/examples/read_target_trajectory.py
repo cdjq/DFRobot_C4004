@@ -18,7 +18,7 @@ while cur_path != os.path.dirname(cur_path):
     sys.path.insert(0, cur_path)
     break
   cur_path = os.path.dirname(cur_path)
-from DFRobot_C4004 import DFRobot_C4004, BoundaryDetectionRange
+from DFRobot_C4004 import DFRobot_C4004, FourSidedRange
 
 c4004 = DFRobot_C4004('/dev/ttyAMA0', 115200)
 
@@ -46,16 +46,15 @@ def print_trajectory_data(data_mode):
   if len(targets) == 0:
     print('No target.')
   else:
-    print('Row\tID\tSize\tFeature\tX\tY\tHeight\tSpeed')
+    print('Row\tID\tKinesia\tFeature\tX\tY\tSpeed')
     for i, target in enumerate(targets):
-      print('%d\t%d\t%d\t%s\t%d\t%d\t%d\t%d' % (
+      print('%d\t%d\t%d\t%s\t%d\t%d\t%d' % (
         i,
         target.index,
-        target.target_size,
+        target.kinesia,
         target_feature_to_string(target.target_feature),
         target.x,
         target.y,
-        target.height,
         target.speed))
   print('')
 
@@ -66,13 +65,13 @@ def main():
     time.sleep(1)
   print('DFRobot C4004 begin success.')
 
-  range_info = BoundaryDetectionRange()
+  range_info = FourSidedRange()
   range_info.mode = c4004.RANGE_FOUR_SIDE_BOUNDARY
-  range_info.x_positive_cm = 300
-  range_info.x_negative_cm = -300
-  range_info.y_positive_cm = 500
+  range_info.x_positive_cm = 200
+  range_info.x_negative_cm = -200
+  range_info.y_positive_cm = 700
   range_info.y_negative_cm = 0
-  if c4004.set_boundary_detection_range(range_info):
+  if c4004.set_four_sided_range_mode(range_info):
     print('Set boundary detection range success.')
   else:
     print('Set boundary detection range failed.')

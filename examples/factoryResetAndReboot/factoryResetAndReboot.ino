@@ -31,8 +31,6 @@ void setup()
 
   Serial.print("Product model: ");
   Serial.println(c4004.getProductModel());
-  Serial.print("Product ID: ");
-  Serial.println(c4004.getProductID(), HEX);
   Serial.print("Hardware version: ");
   Serial.println(c4004.getHardwareVersion());
   Serial.print("Firmware version: ");

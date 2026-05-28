@@ -272,21 +272,21 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
       @return TagInfo object, or None if no valid event.
     '''
 
-  def set_boundary_detection_range(self, range_info):
+  def set_four_sided_range_mode(self, range_info):
     '''!
       @brief Set four-side boundary range (mode 0x04).
-      @param range_info: BoundaryDetectionRange object
+      @param range_info: FourSidedRange object
       @return True or False
     '''
 
-  def get_boundary_detection_range(self, range_info):
+  def get_four_sided_range_mode(self, range_info):
     '''!
       @brief Get four-side boundary range.
-      @param range_info: BoundaryDetectionRange object for output
+      @param range_info: FourSidedRange object for output
       @return True or False
     '''
 
-  def set_trajectory_detection_range(self, enable):
+  def set_trajectory_range_mode(self, enable):
     '''!
       @brief Enable or disable trajectory range mode (mode 0x05).
       @param enable: True/False
@@ -301,7 +301,7 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
       @n   payload: 0x06 + 2B count + n*(2B X + 2B Y)
     '''
 
-  def get_trajectory_detection_range(self, points, point_count):
+  def get_trajectory_range_mode(self, points, point_count):
     '''!
       @brief Get trajectory mode points (mode 0x05).
       @param points: output list for Point objects

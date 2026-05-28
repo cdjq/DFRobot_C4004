@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*
 '''!
   @file bedStillnessDetection.py
-  @brief Bed-zone stillness light control.
-  @details Configure bed/bedroom/bedroom-door tags and control one output pin.
-  @n Rule A: bed static(any person) over 30s => light OFF.
-  @n Rule B: if rule A active, bedroom new entry still keeps OFF.
-  @n Rule C: if rule A inactive, bedroom people>0 => light ON.
-  @n Rule D: bedroom occupied->empty over 30s => light OFF.
+  @brief Bed-zone stillness lighting control using active polling APIs.
+  @details Rule summary:
+  @n 1) If any static person exists in bed area for over 5s, turn room light OFF.
+  @n 2) While rule 1 is active, new people entering room keeps light OFF.
+  @n 3) If bed area has no static person, keep light ON when room has people.
+  @n 4) After room transitions from occupied to empty, wait 5s then turn light OFF.
   @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
   @license The MIT License (MIT)
   @author JiaLi(zhixin.liu@dfrobot.com)
   @version V1.0.0
-  @date 2026-05-25
+  @date 2026-05-22
   @url https://github.com/DFRobot/DFRobot_C4004
 '''
 import os
@@ -25,7 +25,7 @@ while cur_path != os.path.dirname(cur_path):
     break
   cur_path = os.path.dirname(cur_path)
 
-from DFRobot_C4004 import DFRobot_C4004, TagConfig, BoundaryDetectionRange
+from DFRobot_C4004 import DFRobot_C4004, TagConfig, FourSidedRange
 
 try:
   import RPi.GPIO as GPIO
@@ -40,8 +40,10 @@ BEDROOM_TAG_INDEX = 1
 BEDROOM_DOOR_TAG_INDEX = 2
 LIGHT_CTRL_PIN = 3
 
-BED_STATIC_HOLD_S = 30.0
-BEDROOM_EMPTY_HOLD_S = 30.0
+# Users can adjust these times according to their own preferences, needs,
+# application scenarios, etc. The default time is 5 seconds.
+BED_STATIC_HOLD_S = 5.0       # Time required to keep the bed state static.
+BEDROOM_EMPTY_HOLD_S = 5.0    # Time required to keep the bedroom state empty.
 
 LIGHT_OFF_LEVEL = 1
 LIGHT_ON_LEVEL = 0
@@ -84,16 +86,30 @@ def setup_sensor_and_tags():
   else:
     print('Set presence enable failed.')
 
-  range_info = BoundaryDetectionRange()
+  range_info = FourSidedRange()
   range_info.mode = c4004.RANGE_FOUR_SIDE_BOUNDARY
-  range_info.x_positive_cm = 500
-  range_info.x_negative_cm = -500
-  range_info.y_positive_cm = 800
+  range_info.x_positive_cm = 200
+  range_info.x_negative_cm = -200
+  range_info.y_positive_cm = 700
   range_info.y_negative_cm = 0
-  if c4004.set_boundary_detection_range(range_info):
+  if c4004.set_four_sided_range_mode(range_info):
     print('Set boundary detection range success.')
   else:
     print('Set boundary detection range failed.')
+
+  # Tag configuration note:
+  # If the tags have already been configured by the PC tool, you do not need
+  # to configure them again here. In that case, skip clear_all_tags() and
+  # set_tags_from_config(tags).
+  #
+  # Field meaning:
+  #   tag_index : Tag index. It must be unique for each tag.
+  #   tag_type  : Tag function, such as PeopleCounting or ApproachAway.
+  #   scope_type: Tag shape. Use TAG_RANGE_RECTANGLE or TAG_RANGE_CIRCLE.
+  #   center_x  : Tag center X coordinate, in cm.
+  #   center_y  : Tag center Y coordinate, in cm.
+  #   width     : Rectangle width, or circle radius, in cm.
+  #   height    : Rectangle height, in cm. Not used for circle tags.
 
   if c4004.clear_all_tags():
     print('Clear all tags success.')
@@ -103,33 +119,33 @@ def setup_sensor_and_tags():
   tags = []
 
   bed = TagConfig()
-  bed.index = BED_TAG_INDEX
-  bed.type = c4004.TAG_TYPE_PEOPLE_COUNTING
-  bed.range_type = c4004.TAG_RANGE_RECTANGLE
-  bed.center_x = 150
+  bed.tag_index = BED_TAG_INDEX
+  bed.tag_type = c4004.TAG_TYPE_PEOPLE_COUNTING
+  bed.scope_type = c4004.TAG_RANGE_RECTANGLE
+  bed.center_x = -50
   bed.center_y = 300
-  bed.x_size = 300
-  bed.y_size = 300
+  bed.width = 300
+  bed.height = 250
   tags.append(bed)
 
   bedroom = TagConfig()
-  bedroom.index = BEDROOM_TAG_INDEX
-  bedroom.type = c4004.TAG_TYPE_PEOPLE_COUNTING
-  bedroom.range_type = c4004.TAG_RANGE_RECTANGLE
+  bedroom.tag_index = BEDROOM_TAG_INDEX
+  bedroom.tag_type = c4004.TAG_TYPE_PEOPLE_COUNTING
+  bedroom.scope_type = c4004.TAG_RANGE_RECTANGLE
   bedroom.center_x = 0
-  bedroom.center_y = 400
-  bedroom.x_size = 600
-  bedroom.y_size = 700
+  bedroom.center_y = 350
+  bedroom.width = 400
+  bedroom.height = 700
   tags.append(bedroom)
 
   door = TagConfig()
-  door.index = BEDROOM_DOOR_TAG_INDEX
-  door.type = c4004.TAG_TYPE_APPROACH_AWAY
-  door.range_type = c4004.TAG_RANGE_RECTANGLE
+  door.tag_index = BEDROOM_DOOR_TAG_INDEX
+  door.tag_type = c4004.TAG_TYPE_APPROACH_AWAY
+  door.scope_type = c4004.TAG_RANGE_RECTANGLE
   door.center_x = 100
   door.center_y = 700
-  door.x_size = 80
-  door.y_size = 40
+  door.width = 80
+  door.height = 40
   tags.append(door)
 
   if c4004.set_tags_from_config(tags):
@@ -139,10 +155,10 @@ def setup_sensor_and_tags():
 
   print('============================================================')
   print('Bed stillness light control started.')
-  print('Rule A: bed static(any person) over 30s => LIGHT OFF.')
+  print('Rule A: bed static(any person) over 5s => LIGHT OFF.')
   print('Rule B: if rule A active, bedroom new entry still keeps OFF.')
   print('Rule C: if rule A inactive, bedroom people>0 => LIGHT ON.')
-  print('Rule D: bedroom occupied->empty over 30s => LIGHT OFF.')
+  print('Rule D: bedroom occupied->empty over 5s => LIGHT OFF.')
   print('============================================================')
 
 
@@ -157,12 +173,12 @@ def update_people_counts_from_tag_report():
     if event != c4004.EVENT_TAG:
       continue
     info = c4004.get_tag_info()
-    if info is None or info.type != c4004.TAG_TYPE_PEOPLE_COUNTING:
+    if info is None or info.tag_type != c4004.TAG_TYPE_PEOPLE_COUNTING:
       continue
-    if info.index == BED_TAG_INDEX:
+    if info.tag_index == BED_TAG_INDEX:
       bed_motion_count = info.motion_num
       bed_static_count = info.static_num
-    elif info.index == BEDROOM_TAG_INDEX:
+    elif info.tag_index == BEDROOM_TAG_INDEX:
       bedroom_motion_count = info.motion_num
       bedroom_static_count = info.static_num
 

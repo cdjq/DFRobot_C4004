@@ -18,7 +18,7 @@ while cur_path != os.path.dirname(cur_path):
     sys.path.insert(0, cur_path)
     break
   cur_path = os.path.dirname(cur_path)
-from DFRobot_C4004 import DFRobot_C4004, BoundaryDetectionRange
+from DFRobot_C4004 import DFRobot_C4004, FourSidedRange
 
 PORT = '/dev/ttyAMA0'
 c4004 = DFRobot_C4004(PORT, 115200)
@@ -40,13 +40,13 @@ def main():
   else:
     print('Set trajectory LED failed.')
 
-  range_info = BoundaryDetectionRange()
+  range_info = FourSidedRange()
   range_info.mode = c4004.RANGE_FOUR_SIDE_BOUNDARY
-  range_info.x_positive_cm = 300
-  range_info.x_negative_cm = -300
-  range_info.y_positive_cm = 500
+  range_info.x_positive_cm = 200
+  range_info.x_negative_cm = -200
+  range_info.y_positive_cm = 700
   range_info.y_negative_cm = 0
-  if c4004.set_boundary_detection_range(range_info):
+  if c4004.set_four_sided_range_mode(range_info):
     print('Set boundary detection range success.')
   else:
     print('Set boundary detection range failed.')
@@ -70,36 +70,36 @@ def main():
 
   last_query = 0
   while True:
-    event = c4004.get_reported_info(0.1)
+    event = c4004.get_reported_info(0.05)
     if event == c4004.EVENT_PRESENCE:
       presence = c4004.get_presence_state()
-      print('Target presence state:', 'Presence' if presence == c4004.PRESENCE else 'None')
+      print('Human presence state:', 'Presence' if presence == c4004.PRESENCE else 'None')
     elif event == c4004.EVENT_MOTION:
       motion = c4004.get_motion_state()
       if motion == c4004.MOTION_STATIC:
-        print('Target motion state: Static')
+        print('Motion state: Static')
       elif motion == c4004.MOTION_ACTIVE:
-        print('Target motion state: Motion')
+        print('Motion state: Motion')
       else:
-        print('Target motion state: None')
+        print('Motion state: None')
     elif event == c4004.EVENT_PEOPLE_COUNT:
       count = c4004.get_people_count_info(c4004.GET_DATA_REPORT)
-      print('People count:', count)
+      print('Number of trajectories:', count)
 
     if time.time() - last_query > 2:
       last_query = time.time()
-      print('Query people count:', c4004.get_people_count_info(c4004.GET_DATA_REPORT))
+      print('Number of trajectories:', c4004.get_people_count_info(c4004.GET_DATA_REPORT))
 
       query_presence = c4004.get_presence_state()
-      print('Query target presence state:', 'Presence' if query_presence == c4004.PRESENCE else 'None')
+      print('Human presence state:', 'Presence' if query_presence == c4004.PRESENCE else 'None')
 
       query_motion = c4004.get_motion_state()
       if query_motion == c4004.MOTION_NONE:
-        print('Query target motion state: None')
+        print('Motion state: None')
       elif query_motion == c4004.MOTION_STATIC:
-        print('Query target motion state: Static')
+        print('Motion state: Static')
       elif query_motion == c4004.MOTION_ACTIVE:
-        print('Query target motion state: Motion')
+        print('Motion state: Motion')
 
 
 if __name__ == '__main__':

@@ -29,7 +29,7 @@ class TargetInfo(object):
   '''! @brief One tracked target information block. '''
   def __init__(self):
     self.index = 0
-    self.target_size = 0
+    self.kinesia = 0
     self.target_feature = 0
     self.x = 0
     self.y = 0
@@ -40,20 +40,20 @@ class TargetInfo(object):
 class TagConfig(object):
   '''! @brief Tag configuration. '''
   def __init__(self):
-    self.index = 0
-    self.type = 0
-    self.range_type = 1
+    self.tag_index = 0
+    self.tag_type = 0
+    self.scope_type = 1
     self.center_x = 0
     self.center_y = 0
-    self.x_size = 0
-    self.y_size = 0
+    self.width = 0
+    self.height = 0
 
 
 class TagInfo(object):
   '''! @brief Last tag event decoded from a report. '''
   def __init__(self):
-    self.index = 0
-    self.type = 0
+    self.tag_index = 0
+    self.tag_type = 0
     self.center_x = 0
     self.center_y = 0
     self.enter_exit = 0
@@ -62,7 +62,7 @@ class TagInfo(object):
     self.static_num = 0
 
 
-class BoundaryDetectionRange(object):
+class FourSidedRange(object):
   '''! @brief Four-side detection boundary settings. '''
   def __init__(self):
     self.mode = 0xFF
@@ -97,10 +97,10 @@ class DFRobot_C4004(object):
   FRAME_TAIL1 = 0x54
   FRAME_TAIL2 = 0x43
   QUERY_DATA = 0x0F
-  MAX_PAYLOAD = 180
   MAX_TARGETS = 8
   MAX_TAGS = 12
-  MAX_POINTS = 12
+  MAX_POINTS = 64
+  MAX_PAYLOAD = 3 + MAX_POINTS * 4
 
   CTRL_SYSTEM = 0x01
   CTRL_PRODUCT_INFO = 0x02
@@ -260,7 +260,7 @@ class DFRobot_C4004(object):
     self._tags = []
     self._tag_info = TagInfo()
     self._tag_info_valid = False
-    self._range_info = BoundaryDetectionRange()
+    self._range_info = FourSidedRange()
     self._people_count = 0
 
   def begin(self):
@@ -686,13 +686,13 @@ class DFRobot_C4004(object):
       @n TAG_SET_COMM_ERROR / TAG_SET_SUCCESS / TAG_SET_TRACK_COUNT_ERROR / TAG_SET_ALREADY_USED / TAG_SET_INDEX_OUT_OF_RANGE.
       @note center_x/center_y fields are ignored by this API.
     '''
-    data = [tag.index, tag.type, tag.range_type]
-    data += self._u16_bytes(tag.x_size)
-    data += self._u16_bytes(tag.y_size)
+    data = [tag.tag_index, tag.tag_type, tag.scope_type]
+    data += self._u16_bytes(tag.width)
+    data += self._u16_bytes(tag.height)
     packet = self._request_frame(self.CTRL_DETECTION_RANGE, self.CMD_DETECTION_RANGE_SET_TAG, data)
     if packet is None or len(packet.data) < 4:
       return self.TAG_SET_COMM_ERROR
-    if packet.data[0] != (tag.index & 0xFF):
+    if packet.data[0] != (tag.tag_index & 0xFF):
       return self.TAG_SET_COMM_ERROR
     status = packet.data[3]
     if self.TAG_SET_SUCCESS <= status <= self.TAG_SET_INDEX_OUT_OF_RANGE:
@@ -739,11 +739,11 @@ class DFRobot_C4004(object):
     tags = list(tags)[:self.MAX_TAGS]
     data = self._u16_bytes(len(tags))
     for tag in tags:
-      data += [tag.index, tag.type, tag.range_type]
+      data += [tag.tag_index, tag.tag_type, tag.scope_type]
       data += self._sb16_bytes(tag.center_x)
       data += self._sb16_bytes(tag.center_y)
-      data += self._u16_bytes(tag.x_size)
-      data += self._u16_bytes(tag.y_size)
+      data += self._u16_bytes(tag.width)
+      data += self._u16_bytes(tag.height)
     return self._request_frame(self.CTRL_DETECTION_RANGE, self.CMD_DETECTION_RANGE_SET_TAGS_FROM_CONFIG, data) is not None
 
   def get_tag_info(self):
@@ -756,10 +756,10 @@ class DFRobot_C4004(object):
       return None
     return self._tag_info
 
-  def set_boundary_detection_range(self, range_info):
+  def set_four_sided_range_mode(self, range_info):
     '''!
       @brief Set four-side boundary detection range (mode 0x04).
-      @param range_info BoundaryDetectionRange object.
+      @param range_info FourSidedRange object.
       @return true if succeeded, otherwise false.
       @note Position values use sign-bit int16 encoding (bit15: 0=positive, 1=negative).
     '''
@@ -774,10 +774,10 @@ class DFRobot_C4004(object):
       self._range_info.mode = self.RANGE_FOUR_SIDE_BOUNDARY
     return ret
 
-  def get_boundary_detection_range(self, range_info):
+  def get_four_sided_range_mode(self, range_info):
     '''!
       @brief Query and get four-side boundary detection range.
-      @param range_info BoundaryDetectionRange object to receive result.
+      @param range_info FourSidedRange object to receive result.
       @return true if succeeded, otherwise false.
     '''
     if range_info is None:
@@ -792,25 +792,31 @@ class DFRobot_C4004(object):
     range_info.y_negative_cm = self._range_info.y_negative_cm
     return True
 
-  def set_trajectory_detection_range(self, enable):
+  def set_trajectory_range_mode(self, enable):
     '''!
       @brief Enable or disable trajectory detection range mode (mode 0x05).
       @param enable true to enable, false to disable.
       @return true if succeeded, otherwise false.
     '''
-    ret = self._request_frame(self.CTRL_DETECTION_RANGE, self.CMD_DETECTION_RANGE_SET_RANGE, [self.RANGE_TRAJECTORY, 1 if enable else 0]) is not None
-    if ret:
-      self._range_info.mode = self.RANGE_TRAJECTORY
-    return ret
+    data = [self.RANGE_TRAJECTORY, 1 if enable else 0]
+    if not self._send_command(self.CTRL_DETECTION_RANGE, self.CMD_DETECTION_RANGE_SET_RANGE, data):
+      return False
 
-  # Backward-compatible alias.
-  def set_trajectory_detection_range_mode(self, enable):
-    '''!
-      @brief Backward-compatible alias of set_trajectory_detection_range.
-      @param enable true to enable, false to disable.
-      @return true if succeeded, otherwise false.
-    '''
-    return self.set_trajectory_detection_range(enable)
+    start = time.time()
+    while time.time() - start < 0.25:
+      packet = self._read_frame(max(0.01, 0.25 - (time.time() - start)))
+      if packet is None:
+        continue
+      self._handle_packet(packet)
+      if packet.control != self.CTRL_DETECTION_RANGE:
+        continue
+      if packet.cmd == self.CMD_DETECTION_RANGE_SET_RANGE:
+        self._range_info.mode = self.RANGE_TRAJECTORY
+        return True
+      if packet.cmd == self.CMD_DETECTION_RANGE_QUERY_RANGE and len(packet.data) > 0 and packet.data[0] == self.RANGE_TRAJECTORY:
+        self._range_info.mode = self.RANGE_TRAJECTORY
+        return True
+    return False
 
   def set_config_file_mode_points(self, points):
     '''!
@@ -850,12 +856,12 @@ class DFRobot_C4004(object):
       @brief Query current detection range mode.
       @return Current mode value.
     '''
-    range_info = BoundaryDetectionRange()
-    if self.get_boundary_detection_range(range_info):
+    range_info = FourSidedRange()
+    if self.get_four_sided_range_mode(range_info):
       return range_info.mode
     return self._range_info.mode
 
-  def get_trajectory_detection_range(self, points, point_count):
+  def get_trajectory_range_mode(self, points, point_count):
     '''!
       @brief Query and get trajectory detection range points (mode 0x05).
       @param points List used to receive Point objects.
@@ -904,12 +910,12 @@ class DFRobot_C4004(object):
   # Backward-compatible alias.
   def get_trajectory_mode_points(self, points, point_count):
     '''!
-      @brief Backward-compatible alias of get_trajectory_detection_range.
+      @brief Backward-compatible alias of get_trajectory_range_mode.
       @param points List used to receive Point objects.
       @param point_count Output container for point count.
       @return true if succeeded, otherwise false.
     '''
-    return self.get_trajectory_detection_range(points, point_count)
+    return self.get_trajectory_range_mode(points, point_count)
 
   def get_config_file_mode_points(self, points, point_count):
     '''!
@@ -1189,7 +1195,7 @@ class DFRobot_C4004(object):
       offset = i * target_len
       target = TargetInfo()
       target.index = data[offset]
-      target.target_size = data[offset + 1]
+      target.kinesia = data[offset + 1]
       feature = data[offset + 2]
       if feature in (self.STATIC, self.MOTION, self.UNCERTAIN, self.UNKNOWN):
         target.target_feature = feature
@@ -1209,13 +1215,13 @@ class DFRobot_C4004(object):
     for i in range(count):
       offset = 2 + i * 11
       tag = TagConfig()
-      tag.index = data[offset]
-      tag.type = data[offset + 1]
-      tag.range_type = data[offset + 2]
+      tag.tag_index = data[offset]
+      tag.tag_type = data[offset + 1]
+      tag.scope_type = data[offset + 2]
       tag.center_x = self._sb16(data, offset + 3)
       tag.center_y = self._sb16(data, offset + 5)
-      tag.x_size = self._u16(data, offset + 7)
-      tag.y_size = self._u16(data, offset + 9)
+      tag.width = self._u16(data, offset + 7)
+      tag.height = self._u16(data, offset + 9)
       self._tags.append(tag)
 
   def _parse_tag_event(self, data):
@@ -1224,15 +1230,15 @@ class DFRobot_C4004(object):
       self._tag_info = info
       self._tag_info_valid = False
       return
-    info.index = data[0]
-    info.type = data[1]
+    info.tag_index = data[0]
+    info.tag_type = data[1]
     info.center_x = self._sb16(data, 2)
     info.center_y = self._sb16(data, 4)
-    if info.type == self.TAG_TYPE_ENTER_EXIT:
+    if info.tag_type == self.TAG_TYPE_ENTER_EXIT:
       info.enter_exit = data[6]
-    elif info.type == self.TAG_TYPE_APPROACH_AWAY:
+    elif info.tag_type == self.TAG_TYPE_APPROACH_AWAY:
       info.motion_dir = data[6]
-    elif info.type == self.TAG_TYPE_PEOPLE_COUNTING:
+    elif info.tag_type == self.TAG_TYPE_PEOPLE_COUNTING:
       info.motion_num = (data[6] >> 4) & 0x0F
       info.static_num = data[6] & 0x0F
     self._tag_info = info

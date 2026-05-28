@@ -26,7 +26,7 @@ while cur_path != os.path.dirname(cur_path):
     break
   cur_path = os.path.dirname(cur_path)
 
-from DFRobot_C4004 import DFRobot_C4004, TagConfig, BoundaryDetectionRange
+from DFRobot_C4004 import DFRobot_C4004, TagConfig, FourSidedRange
 
 PORT = '/dev/ttyAMA0'
 c4004 = DFRobot_C4004(PORT, 115200)
@@ -290,9 +290,9 @@ def process_tag_event():
   if info is None:
     return
 
-  if info.index == TAG_LIVING_ROOM and info.type == c4004.TAG_TYPE_PEOPLE_COUNTING:
+  if info.tag_index == TAG_LIVING_ROOM and info.tag_type == c4004.TAG_TYPE_PEOPLE_COUNTING:
     process_living_room_tag(info)
-  elif info.index == TAG_KITCHEN_DOOR and info.type == c4004.TAG_TYPE_APPROACH_AWAY:
+  elif info.tag_index == TAG_KITCHEN_DOOR and info.tag_type == c4004.TAG_TYPE_APPROACH_AWAY:
     if info.motion_dir == 0:
       start_door_session()
     elif info.motion_dir == 1:
@@ -310,13 +310,13 @@ def setup_sensor_and_tags():
   else:
     print('Set presence enable failed.')
 
-  range_info = BoundaryDetectionRange()
+  range_info = FourSidedRange()
   range_info.mode = c4004.RANGE_FOUR_SIDE_BOUNDARY
   range_info.x_positive_cm = 200
   range_info.x_negative_cm = -200
-  range_info.y_positive_cm = 600
+  range_info.y_positive_cm = 700
   range_info.y_negative_cm = 0
-  if c4004.set_boundary_detection_range(range_info):
+  if c4004.set_four_sided_range_mode(range_info):
     print('Set boundary detection range success.')
   else:
     print('Set boundary detection range failed.')
@@ -329,33 +329,33 @@ def setup_sensor_and_tags():
   tags = []
 
   living_room = TagConfig()
-  living_room.index = TAG_LIVING_ROOM
-  living_room.type = c4004.TAG_TYPE_PEOPLE_COUNTING
-  living_room.range_type = c4004.TAG_RANGE_RECTANGLE
+  living_room.tag_index = TAG_LIVING_ROOM
+  living_room.tag_type = c4004.TAG_TYPE_PEOPLE_COUNTING
+  living_room.scope_type = c4004.TAG_RANGE_RECTANGLE
   living_room.center_x = LIVING_ROOM_CENTER_X_CM
   living_room.center_y = LIVING_ROOM_CENTER_Y_CM
-  living_room.x_size = LIVING_ROOM_SIZE_X_CM
-  living_room.y_size = LIVING_ROOM_SIZE_Y_CM
+  living_room.width = LIVING_ROOM_SIZE_X_CM
+  living_room.height = LIVING_ROOM_SIZE_Y_CM
   tags.append(living_room)
 
   kitchen = TagConfig()
-  kitchen.index = TAG_KITCHEN
-  kitchen.type = c4004.TAG_TYPE_PEOPLE_COUNTING
-  kitchen.range_type = c4004.TAG_RANGE_RECTANGLE
+  kitchen.tag_index = TAG_KITCHEN
+  kitchen.tag_type = c4004.TAG_TYPE_PEOPLE_COUNTING
+  kitchen.scope_type = c4004.TAG_RANGE_RECTANGLE
   kitchen.center_x = KITCHEN_CENTER_X_CM
   kitchen.center_y = KITCHEN_CENTER_Y_CM
-  kitchen.x_size = KITCHEN_SIZE_X_CM
-  kitchen.y_size = KITCHEN_SIZE_Y_CM
+  kitchen.width = KITCHEN_SIZE_X_CM
+  kitchen.height = KITCHEN_SIZE_Y_CM
   tags.append(kitchen)
 
   kitchen_door = TagConfig()
-  kitchen_door.index = TAG_KITCHEN_DOOR
-  kitchen_door.type = c4004.TAG_TYPE_APPROACH_AWAY
-  kitchen_door.range_type = c4004.TAG_RANGE_RECTANGLE
+  kitchen_door.tag_index = TAG_KITCHEN_DOOR
+  kitchen_door.tag_type = c4004.TAG_TYPE_APPROACH_AWAY
+  kitchen_door.scope_type = c4004.TAG_RANGE_RECTANGLE
   kitchen_door.center_x = DOOR_CENTER_X_CM
   kitchen_door.center_y = DOOR_CENTER_Y_CM
-  kitchen_door.x_size = DOOR_SIZE_X_CM
-  kitchen_door.y_size = DOOR_SIZE_Y_CM
+  kitchen_door.width = DOOR_SIZE_X_CM
+  kitchen_door.height = DOOR_SIZE_Y_CM
   tags.append(kitchen_door)
 
   if c4004.set_tags_from_config(tags):
