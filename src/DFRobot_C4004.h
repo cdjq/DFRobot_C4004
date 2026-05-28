@@ -237,7 +237,7 @@ typedef enum {
   eRangeSideLeftEdge     = 0x01,
   eRangeSideRightEdge    = 0x02,
   eRangeHotelCorridor    = 0x03,
-  eRangeFourSideBoundary = 0x04,
+  eRangeFourSide = 0x04,
   eRangeTrajectory       = 0x05,
   eRangeConfigFile       = 0x06,
   eRangeNoBoundary       = 0x07,
@@ -670,12 +670,12 @@ public:
 
   /**
    * @fn setTrajectoryRangeMode
-   * @brief Enable or disable trajectory-range mode.
-   * @param enable: Enable or disable trajectory-range mode.
-   * @n          true: Enable, false: Disable.
+   * @brief Start trajectory-range learning or use the learned trajectory range.
+   * @param learning: Trajectory-range learning switch.
+   * @n          true: Start learning trajectory range, false: Use trajectory range mode without learning.
    * @return true: Set succeeded, false: Set failed.
   */
-  bool setTrajectoryRangeMode(bool enable);
+  bool setTrajectoryRangeMode(bool learning);
 
   /**
    * @fn getTrajectoryRangeMode

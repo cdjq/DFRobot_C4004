@@ -372,12 +372,12 @@ pip3 install pyserial
 
   /**
    * @fn setTrajectoryRangeMode
-   * @brief 启用或禁用轨迹范围模式。
-   * @param enable: 启用或禁用轨迹范围模式。
-   * @n          true: 启用，false: 禁用。
+   * @brief 开始轨迹范围学习，或使用已学习的轨迹范围模式。
+   * @param learning: 轨迹范围学习开关。
+   * @n          true: 开始学习轨迹范围，false: 使用轨迹范围模式但不学习。
    * @return true: 设置成功，false: 设置失败。
    */
-  bool setTrajectoryRangeMode(bool enable);
+  bool setTrajectoryRangeMode(bool learning);
 
   /**
    * @fn getTrajectoryRangeMode

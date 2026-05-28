@@ -129,7 +129,7 @@ eRangeSideDefault	LITERAL1
 eRangeSideLeftEdge	LITERAL1
 eRangeSideRightEdge	LITERAL1
 eRangeHotelCorridor	LITERAL1
-eRangeFourSideBoundary	LITERAL1
+eRangeFourSide	LITERAL1
 eRangeTrajectory	LITERAL1
 eRangeConfigFile	LITERAL1
 eRangeNoBoundary	LITERAL1

@@ -41,7 +41,7 @@ def main():
     print('Set trajectory LED failed.')
 
   range_info = FourSidedRange()
-  range_info.mode = c4004.RANGE_FOUR_SIDE_BOUNDARY
+  range_info.mode = c4004.RANGE_FOUR_SIDE
   range_info.x_positive_cm = 200
   range_info.x_negative_cm = -200
   range_info.y_positive_cm = 700

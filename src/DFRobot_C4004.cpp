@@ -588,7 +588,7 @@ bool DFRobot_C4004::setFourSidedRangeMode(sFourSidedRange &range)
   uint8_t data[9];
   sPacket_t packet;
 
-  data[0] = eRangeFourSideBoundary;
+  data[0] = eRangeFourSide;
   writeSignBitInt16(&data[1], range.xPositiveCm);
   writeSignBitInt16(&data[3], range.xNegativeCm);
   writeSignBitInt16(&data[5], range.yPositiveCm);
@@ -598,7 +598,7 @@ bool DFRobot_C4004::setFourSidedRangeMode(sFourSidedRange &range)
     return false;
   }
   _rangeInfo = range;
-  _rangeInfo.mode = eRangeFourSideBoundary;
+  _rangeInfo.mode = eRangeFourSide;
   return true;
 }
 
@@ -617,14 +617,14 @@ bool DFRobot_C4004::getFourSidedRangeMode(sFourSidedRange *range)
   return true;
 }
 
-bool DFRobot_C4004::setTrajectoryRangeMode(bool enable)
+bool DFRobot_C4004::setTrajectoryRangeMode(bool learning)
 {
   uint8_t data[2];
   sPacket_t packet;
   uint32_t startTime = 0;
 
   data[0] = eRangeTrajectory;
-  data[1] = enable ? 1 : 0;
+  data[1] = learning ? 1 : 0;
 
   flushInput();
   if (!sendCommand(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_SET_RANGE, data, sizeof(data))) {
@@ -1310,7 +1310,7 @@ void DFRobot_C4004::parseBoundaryRange(const uint8_t *data, uint16_t len)
   }
   _rangeInfo.mode = (eDetectionRangeMode_t)data[0];
 
-  if (_rangeInfo.mode == eRangeFourSideBoundary) {
+  if (_rangeInfo.mode == eRangeFourSide) {
     if (len >= 10 && data[1] == 0x00) {
       offset = 2;
     }

@@ -221,7 +221,9 @@ class DFRobot_C4004(object):
   RANGE_SIDE_LEFT_EDGE = 0x01
   RANGE_SIDE_RIGHT_EDGE = 0x02
   RANGE_HOTEL_CORRIDOR = 0x03
-  RANGE_FOUR_SIDE_BOUNDARY = 0x04
+  RANGE_FOUR_SIDE = 0x04
+  # Backward-compatible alias.
+  RANGE_FOUR_SIDE_BOUNDARY = RANGE_FOUR_SIDE
   RANGE_TRAJECTORY = 0x05
   RANGE_CONFIG_FILE = 0x06
   RANGE_NO_BOUNDARY = 0x07
@@ -763,15 +765,19 @@ class DFRobot_C4004(object):
       @return true if succeeded, otherwise false.
       @note Position values use sign-bit int16 encoding (bit15: 0=positive, 1=negative).
     '''
-    data = [self.RANGE_FOUR_SIDE_BOUNDARY]
+    data = [self.RANGE_FOUR_SIDE]
     data += self._sb16_bytes(range_info.x_positive_cm)
     data += self._sb16_bytes(range_info.x_negative_cm)
     data += self._sb16_bytes(range_info.y_positive_cm)
     data += self._sb16_bytes(range_info.y_negative_cm)
     ret = self._request_frame(self.CTRL_DETECTION_RANGE, self.CMD_DETECTION_RANGE_SET_RANGE, data) is not None
     if ret:
-      self._range_info = range_info
-      self._range_info.mode = self.RANGE_FOUR_SIDE_BOUNDARY
+      # Keep local cache as value-copy to match C++ behavior.
+      self._range_info.mode = self.RANGE_FOUR_SIDE
+      self._range_info.x_positive_cm = range_info.x_positive_cm
+      self._range_info.x_negative_cm = range_info.x_negative_cm
+      self._range_info.y_positive_cm = range_info.y_positive_cm
+      self._range_info.y_negative_cm = range_info.y_negative_cm
     return ret
 
   def get_four_sided_range_mode(self, range_info):
@@ -792,13 +798,13 @@ class DFRobot_C4004(object):
     range_info.y_negative_cm = self._range_info.y_negative_cm
     return True
 
-  def set_trajectory_range_mode(self, enable):
+  def set_trajectory_range_mode(self, learning):
     '''!
-      @brief Enable or disable trajectory detection range mode (mode 0x05).
-      @param enable true to enable, false to disable.
+      @brief Start trajectory-range learning or use the learned trajectory range (mode 0x05).
+      @param learning True starts trajectory-range learning; False uses trajectory range mode without learning.
       @return true if succeeded, otherwise false.
     '''
-    data = [self.RANGE_TRAJECTORY, 1 if enable else 0]
+    data = [self.RANGE_TRAJECTORY, 1 if learning else 0]
     if not self._send_command(self.CTRL_DETECTION_RANGE, self.CMD_DETECTION_RANGE_SET_RANGE, data):
       return False
 
@@ -1248,7 +1254,7 @@ class DFRobot_C4004(object):
     if len(data) < 1:
       return
     self._range_info.mode = data[0]
-    if self._range_info.mode == self.RANGE_FOUR_SIDE_BOUNDARY:
+    if self._range_info.mode == self.RANGE_FOUR_SIDE:
       offset = 2 if len(data) >= 10 and data[1] == 0 else 1
       if len(data) >= offset + 8:
         self._range_info.x_positive_cm = self._sb16(data, offset)

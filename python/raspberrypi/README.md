@@ -286,10 +286,10 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
       @return True or False
     '''
 
-  def set_trajectory_range_mode(self, enable):
+  def set_trajectory_range_mode(self, learning):
     '''!
-      @brief Enable or disable trajectory range mode (mode 0x05).
-      @param enable: True/False
+      @brief Start trajectory-range learning or use the learned trajectory range (mode 0x05).
+      @param learning: True starts learning; False uses trajectory range mode without learning.
       @return True or False
     '''
 

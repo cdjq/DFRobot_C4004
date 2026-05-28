@@ -43,7 +43,7 @@ void setup()
   }
 
   sFourSidedRange range;
-  range.mode = eRangeFourSideBoundary;
+  range.mode = eRangeFourSide;
   range.xPositiveCm = 200;
   range.xNegativeCm = -200;
   range.yPositiveCm = 700;

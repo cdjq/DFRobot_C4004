@@ -88,7 +88,7 @@ def main():
   print('Current trajectory LED:', 'ON' if c4004.get_trajectory_led() else 'OFF')
 
   range_info = FourSidedRange()
-  range_info.mode = c4004.RANGE_FOUR_SIDE_BOUNDARY
+  range_info.mode = c4004.RANGE_FOUR_SIDE
   range_info.x_positive_cm = 200
   range_info.x_negative_cm = -200
   range_info.y_positive_cm = 700
@@ -103,14 +103,14 @@ def main():
 
   mode = c4004.get_detection_range_mode()
   print('Current detection mode:', end=' ')
-  if mode == c4004.RANGE_FOUR_SIDE_BOUNDARY:
+  if mode == c4004.RANGE_FOUR_SIDE:
     print('Four-side boundary')
   elif mode == c4004.RANGE_TRAJECTORY:
     print('Trajectory')
   else:
     print('Other')
 
-  if mode == c4004.RANGE_FOUR_SIDE_BOUNDARY:
+  if mode == c4004.RANGE_FOUR_SIDE:
     current_range = FourSidedRange()
     if c4004.get_four_sided_range_mode(current_range):
       print('Current boundary x+/x-/y+/y- (cm): %d/%d/%d/%d' % (

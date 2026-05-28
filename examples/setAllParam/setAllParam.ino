@@ -106,7 +106,7 @@ void setup()
 
   Serial.println(F("====================Range Param==================="));
   sFourSidedRange range;
-  range.mode = eRangeFourSideBoundary;
+  range.mode = eRangeFourSide;
   range.xPositiveCm = 200;
   range.xNegativeCm = -200;
   range.yPositiveCm = 700;
@@ -114,15 +114,15 @@ void setup()
 
   // Set the boundary detection range
   if (c4004.setFourSidedRangeMode(range)) {
-    Serial.println(F("Set boundary detection range success!"));
+    Serial.println(F("Set four sided range success!"));
   } else {
-    Serial.println(F("Set boundary detection range failed!"));
+    Serial.println(F("Set four sided range failed!"));
   }
   delay(50);
 
   eDetectionRangeMode_t mode = c4004.getDetectionRangeMode();
   Serial.print(F("Current detection mode: "));
-  if (mode == eRangeFourSideBoundary) {
+  if (mode == eRangeFourSide) {
     Serial.println(F("Four-side boundary"));
   } else if (mode == eRangeTrajectory) {
     Serial.println(F("Trajectory"));
@@ -130,7 +130,7 @@ void setup()
     Serial.println(F("Other"));
   }
 
-  if (mode == eRangeFourSideBoundary) {
+  if (mode == eRangeFourSide) {
     sFourSidedRange currentRange;
     if (c4004.getFourSidedRangeMode(&currentRange)) {
       Serial.print(F("Current boundary x+/x-/y+/y- (cm): "));
