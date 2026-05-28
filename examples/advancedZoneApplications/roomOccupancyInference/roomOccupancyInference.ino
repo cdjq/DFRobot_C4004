@@ -390,10 +390,10 @@ void setup()
     Serial.println(F("Set trajectory track enable failed."));
   }
 
-  if (c4004.setTrajectoryHoldTime(1)) {
-    Serial.println(F("Set trajectory hold time success."));
+  if (c4004.setTrackExistsTime(1)) {
+    Serial.println(F("Set TrackExistsTime success."));
   } else {
-    Serial.println(F("Set trajectory hold time failed."));
+    Serial.println(F("Set TrackExistsTime failed."));
   }
 
   Serial.println(F("============================================================"));

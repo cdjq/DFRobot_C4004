@@ -54,10 +54,10 @@ void setup()
     Serial.println("Set boundary detection range failed.");
   }
 
-  if (c4004.setPeopleReportInterval(2)) {
-    Serial.println("Set people report interval success.");
+  if (c4004.setRealTimePeopleTime(2)) {
+    Serial.println("Set RealTimePeopleTime success.");
   } else {
-    Serial.println("Set people report interval failed.");
+    Serial.println("Set RealTimePeopleTime failed.");
   }
 
   if (c4004.setPresenceEnable(true)) {
@@ -100,7 +100,7 @@ void loop()
       Serial.println("None");
     }
   } else if (event == eEventPeopleCount) {
-    uint8_t count = c4004.getPeopleCountInfo(eGetDataReport);
+    uint8_t count = c4004.getPeopleTime(eGetDataReport);
     Serial.print("Number of trajectories: ");
     Serial.println(count);
   }
@@ -109,8 +109,8 @@ void loop()
   if (millis() - lastQuery > 2000) {
     lastQuery = millis();
     Serial.print("Number of trajectories: ");
-    //Serial.println(c4004.getPeopleCountInfo(eGetDataActive)); // Query active data
-    Serial.println(c4004.getPeopleCountInfo(eGetDataReport)); // Query report data
+    //Serial.println(c4004.getPeopleTime(eGetDataActive)); // Query active data
+    Serial.println(c4004.getPeopleTime(eGetDataReport)); // Query report data
 
     ePresenceState_t queryPresence = c4004.getPresenceState();
     Serial.print("Human presence state: ");

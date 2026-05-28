@@ -418,30 +418,30 @@ pip3 install pyserial
   eDetectionRangeMode_t getDetectionRangeMode(void);
 
   /**
-   * @fn getPeopleCountInfo
+   * @fn getPeopleTime
    * @brief 获取人数统计。
    * @param mode: 数据获取模式。
    * @n          eGetDataActive: 主动查询最新数据并更新缓存。
    * @n          eGetDataReport: 直接返回缓存数据。
    * @return uint8_t: 人数统计（模块上报的最大计数值）。
    */
-  uint8_t getPeopleCountInfo(eGetDataMode_t mode = eGetDataActive);
+  uint8_t getPeopleTime(eGetDataMode_t mode = eGetDataActive);
 
   /**
-   * @fn setPeopleReportInterval
+   * @fn setRealTimePeopleTime
    * @brief 设置人数统计上报间隔。
    * @param interval: 上报间隔，单位为秒。
    * @return true: 设置成功，false: 设置失败。
    */
-  bool setPeopleReportInterval(uint32_t interval);
+  bool setRealTimePeopleTime(uint32_t interval);
 
   /**
-   * @fn getPeopleReportInterval
+   * @fn getRealTimePeopleTime
    * @brief 获取人数统计上报间隔。
    * @param interval: 接收上报间隔的指针，单位为秒。
    * @return true: 获取成功，false: 获取失败。
    */
-  bool getPeopleReportInterval(uint32_t *interval);
+  bool getRealTimePeopleTime(uint32_t *interval);
 
   /**
    * @fn clearPeopleCount
@@ -451,52 +451,52 @@ pip3 install pyserial
   bool clearPeopleCount(void);
 
   /**
-   * @fn setTrajectoryGenerateDistance
+   * @fn setTrackMeters
    * @brief 设置轨迹生成距离阈值。
    * @param distanceCm: 距离阈值，单位为 cm。
    * @return true: 设置成功，false: 设置失败。
    */
-  bool setTrajectoryGenerateDistance(uint32_t distanceCm);
+  bool setTrackMeters(uint32_t distanceCm);
 
   /**
-   * @fn getTrajectoryGenerateDistance
+   * @fn getTrackMeters
    * @brief 获取轨迹生成距离阈值。
    * @param distanceCm: 接收距离阈值的指针，单位为 cm。
    * @return true: 获取成功，false: 获取失败。
    */
-  bool getTrajectoryGenerateDistance(uint32_t *distanceCm);
+  bool getTrackMeters(uint32_t *distanceCm);
 
   /**
-   * @fn setTrajectoryHoldTime
+   * @fn setTrackExistsTime
    * @brief 设置轨迹保持时间。
-   * @param holdTime: 保持时间，单位为秒。
+   * @param time: 保持时间，单位为秒。
    * @return true: 设置成功，false: 设置失败。
    */
-  bool setTrajectoryHoldTime(uint32_t holdTime);
+  bool setTrackExistsTime(uint32_t time);
 
   /**
-   * @fn getTrajectoryHoldTime
+   * @fn getTrackExistsTime
    * @brief 获取轨迹保持时间。
-   * @param holdTime: 接收保持时间的指针，单位为秒。
+   * @param time: 接收保持时间的指针，单位为秒。
    * @return true: 获取成功，false: 获取失败。
    */
-  bool getTrajectoryHoldTime(uint32_t *holdTime);
+  bool getTrackExistsTime(uint32_t *time);
 
   /**
-   * @fn setNoPersonDelay
+   * @fn setUnmannedTime
    * @brief 设置无人延迟时间。
    * @param delayTime: 延迟时间，单位为秒。
    * @return true: 设置成功，false: 设置失败。
    */
-  bool setNoPersonDelay(uint32_t delayTime);
+  bool setUnmannedTime(uint32_t delayTime);
 
   /**
-   * @fn getNoPersonDelay
+   * @fn getUnmannedTime
    * @brief 获取无人延迟时间。
    * @param delayTime: 接收延迟时间的指针，单位为秒。
    * @return true: 获取成功，false: 获取失败。
    */
-  bool getNoPersonDelay(uint32_t *delayTime);
+  bool getUnmannedTime(uint32_t *delayTime);
 ```
 
 ## 兼容性

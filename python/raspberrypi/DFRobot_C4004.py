@@ -969,7 +969,7 @@ class DFRobot_C4004(object):
       return True
     return False
 
-  def get_people_count_info(self, mode=GET_DATA_ACTIVE):
+  def get_people_time(self, mode=GET_DATA_ACTIVE):
     '''!
       @brief Get people count information.
       @param mode Data acquisition mode.
@@ -983,7 +983,7 @@ class DFRobot_C4004(object):
       self._request_frame(self.CTRL_PEOPLE_COUNT, self.CMD_PEOPLE_COUNT_QUERY_COUNT, [self.QUERY_DATA])
     return self._people_count
 
-  def set_people_report_interval(self, interval):
+  def set_real_time_people_time(self, interval):
     '''!
       @brief Set people count report interval.
       @param interval Interval in seconds.
@@ -991,7 +991,7 @@ class DFRobot_C4004(object):
     '''
     return self._set_u32(self.CTRL_PEOPLE_COUNT, self.CMD_PEOPLE_COUNT_SET_REPORT_INTERVAL, interval)
 
-  def get_people_report_interval(self):
+  def get_real_time_people_time(self):
     '''!
       @brief Query people count report interval.
       @return Interval in seconds. Returns 0 on failure.
@@ -1005,7 +1005,7 @@ class DFRobot_C4004(object):
     '''
     return self._request_frame(self.CTRL_PEOPLE_COUNT, self.CMD_PEOPLE_COUNT_CLEAR_COUNT, [self.QUERY_DATA]) is not None
 
-  def set_trajectory_generate_distance(self, distance_cm):
+  def set_track_meters(self, distance_cm):
     '''!
       @brief Set trajectory generation distance threshold.
       @param distance_cm Distance threshold in cm.
@@ -1013,29 +1013,29 @@ class DFRobot_C4004(object):
     '''
     return self._set_u32(self.CTRL_PEOPLE_COUNT, self.CMD_PEOPLE_COUNT_SET_TRAJECTORY_DISTANCE, distance_cm)
 
-  def get_trajectory_generate_distance(self):
+  def get_track_meters(self):
     '''!
       @brief Query trajectory generation distance threshold.
       @return Distance threshold in cm. Returns 0 on failure.
     '''
     return self._query_u32(self.CTRL_PEOPLE_COUNT, self.CMD_PEOPLE_COUNT_QUERY_TRAJECTORY_DISTANCE)
 
-  def set_trajectory_hold_time(self, hold_time):
+  def set_track_exists_time(self, time):
     '''!
       @brief Set trajectory hold time.
-      @param hold_time Hold time in seconds.
+      @param time Hold time in seconds.
       @return true if succeeded, otherwise false.
     '''
-    return self._set_u32(self.CTRL_PEOPLE_COUNT, self.CMD_PEOPLE_COUNT_SET_TRAJECTORY_HOLD_TIME, hold_time)
+    return self._set_u32(self.CTRL_PEOPLE_COUNT, self.CMD_PEOPLE_COUNT_SET_TRAJECTORY_HOLD_TIME, time)
 
-  def get_trajectory_hold_time(self):
+  def get_track_exists_time(self):
     '''!
       @brief Query trajectory hold time.
       @return Hold time in seconds. Returns 0 on failure.
     '''
     return self._query_u32(self.CTRL_PEOPLE_COUNT, self.CMD_PEOPLE_COUNT_QUERY_TRAJECTORY_HOLD_TIME)
 
-  def set_no_person_delay(self, delay_time):
+  def set_unmanned_time(self, delay_time):
     '''!
       @brief Set no-person delay time.
       @param delay_time Delay time in seconds.
@@ -1043,7 +1043,7 @@ class DFRobot_C4004(object):
     '''
     return self._set_u32(self.CTRL_PEOPLE_COUNT, self.CMD_PEOPLE_COUNT_SET_NO_PERSON_DELAY, delay_time)
 
-  def get_no_person_delay(self):
+  def get_unmanned_time(self):
     '''!
       @brief Query no-person delay time.
       @return Delay time in seconds. Returns 0 on failure.

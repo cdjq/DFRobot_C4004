@@ -716,30 +716,30 @@ public:
   eDetectionRangeMode_t getDetectionRangeMode(void);
 
   /**
-   * @fn getPeopleCountInfo
+   * @fn getPeopleTime
    * @brief Get people count.
    * @param mode: Data acquisition mode.
    * @n          eGetDataActive: Query latest data and update cache.
    * @n          eGetDataReport: Return cached data directly.
    * @return uint8_t: People count (maximum count reported by module).
   */
-  uint8_t getPeopleCountInfo(eGetDataMode_t mode = eGetDataActive);
+  uint8_t getPeopleTime(eGetDataMode_t mode = eGetDataActive);
 
   /**
-   * @fn setPeopleReportInterval
+   * @fn setRealTimePeopleTime
    * @brief Set people count report interval.
-   * @param interval: Report interval, in seconds.
+   * @param time: Report interval, in seconds.
    * @return true: Set succeeded, false: Set failed.
   */
-  bool setPeopleReportInterval(uint32_t interval);
+  bool setRealTimePeopleTime(uint32_t time);
 
   /**
-   * @fn getPeopleReportInterval
+   * @fn getRealTimePeopleTime
    * @brief Get people count report interval.
-   * @param interval: Pointer to receive report interval, in seconds.
+   * @param time: Pointer to receive report interval, in seconds.
    * @return true: Get succeeded, false: Get failed.
   */
-  bool getPeopleReportInterval(uint32_t *interval);
+  bool getRealTimePeopleTime(uint32_t *time);
 
   /**
    * @fn clearPeopleCount
@@ -749,52 +749,52 @@ public:
   bool clearPeopleCount(void);
 
   /**
-   * @fn setTrajectoryGenerateDistance
+   * @fn setTrackMeters
    * @brief Set trajectory generation distance threshold.
    * @param distanceCm: Distance threshold, in cm.
    * @return true: Set succeeded, false: Set failed.
   */
-  bool setTrajectoryGenerateDistance(uint32_t distanceCm);
+  bool setTrackMeters(uint32_t distanceCm);
 
   /**
-   * @fn getTrajectoryGenerateDistance
+   * @fn getTrackMeters
    * @brief Get trajectory generation distance threshold.
    * @param distanceCm: Pointer to receive distance threshold, in cm.
    * @return true: Get succeeded, false: Get failed.
   */
-  bool getTrajectoryGenerateDistance(uint32_t *distanceCm);
+  bool getTrackMeters(uint32_t *distanceCm);
 
   /**
-   * @fn setTrajectoryHoldTime
+   * @fn setTrackExistsTime
    * @brief Set trajectory hold time.
-   * @param holdTime: Hold time, in seconds.
+   * @param time: Hold time, in seconds.
    * @return true: Set succeeded, false: Set failed.
   */
-  bool setTrajectoryHoldTime(uint32_t holdTime);
+  bool setTrackExistsTime(uint32_t time);
 
   /**
-   * @fn getTrajectoryHoldTime
+   * @fn getTrackExistsTime
    * @brief Get trajectory hold time.
-   * @param holdTime: Pointer to receive hold time, in seconds.
+   * @param time: Pointer to receive hold time, in seconds.
    * @return true: Get succeeded, false: Get failed.
   */
-  bool getTrajectoryHoldTime(uint32_t *holdTime);
+  bool getTrackExistsTime(uint32_t *time);
 
   /**
-   * @fn setNoPersonDelay
+   * @fn setUnmannedTime
    * @brief Set no-person delay time.
    * @param delayTime: Delay time, in seconds.
    * @return true: Set succeeded, false: Set failed.
   */
-  bool setNoPersonDelay(uint32_t delayTime);
+  bool setUnmannedTime(uint32_t delayTime);
 
   /**
-   * @fn getNoPersonDelay
+   * @fn getUnmannedTime
    * @brief Get no-person delay time.
    * @param delayTime: Pointer to receive delay time, in seconds.
    * @return true: Get succeeded, false: Get failed.
   */
-  bool getNoPersonDelay(uint32_t *delayTime);
+  bool getUnmannedTime(uint32_t *delayTime);
 
 protected:
   void setTimeout(uint16_t timeoutMs);

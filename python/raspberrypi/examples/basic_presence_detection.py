@@ -51,10 +51,10 @@ def main():
   else:
     print('Set boundary detection range failed.')
 
-  if c4004.set_people_report_interval(2):
-    print('Set people report interval success.')
+  if c4004.set_real_time_people_time(2):
+    print('Set RealTimePeopleTime success.')
   else:
-    print('Set people report interval failed.')
+    print('Set RealTimePeopleTime failed.')
 
   if c4004.set_presence_enable(True):
     print('Set presence enable success.')
@@ -83,12 +83,12 @@ def main():
       else:
         print('Motion state: None')
     elif event == c4004.EVENT_PEOPLE_COUNT:
-      count = c4004.get_people_count_info(c4004.GET_DATA_REPORT)
+      count = c4004.get_people_time(c4004.GET_DATA_REPORT)
       print('Number of trajectories:', count)
 
     if time.time() - last_query > 2:
       last_query = time.time()
-      print('Number of trajectories:', c4004.get_people_count_info(c4004.GET_DATA_REPORT))
+      print('Number of trajectories:', c4004.get_people_time(c4004.GET_DATA_REPORT))
 
       query_presence = c4004.get_presence_state()
       print('Human presence state:', 'Presence' if query_presence == c4004.PRESENCE else 'None')

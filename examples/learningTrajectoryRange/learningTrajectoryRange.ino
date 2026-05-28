@@ -65,7 +65,7 @@ void setup()
   }
   delay(50);
 
-  if (c4004.setPeopleReportInterval(0)) {
+  if (c4004.setRealTimePeopleTime(0)) {
     Serial.println(F("Disabled people count report."));
   } else {
     Serial.println(F("Failed to disable people count report."));

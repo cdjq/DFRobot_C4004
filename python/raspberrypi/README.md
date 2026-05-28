@@ -323,21 +323,21 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
       @return mode value
     '''
 
-  def get_people_count_info(self, mode=GET_DATA_ACTIVE):
+  def get_people_time(self, mode=GET_DATA_ACTIVE):
     '''!
       @brief Get people count.
       @param mode: data mode
       @return people count
     '''
 
-  def set_people_report_interval(self, interval):
+  def set_real_time_people_time(self, interval):
     '''!
       @brief Set people report interval.
       @param interval: seconds
       @return True or False
     '''
 
-  def get_people_report_interval(self):
+  def get_real_time_people_time(self):
     '''!
       @brief Get people report interval.
       @return seconds
@@ -349,40 +349,40 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
       @return True or False
     '''
 
-  def set_trajectory_generate_distance(self, distance_cm):
+  def set_track_meters(self, distance_cm):
     '''!
       @brief Set trajectory generation distance threshold.
       @param distance_cm: threshold in cm
       @return True or False
     '''
 
-  def get_trajectory_generate_distance(self):
+  def get_track_meters(self):
     '''!
       @brief Get trajectory generation distance threshold.
       @return threshold in cm
     '''
 
-  def set_trajectory_hold_time(self, hold_time):
+  def set_track_exists_time(self, time):
     '''!
       @brief Set trajectory hold time.
-      @param hold_time: seconds
+      @param time: seconds
       @return True or False
     '''
 
-  def get_trajectory_hold_time(self):
+  def get_track_exists_time(self):
     '''!
       @brief Get trajectory hold time.
       @return seconds
     '''
 
-  def set_no_person_delay(self, delay_time):
+  def set_unmanned_time(self, delay_time):
     '''!
       @brief Set no-person delay time.
       @param delay_time: seconds
       @return True or False
     '''
 
-  def get_no_person_delay(self):
+  def get_unmanned_time(self):
     '''!
       @brief Get no-person delay time.
       @return seconds

@@ -784,7 +784,7 @@ eDetectionRangeMode_t DFRobot_C4004::getDetectionRangeMode(void)
   return _rangeInfo.mode;
 }
 
-uint8_t DFRobot_C4004::getPeopleCountInfo(eGetDataMode_t mode)
+uint8_t DFRobot_C4004::getPeopleTime(eGetDataMode_t mode)
 {
   uint8_t data = QUERY_DATA;
   sPacket_t packet;
@@ -795,14 +795,14 @@ uint8_t DFRobot_C4004::getPeopleCountInfo(eGetDataMode_t mode)
   return _peopleCount;
 }
 
-bool DFRobot_C4004::setPeopleReportInterval(uint32_t interval)
+bool DFRobot_C4004::setRealTimePeopleTime(uint32_t time)
 {
-  return setUint32(CTRL_PEOPLE_COUNT, CMD_PEOPLE_COUNT_SET_REPORT_INTERVAL, interval);
+  return setUint32(CTRL_PEOPLE_COUNT, CMD_PEOPLE_COUNT_SET_REPORT_INTERVAL, time);
 }
 
-bool DFRobot_C4004::getPeopleReportInterval(uint32_t *interval)
+bool DFRobot_C4004::getRealTimePeopleTime(uint32_t *time)
 {
-  return queryUint32(CTRL_PEOPLE_COUNT, CMD_PEOPLE_COUNT_QUERY_REPORT_INTERVAL, interval);
+  return queryUint32(CTRL_PEOPLE_COUNT, CMD_PEOPLE_COUNT_QUERY_REPORT_INTERVAL, time);
 }
 
 bool DFRobot_C4004::clearPeopleCount(void)
@@ -812,32 +812,32 @@ bool DFRobot_C4004::clearPeopleCount(void)
   return requestFrame(CTRL_PEOPLE_COUNT, CMD_PEOPLE_COUNT_CLEAR_COUNT, &data, 1, &packet);
 }
 
-bool DFRobot_C4004::setTrajectoryGenerateDistance(uint32_t distanceCm)
+bool DFRobot_C4004::setTrackMeters(uint32_t distanceCm)
 {
   return setUint32(CTRL_PEOPLE_COUNT, CMD_PEOPLE_COUNT_SET_TRAJECTORY_DISTANCE, distanceCm);
 }
 
-bool DFRobot_C4004::getTrajectoryGenerateDistance(uint32_t *distanceCm)
+bool DFRobot_C4004::getTrackMeters(uint32_t *distanceCm)
 {
   return queryUint32(CTRL_PEOPLE_COUNT, CMD_PEOPLE_COUNT_QUERY_TRAJECTORY_DISTANCE, distanceCm);
 }
 
-bool DFRobot_C4004::setTrajectoryHoldTime(uint32_t holdTime)
+bool DFRobot_C4004::setTrackExistsTime(uint32_t time)
 {
-  return setUint32(CTRL_PEOPLE_COUNT, CMD_PEOPLE_COUNT_SET_TRAJECTORY_HOLD_TIME, holdTime);
+  return setUint32(CTRL_PEOPLE_COUNT, CMD_PEOPLE_COUNT_SET_TRAJECTORY_HOLD_TIME, time);
 }
 
-bool DFRobot_C4004::getTrajectoryHoldTime(uint32_t *holdTime)
+bool DFRobot_C4004::getTrackExistsTime(uint32_t *time)
 {
-  return queryUint32(CTRL_PEOPLE_COUNT, CMD_PEOPLE_COUNT_QUERY_TRAJECTORY_HOLD_TIME, holdTime);
+  return queryUint32(CTRL_PEOPLE_COUNT, CMD_PEOPLE_COUNT_QUERY_TRAJECTORY_HOLD_TIME, time);
 }
 
-bool DFRobot_C4004::setNoPersonDelay(uint32_t delayTime)
+bool DFRobot_C4004::setUnmannedTime(uint32_t delayTime)
 {
   return setUint32(CTRL_PEOPLE_COUNT, CMD_PEOPLE_COUNT_SET_NO_PERSON_DELAY, delayTime);
 }
 
-bool DFRobot_C4004::getNoPersonDelay(uint32_t *delayTime)
+bool DFRobot_C4004::getUnmannedTime(uint32_t *delayTime)
 {
   return queryUint32(CTRL_PEOPLE_COUNT, CMD_PEOPLE_COUNT_QUERY_NO_PERSON_DELAY, delayTime);
 }

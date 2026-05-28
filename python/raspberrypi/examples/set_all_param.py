@@ -147,28 +147,28 @@ def main():
   #   print('Current multi-point config query failed.')
 
   print('================People Count Param================')
-  if c4004.set_people_report_interval(5):
-    print('Set people report interval success!')
+  if c4004.set_real_time_people_time(5):
+    print('Set RealTimePeopleTime success!')
   else:
-    print('Set people report interval failed!')
+    print('Set RealTimePeopleTime failed!')
   time.sleep(0.05)
 
-  if c4004.set_trajectory_generate_distance(50):
-    print('Set trajectory generate distance success!')
+  if c4004.set_track_meters(50):
+    print('Set TrackMeters success!')
   else:
-    print('Set trajectory generate distance failed!')
+    print('Set TrackMeters failed!')
   time.sleep(0.05)
 
-  if c4004.set_trajectory_hold_time(10):
-    print('Set trajectory hold time success!')
+  if c4004.set_track_exists_time(10):
+    print('Set TrackExistsTime success!')
   else:
-    print('Set trajectory hold time failed!')
+    print('Set TrackExistsTime failed!')
   time.sleep(0.05)
 
-  if c4004.set_no_person_delay(30):
-    print('Set no person delay success!')
+  if c4004.set_unmanned_time(30):
+    print('Set UnmannedTime success!')
   else:
-    print('Set no person delay failed!')
+    print('Set UnmannedTime failed!')
   time.sleep(0.05)
 
   if c4004.clear_people_count():
@@ -177,11 +177,11 @@ def main():
     print('Clear people count failed!')
   time.sleep(0.05)
 
-  print('Current people report interval(s):', c4004.get_people_report_interval())
-  print('Current trajectory generate distance(cm):', c4004.get_trajectory_generate_distance())
-  print('Current trajectory hold time(s):', c4004.get_trajectory_hold_time())
-  print('Current no person delay(s):', c4004.get_no_person_delay())
-  print('Current people count(active):', c4004.get_people_count_info(c4004.GET_DATA_ACTIVE))
+  print('Current RealTimePeopleTime(s):', c4004.get_real_time_people_time())
+  print('Current TrackMeters(cm):', c4004.get_track_meters())
+  print('Current TrackExistsTime(s):', c4004.get_track_exists_time())
+  print('Current UnmannedTime(s):', c4004.get_unmanned_time())
+  print('Current people count(active):', c4004.get_people_time(c4004.GET_DATA_ACTIVE))
 
   print('=======================Done=======================')
 

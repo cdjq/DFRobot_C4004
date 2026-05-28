@@ -52,16 +52,16 @@ getTrajectoryRangeMode	KEYWORD2
 setConfigFileModePoints	KEYWORD2
 getConfigFileModePoints	KEYWORD2
 getDetectionRangeMode	KEYWORD2
-getPeopleCountInfo	KEYWORD2
-setPeopleReportInterval	KEYWORD2
-getPeopleReportInterval	KEYWORD2
+getPeopleTime	KEYWORD2
+setRealTimePeopleTime	KEYWORD2
+getRealTimePeopleTime	KEYWORD2
 clearPeopleCount	KEYWORD2
-setTrajectoryGenerateDistance	KEYWORD2
-getTrajectoryGenerateDistance	KEYWORD2
-setTrajectoryHoldTime	KEYWORD2
-getTrajectoryHoldTime	KEYWORD2
-setNoPersonDelay	KEYWORD2
-getNoPersonDelay	KEYWORD2
+setTrackMeters	KEYWORD2
+getTrackMeters	KEYWORD2
+setTrackExistsTime	KEYWORD2
+getTrackExistsTime	KEYWORD2
+setUnmannedTime	KEYWORD2
+getUnmannedTime	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

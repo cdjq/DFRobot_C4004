@@ -362,27 +362,27 @@ RX         | TXD
       @return 阈值(cm)
     '''
 
-  def set_trajectory_hold_time(self, hold_time):
+  def set_track_exists_time(self, time):
     '''!
       @brief 设置轨迹保持时间。
-      @param hold_time: 秒
+      @param time: 秒
       @return True or False
     '''
 
-  def get_trajectory_hold_time(self):
+  def get_track_exists_time(self):
     '''!
       @brief 获取轨迹保持时间。
       @return 秒
     '''
 
-  def set_no_person_delay(self, delay_time):
+  def set_unmanned_time(self, delay_time):
     '''!
       @brief 设置无人延迟时间。
       @param delay_time: 秒
       @return True or False
     '''
 
-  def get_no_person_delay(self):
+  def get_unmanned_time(self):
     '''!
       @brief 获取无人延迟时间。
       @return 秒

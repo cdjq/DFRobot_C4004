@@ -368,10 +368,10 @@ def setup_sensor_and_tags():
   else:
     print('Set trajectory track enable failed.')
 
-  if c4004.set_trajectory_hold_time(1):
-    print('Set trajectory hold time success.')
+  if c4004.set_track_exists_time(1):
+    print('Set TrackExistsTime success.')
   else:
-    print('Set trajectory hold time failed.')
+    print('Set TrackExistsTime failed.')
 
   print('============================================================')
   print('Kitchen occupancy inference started.')

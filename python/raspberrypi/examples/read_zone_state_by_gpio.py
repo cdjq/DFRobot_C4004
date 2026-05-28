@@ -118,10 +118,10 @@ def main():
   else:
     print('Set motion LED failed.')
 
-  if c4004.set_people_report_interval(5):
-    print('Set people report interval success.')
+  if c4004.set_real_time_people_time(5):
+    print('Set RealTimePeopleTime success.')
   else:
-    print('Set people report interval failed.')
+    print('Set RealTimePeopleTime failed.')
 
   try:
     last_print = 0

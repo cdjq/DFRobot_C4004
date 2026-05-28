@@ -119,10 +119,10 @@ void setup()
     Serial.println("Set motion LED failed.");
   }
 
-  if (c4004.setPeopleReportInterval(5)) {
-    Serial.println("Set people report interval success.");
+  if (c4004.setRealTimePeopleTime(5)) {
+    Serial.println("Set RealTimePeopleTime success.");
   } else {
-    Serial.println("Set people report interval failed.");
+    Serial.println("Set RealTimePeopleTime failed.");
   }
 }
 
