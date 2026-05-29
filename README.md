@@ -503,11 +503,11 @@ pip3 install pyserial
 
 MCU                | Work Well    | Work Wrong   | Untested    | Remarks
 ------------------ | :----------: | :----------: | :---------: | :----:
-Arduino Uno        |      âˆ?      |              |             |
-Arduino MEGA2560   |      âˆ?      |              |             |
-Arduino Leonardo   |      âˆ?      |              |             |
-FireBeetle-ESP32   |      âˆ?      |              |             |
-Micro:bit          |              |              |      âˆ?     |
+Arduino Uno        |      âˆš       |              |             |
+Arduino MEGA2560   |      âˆš       |              |             |
+Arduino Leonardo   |      âˆš       |              |             |
+FireBeetle-ESP32   |      âˆš       |              |             |
+Micro:bit          |              |              |      âˆš      |
 
 ## History
 
