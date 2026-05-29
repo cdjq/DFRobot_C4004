@@ -105,14 +105,7 @@ bool DFRobot_C4004::isInitFinished(void)
 
 bool DFRobot_C4004::isConnected(void)
 {
-  if (getHeartbeat()) {
-    return true;
-  }
-
-  if (_lastHeartbeatMs == 0) {
-    return false;
-  }
-  return ((uint32_t)(millis() - _lastHeartbeatMs) < HEARTBEAT_TIMEOUT);
+  return getHeartbeat(eGetDataActive);
 }
 
 bool DFRobot_C4004::reset(void)
@@ -143,12 +136,13 @@ bool DFRobot_C4004::getHeartbeat(eGetDataMode_t mode)
   }
 
   if (!requestFrame(CTRL_SYSTEM, CMD_SYSTEM_HEARTBEAT_QUERY, &data, 1, &packet)) {
+    _heartbeat = false;
     return false;
   }
   if (packet.len > 0 && packet.data[0] != QUERY_DATA) {
+    _heartbeat = false;
     return false;
   }
-  _lastHeartbeatMs = millis();
   _heartbeat = true;
   return true;
 }
@@ -924,6 +918,7 @@ bool DFRobot_C4004::requestFrame(uint8_t control, uint8_t cmd, const uint8_t *da
   if (response == NULL) {
     return false;
   }
+  memset(response, 0, sizeof(sPacket_t));
 
   flushInput();
   if (!sendCommand(control, cmd, data, len)) {
@@ -961,6 +956,7 @@ bool DFRobot_C4004::readFrame(sPacket_t *packet, uint16_t timeoutMs)
   if (packet == NULL || _s == NULL) {
     return false;
   }
+  memset(packet, 0, sizeof(sPacket_t));
 
   while ((uint32_t)(millis() - startTime) < timeoutMs) {
     if (!readByte(&value, 1)) {
