@@ -37,7 +37,7 @@
 
 #define MAX_TARGETS           8
 #define MAX_TAGS              12
-#define MAX_POINTS            64
+#define MAX_POINTS            150
 #define MAX_PAYLOAD           (3 + MAX_POINTS * 4)
 #define QUERY_DATA            0x0F
 #define FRAME_HEAD1           0x53
