@@ -302,9 +302,7 @@ class DFRobot_C4004(object):
       @brief Check whether the module is connected.
       @return true if connected, otherwise false.
     '''
-    if self.get_heartbeat():
-      return True
-    return self._last_heartbeat_time != 0 and (time.time() - self._last_heartbeat_time) < 90
+    return self.get_heartbeat(self.GET_DATA_ACTIVE)
 
   def reset(self):
     '''!
@@ -332,10 +330,11 @@ class DFRobot_C4004(object):
       return self._heartbeat
     packet = self._request_frame(self.CTRL_SYSTEM, self.CMD_SYSTEM_HEARTBEAT_QUERY, [self.QUERY_DATA])
     if packet is None:
+      self._heartbeat = False
       return False
     if len(packet.data) > 0 and packet.data[0] != self.QUERY_DATA:
+      self._heartbeat = False
       return False
-    self._last_heartbeat_time = time.time()
     self._heartbeat = True
     return True
 
@@ -345,6 +344,8 @@ class DFRobot_C4004(object):
       @param timeout Maximum wait time in seconds.
       @return Event type, such as EVENT_PRESENCE, EVENT_MOTION, EVENT_TRAJECTORY, etc.
     '''
+    if hasattr(self.ser, 'reset_input_buffer'):
+      self.ser.reset_input_buffer()
     packet = self._read_frame(timeout)
     if packet is None:
       return self.EVENT_NONE
@@ -367,7 +368,7 @@ class DFRobot_C4004(object):
       return 0
     if len(packet.data) >= 2:
       return self._u16(packet.data, 0)
-    return packet.data[0]
+    return 0
 
   def get_hardware_version(self):
     '''!
@@ -1072,7 +1073,7 @@ class DFRobot_C4004(object):
     packet = self._request_frame(control, cmd, [self.QUERY_DATA])
     if packet is None:
       return ''
-    return bytes([b for b in packet.data if b != 0]).decode('ascii', errors='ignore')
+    return bytes([b for b in packet.data if b != 0 and 0x20 <= b <= 0x7E]).decode('ascii', errors='ignore')
 
   def _send_command(self, control, cmd, data):
     if self.ser is None:
@@ -1120,14 +1121,16 @@ class DFRobot_C4004(object):
       cmd = header[1]
       length = (header[2] << 8) | header[3]
       if length > self.MAX_PAYLOAD:
-        return None
+        if hasattr(self.ser, 'reset_input_buffer'):
+          self.ser.reset_input_buffer()
+        continue
       payload = self._read_exact(length, max(0.001, timeout - (time.time() - start)))
       tail = self._read_exact(3, max(0.001, timeout - (time.time() - start)))
       if len(payload) != length or len(tail) != 3:
         return None
       checksum = (self.FRAME_HEAD1 + self.FRAME_HEAD2 + sum(header) + sum(payload)) & 0xFF
       if tail[0] != checksum or tail[1] != self.FRAME_TAIL1 or tail[2] != self.FRAME_TAIL2:
-        return None
+        continue
       return Packet(control, cmd, payload)
     return None
 
