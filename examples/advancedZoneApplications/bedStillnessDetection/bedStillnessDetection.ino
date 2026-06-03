@@ -59,6 +59,13 @@ void setup()
   }
   Serial.println(F("DFRobot C4004 begin success."));
 
+  if (c4004.setCheckToActiveFrames(7)) {
+    Serial.println(F("Set check-to-active frames success."));
+  } else {
+    Serial.println(F("Set check-to-active frames failed."));
+  }
+  delay(50);
+
   if (c4004.setPresenceEnable(true)) {
     Serial.println(F("Set presence enable success."));
   } else {

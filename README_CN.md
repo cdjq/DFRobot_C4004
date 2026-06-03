@@ -225,7 +225,7 @@ pip3 install pyserial
   /**
    * @fn setCheckToActiveFrames
    * @brief 设置检查状态切换到活跃状态的确认帧数。
-   * @param frames: 帧数。
+   * @param frames: 帧数，有效范围：1-7。
    * @return true: 设置成功，false: 设置失败。
    */
   bool setCheckToActiveFrames(uint8_t frames);

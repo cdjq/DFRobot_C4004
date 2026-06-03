@@ -526,7 +526,7 @@ public:
   /**
    * @fn setCheckToActiveFrames
    * @brief Set the frame count used to confirm transition from check state to active state.
-   * @param frames: Frame count.
+   * @param frames: Frame count, valid range: 1-7.
    * @return true: Set succeeded, false: Set failed.
   */
   bool setCheckToActiveFrames(uint8_t frames);

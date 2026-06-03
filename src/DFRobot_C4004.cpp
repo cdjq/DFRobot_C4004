@@ -355,6 +355,9 @@ bool DFRobot_C4004::getTrajectoryTrackEnable(bool *enable)
 
 bool DFRobot_C4004::setCheckToActiveFrames(uint8_t frames)
 {
+  if (frames < 1 || frames > 7) {
+    return false;
+  }
   return setByte(CTRL_TRAJECTORY, CMD_TRAJECTORY_SET_CHECK_TO_ACTIVE_FRAMES, frames);
 }
 

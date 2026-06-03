@@ -121,6 +121,13 @@ void setup()
     delay(1000);
   }
 
+  if (c4004.setCheckToActiveFrames(7)) {
+    Serial.println("Set check-to-active frames success.");
+  } else {
+    Serial.println("Set check-to-active frames failed.");
+  }
+  delay(50);
+
   sFourSidedRange range;
   range.mode = eRangeFourSide;
   range.xPositiveCm = 200;

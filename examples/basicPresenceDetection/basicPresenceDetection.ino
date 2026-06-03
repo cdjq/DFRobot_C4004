@@ -30,6 +30,13 @@ void setup()
   }
   Serial.println("DFRobot C4004 begin success.");
 
+  if (c4004.setCheckToActiveFrames(7)) {
+    Serial.println("Set check-to-active frames success.");
+  } else {
+    Serial.println("Set check-to-active frames failed.");
+  }
+  delay(50);
+
   if (c4004.setMotionLed(true)) {
     Serial.println("Set motion LED success.");
   } else {
