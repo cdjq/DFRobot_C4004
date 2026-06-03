@@ -5,6 +5,7 @@
  * @n tags in code. It keeps the last event result for each tag, prints a summary table
  * @n every 3 seconds or when a tag event arrives, and drives outputs based on
  * @n game-area and sofa-area people counting results.
+ * @n Tag event reports do not include IO index; IO linkage belongs to tag configuration.
  * @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
  * @license The MIT License (MIT)
  * @author JiaLi(zhixin.liu@dfrobot.com)
@@ -163,7 +164,7 @@ void setup()
  *   tagIndex : Tag index. It must be unique for each tag.
  *   tagType  : Tag function, such as PeopleCounting, ApproachAway, or Noise.
  *   scopeType: Tag shape. Use eTagRangeRectangle or eTagRangeCircle.
- *   ioIndex  : IO linkage index. 0 means unused; 2-6 maps to IO2-IO6.
+ *   ioIndex  : IO linkage index in tag configuration. Tag events do not report it.
  *   centerX  : Tag center X coordinate, in cm.
  *   centerY  : Tag center Y coordinate, in cm.
  *   width    : Rectangle width, or circle radius, in cm.
@@ -252,6 +253,7 @@ void setup()
 
   Serial.println(F("==================================================================="));
   Serial.println(F("Room occupancy inference started."));
+  Serial.println(F("Tag events do not include IO index; IO is only tag configuration."));
   Serial.println(F("Rule 1: Game area has person -> TV IO HIGH immediately; no person for 5s -> LOW."));
   Serial.println(F("Rule 2: Sofa static-only for 5s -> Light PWM 150; motion for 5s -> 0; no person for 5s -> 255."));
   Serial.println(F("==================================================================="));
@@ -268,7 +270,6 @@ void loop()
       tagCache[tagInfo.tagIndex].tagIndex = tagInfo.tagIndex;
       tagCache[tagInfo.tagIndex].centerX = tagInfo.centerX;
       tagCache[tagInfo.tagIndex].centerY = tagInfo.centerY;
-      tagCache[tagInfo.tagIndex].tagType = tagInfo.tagType;
       tagCache[tagInfo.tagIndex].enterExit = tagInfo.enterExit;
       tagCache[tagInfo.tagIndex].motionDir = tagInfo.motionDir;
       tagCache[tagInfo.tagIndex].motionNum = tagInfo.motionNum;

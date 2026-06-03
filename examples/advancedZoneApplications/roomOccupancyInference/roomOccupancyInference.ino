@@ -4,6 +4,8 @@
  * @details This example configures living-room, kitchen, and kitchen-door tags.
  * @n The kitchen-door tag is EnterExit. Enter events increment the kitchen
  * @n people count, and exit events decrement it.
+ * @n Tag event reports do not include IO index; inference uses tag index and
+ * @n EnterExit event value.
  * @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
  * @license The MIT License (MIT)
  * @author JiaLi(zhixin.liu@dfrobot.com)
@@ -108,9 +110,9 @@ void processTagEvent()
     return;
   }
 
-  if (tagInfo.tagIndex == TAG_LIVING_ROOM && tagInfo.tagType == eTagTypePeopleCounting) {
+  if (tagInfo.tagIndex == TAG_LIVING_ROOM) {
     processLivingRoomTag(tagInfo);
-  } else if (tagInfo.tagIndex == TAG_KITCHEN_DOOR && tagInfo.tagType == eTagTypeEnterExit) {
+  } else if (tagInfo.tagIndex == TAG_KITCHEN_DOOR) {
     processKitchenDoorTag(tagInfo);
   }
 }
@@ -220,6 +222,7 @@ void setup()
   Serial.println(F("============================================================"));
   Serial.println(F("Kitchen occupancy inference started."));
   Serial.println(F("Direction: kitchen-door Enter/Exit tag event."));
+  Serial.println(F("Tag events do not include IO index; use tag index and event value."));
   Serial.println(F("Kitchen people count increments on Enter and decrements on Exit."));
   Serial.println(F("Living-room count is printed only and does not affect kitchen state."));
   Serial.println(F("Kitchen tag is configured for range/tag testing only."));

@@ -48,6 +48,8 @@ void printTagEvent(const sTagInfo_t &info)
   Serial.println("======================================================================");
   snprintf(line, sizeof(line), "Tag Index : %u", info.tagIndex);
   Serial.println(line);
+  snprintf(line, sizeof(line), "Tag Type  : %s", tagTypeToString(info.tagType));
+  Serial.println(line);
   snprintf(line, sizeof(line), "Center XY : %d / %d", info.centerX, info.centerY);
   Serial.println(line);
 
@@ -212,6 +214,8 @@ void setup()
   sTagConfig_t tags[MAX_TAGS];
   uint8_t count = c4004.getTags(tags, MAX_TAGS);
   printTagList("Active tag list after setup:", tags, count);
+  Serial.println("Note: TagEventReport does not include IO index; IO above is tag configuration only.");
+  Serial.println();
 }
 
 void loop()

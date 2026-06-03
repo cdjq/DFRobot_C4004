@@ -6,6 +6,8 @@
  * @n 2) While rule 1 is active, new people entering room keeps light OFF.
  * @n 3) If bed area has no static person, keep light ON when room has people.
  * @n 4) After room transitions from occupied to empty, wait 5s then turn light OFF.
+ * @n Tag event reports do not include IO index; this example uses tag index and
+ * @n people-counting event values.
  * @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
  * @license The MIT License (MIT)
  * @author JiaLi(zhixin.liu@dfrobot.com)
@@ -127,6 +129,7 @@ void setup()
 
   Serial.println(F("============================================================"));
   Serial.println(F("Bed stillness light control started."));
+  Serial.println(F("Tag events do not include IO index; use tag index and people counts."));
   Serial.println(F("Rule A: bed static(any person) over 5s => LIGHT OFF."));
   Serial.println(F("Rule B: if rule A active, bedroom new entry still keeps OFF."));
   Serial.println(F("Rule C: if rule A inactive, bedroom people>0 => LIGHT ON."));
@@ -140,7 +143,7 @@ void updatePeopleCountsFromTagReport()
     eReportedEvent_t event = c4004.getReportedInfo(5);
     if (event == eEventTag) {
       sTagInfo_t tagInfo;
-      if (c4004.getTagInfo(&tagInfo) && tagInfo.tagType == eTagTypePeopleCounting) {
+      if (c4004.getTagInfo(&tagInfo)) {
         if (tagInfo.tagIndex == BED_TAG_INDEX) {
           bedMotionCount = tagInfo.motionNum;
           bedStaticCount = tagInfo.staticNum;
