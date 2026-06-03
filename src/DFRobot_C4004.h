@@ -302,6 +302,7 @@ typedef struct {
 /**
  * @struct sTagInfo_t
  * @brief Last tag event decoded from an active report.
+ * @note Tag event reports do not include ioIndex; IO linkage belongs to tag configuration.
  */
 typedef struct {
   uint8_t tagIndex;
@@ -667,6 +668,7 @@ public:
    * @param tagInfo: Pointer to receive reported tag event information.
    * @return true: Get succeeded, false: No valid reported tag event or invalid parameter.
    * @note This API reads report cache only. Call getReportedInfo() to receive new report data first.
+   * @note Tag event reports do not include ioIndex. Query tag configuration with getTags() when IO linkage is needed.
   */
   bool getTagInfo(sTagInfo_t *tagInfo);
 

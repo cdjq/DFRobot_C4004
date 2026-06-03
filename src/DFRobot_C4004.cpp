@@ -21,6 +21,12 @@ static void appendHexByte(String &text, uint8_t value)
 }
 #endif
 
+static bool isKnownTagType(uint8_t value)
+{
+  return value == eTagTypeNone || value == eTagTypeEnterExit || value == eTagTypeApproachAway ||
+         value == eTagTypePeopleCounting || value == eTagTypeNoise;
+}
+
 #if defined(ESP8266) || defined(ARDUINO_AVR_UNO)
 DFRobot_C4004::DFRobot_C4004(SoftwareSerial *sSerial, uint32_t baud)
 {
@@ -496,8 +502,8 @@ bool DFRobot_C4004::getTagInfo(sTagInfo_t *tagInfo)
 eTagSetStatus_t DFRobot_C4004::setTag(const sTagConfig_t &tag)
 {
   uint8_t data[8];
-  uint8_t statusIndex = 3;
   sPacket_t packet;
+  eTagSetStatus_t status = eTagSetCommError;
 
   data[0] = tag.tagIndex;
   data[1] = (uint8_t)tag.tagType;
@@ -516,13 +522,23 @@ eTagSetStatus_t DFRobot_C4004::setTag(const sTagConfig_t &tag)
     return eTagSetCommError;
   }
 
-  if (packet.len >= 13 && packet.data[3] == tag.ioIndex) {
-    statusIndex = 4;
+  if (packet.data[3] >= eTagSetSuccess && packet.data[3] <= eTagSetIndexOutOfRange) {
+    status = (eTagSetStatus_t)packet.data[3];
   }
-  if (packet.data[statusIndex] >= eTagSetSuccess && packet.data[statusIndex] <= eTagSetIndexOutOfRange) {
-    return (eTagSetStatus_t)packet.data[statusIndex];
+  if (status == eTagSetSuccess) {
+    bool updated = false;
+    for (uint8_t i = 0; i < _tagCount; i++) {
+      if (_tags[i].tagIndex == tag.tagIndex) {
+        _tags[i] = tag;
+        updated = true;
+        break;
+      }
+    }
+    if (!updated && _tagCount < MAX_TAGS) {
+      _tags[_tagCount++] = tag;
+    }
   }
-  return eTagSetCommError;
+  return status;
 }
 
 bool DFRobot_C4004::clearTag(uint16_t tagIndex)
@@ -542,7 +558,19 @@ bool DFRobot_C4004::clearTag(uint16_t tagIndex)
     return false;
   }
   respIndex = readUint16(packet.data);
-  return (respIndex == tagIndex);
+  if (respIndex != tagIndex) {
+    return false;
+  }
+  for (uint8_t i = 0; i < _tagCount; i++) {
+    if (_tags[i].tagIndex == (uint8_t)tagIndex) {
+      for (uint8_t j = i; j + 1 < _tagCount; j++) {
+        _tags[j] = _tags[j + 1];
+      }
+      _tagCount--;
+      break;
+    }
+  }
+  return true;
 }
 
 bool DFRobot_C4004::clearAllTags(void)
@@ -561,6 +589,7 @@ bool DFRobot_C4004::clearAllTags(void)
       return false;
     }
   }
+  _tagCount = 0;
   return true;
 }
 
@@ -569,6 +598,7 @@ bool DFRobot_C4004::setTagsFromConfig(const sTagConfig_t *tags, uint8_t tagCount
   uint8_t data[MAX_PAYLOAD];
   uint16_t offset = 0;
   sPacket_t packet;
+  bool ret = false;
 
   if (tags == NULL && tagCount > 0) {
     return false;
@@ -593,7 +623,14 @@ bool DFRobot_C4004::setTagsFromConfig(const sTagConfig_t *tags, uint8_t tagCount
     writeUint16(&data[offset], tags[i].height);
     offset += 2;
   }
-  return requestFrame(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_SET_TAGS_FROM_CONFIG, data, offset, &packet);
+  ret = requestFrame(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_SET_TAGS_FROM_CONFIG, data, offset, &packet);
+  if (ret) {
+    _tagCount = tagCount;
+    for (uint8_t i = 0; i < _tagCount; i++) {
+      _tags[i] = tags[i];
+    }
+  }
+  return ret;
 }
 
 bool DFRobot_C4004::setFourSidedRangeMode(sFourSidedRange &range)
@@ -1314,23 +1351,47 @@ void DFRobot_C4004::parseTagList(const uint8_t *data, uint16_t len)
 
 void DFRobot_C4004::parseTagEvent(const uint8_t *data, uint16_t len)
 {
-  if (data == NULL || len < 7) {
+  uint8_t coordOffset = 2;
+  uint8_t eventOffset = 6;
+  eTagType_t cachedType = (eTagType_t)0xFF;
+  bool hasPayloadType = false;
+
+  if (data == NULL || len < 6) {
+    _tagInfoValid = false;
+    return;
+  }
+
+  for (uint8_t i = 0; i < _tagCount; i++) {
+    if (_tags[i].tagIndex == data[0]) {
+      cachedType = _tags[i].tagType;
+      break;
+    }
+  }
+
+  if (len >= 7 && isKnownTagType(data[1]) &&
+      ((uint8_t)cachedType == 0xFF || cachedType == (eTagType_t)data[1])) {
+    hasPayloadType = true;
+  } else {
+    coordOffset = 1;
+    eventOffset = 5;
+  }
+  if (eventOffset >= len) {
     _tagInfoValid = false;
     return;
   }
 
   memset(&_tagInfo, 0, sizeof(_tagInfo));
   _tagInfo.tagIndex = data[0];
-  _tagInfo.tagType = (eTagType_t)data[1];
-  _tagInfo.centerX = readSignBitInt16(&data[2]);
-  _tagInfo.centerY = readSignBitInt16(&data[4]);
+  _tagInfo.tagType = hasPayloadType ? (eTagType_t)data[1] : cachedType;
+  _tagInfo.centerX = readSignBitInt16(&data[coordOffset]);
+  _tagInfo.centerY = readSignBitInt16(&data[coordOffset + 2]);
   if (_tagInfo.tagType == eTagTypeEnterExit) {
-    _tagInfo.enterExit = data[6];
+    _tagInfo.enterExit = data[eventOffset];
   } else if (_tagInfo.tagType == eTagTypeApproachAway) {
-    _tagInfo.motionDir = data[6];
+    _tagInfo.motionDir = data[eventOffset];
   } else if (_tagInfo.tagType == eTagTypePeopleCounting) {
-    _tagInfo.motionNum = (data[6] >> 4) & 0x0F;
-    _tagInfo.staticNum = data[6] & 0x0F;
+    _tagInfo.motionNum = (data[eventOffset] >> 4) & 0x0F;
+    _tagInfo.staticNum = data[eventOffset] & 0x0F;
   }
   _tagInfoValid = true;
 }
