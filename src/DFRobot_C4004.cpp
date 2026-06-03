@@ -353,6 +353,16 @@ bool DFRobot_C4004::getTrajectoryTrackEnable(bool *enable)
   return true;
 }
 
+bool DFRobot_C4004::setCheckToActiveFrames(uint8_t frames)
+{
+  return setByte(CTRL_TRAJECTORY, CMD_TRAJECTORY_SET_CHECK_TO_ACTIVE_FRAMES, frames);
+}
+
+bool DFRobot_C4004::getCheckToActiveFrames(uint8_t *frames)
+{
+  return queryByte(CTRL_TRAJECTORY, CMD_TRAJECTORY_QUERY_CHECK_TO_ACTIVE_FRAMES, frames);
+}
+
 bool DFRobot_C4004::getTargetInfo(uint8_t index, sTargetInfo_t *targetInfo, eGetDataMode_t mode)
 {
   uint8_t data = QUERY_DATA;
@@ -482,14 +492,16 @@ bool DFRobot_C4004::getTagInfo(sTagInfo_t *tagInfo)
 
 eTagSetStatus_t DFRobot_C4004::setTag(const sTagConfig_t &tag)
 {
-  uint8_t data[7];
+  uint8_t data[8];
+  uint8_t statusIndex = 3;
   sPacket_t packet;
 
   data[0] = tag.tagIndex;
   data[1] = (uint8_t)tag.tagType;
   data[2] = (uint8_t)tag.scopeType;
-  writeUint16(&data[3], tag.width);
-  writeUint16(&data[5], tag.height);
+  data[3] = tag.ioIndex;
+  writeUint16(&data[4], tag.width);
+  writeUint16(&data[6], tag.height);
 
   if (!requestFrame(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_SET_TAG, data, sizeof(data), &packet)) {
     return eTagSetCommError;
@@ -501,8 +513,11 @@ eTagSetStatus_t DFRobot_C4004::setTag(const sTagConfig_t &tag)
     return eTagSetCommError;
   }
 
-  if (packet.data[3] >= eTagSetSuccess && packet.data[3] <= eTagSetIndexOutOfRange) {
-    return (eTagSetStatus_t)packet.data[3];
+  if (packet.len >= 13 && packet.data[3] == tag.ioIndex) {
+    statusIndex = 4;
+  }
+  if (packet.data[statusIndex] >= eTagSetSuccess && packet.data[statusIndex] <= eTagSetIndexOutOfRange) {
+    return (eTagSetStatus_t)packet.data[statusIndex];
   }
   return eTagSetCommError;
 }
@@ -565,6 +580,7 @@ bool DFRobot_C4004::setTagsFromConfig(const sTagConfig_t *tags, uint8_t tagCount
     data[offset++] = tags[i].tagIndex;
     data[offset++] = (uint8_t)tags[i].tagType;
     data[offset++] = (uint8_t)tags[i].scopeType;
+    data[offset++] = tags[i].ioIndex;
     writeSignBitInt16(&data[offset], tags[i].centerX);
     offset += 2;
     writeSignBitInt16(&data[offset], tags[i].centerY);
@@ -1113,6 +1129,8 @@ eReportedEvent_t DFRobot_C4004::handlePacket(const sPacket_t *packet)
     _motionLed = packet->data[0];
   } else if (packet->control == CTRL_DETECTION_RANGE && packet->cmd == CMD_DETECTION_RANGE_QUERY_TAGS) {
     parseTagList(packet->data, packet->len);
+  } else if (packet->control == CTRL_DETECTION_RANGE && packet->cmd == CMD_DETECTION_RANGE_SET_TAGS_FROM_CONFIG && packet->len >= 2) {
+    parseTagList(packet->data, packet->len);
   } else if (packet->control == CTRL_DETECTION_RANGE && packet->cmd == CMD_DETECTION_RANGE_TAG_REPORT) {
     parseTagEvent(packet->data, packet->len);
   } else if (packet->control == CTRL_DETECTION_RANGE && packet->cmd == CMD_DETECTION_RANGE_QUERY_RANGE) {
@@ -1244,6 +1262,10 @@ void DFRobot_C4004::parseTargets(const uint8_t *data, uint16_t len)
 
 void DFRobot_C4004::parseTagList(const uint8_t *data, uint16_t len)
 {
+  const uint8_t tagLenWithIo = 12;
+  const uint8_t tagLenWithoutIo = 11;
+  uint8_t tagLen = tagLenWithIo;
+  uint16_t availableLen = 0;
   uint16_t total = 0;
   uint8_t count = 0;
 
@@ -1253,24 +1275,37 @@ void DFRobot_C4004::parseTagList(const uint8_t *data, uint16_t len)
   }
 
   total = readUint16(data);
-  count = (uint8_t)total;
-  if (count > MAX_TAGS) {
+  if (total > MAX_TAGS) {
     count = MAX_TAGS;
+  } else {
+    count = (uint8_t)total;
   }
-  if (len < (uint16_t)(2 + count * 11)) {
-    count = (len - 2) / 11;
+  availableLen = len - 2;
+  if (total > 0 && (uint32_t)availableLen >= (uint32_t)total * tagLenWithIo) {
+    tagLen = tagLenWithIo;
+  } else if (total > 0 && (uint32_t)availableLen >= (uint32_t)total * tagLenWithoutIo) {
+    tagLen = tagLenWithoutIo;
+  } else if ((availableLen % tagLenWithIo) == 0) {
+    tagLen = tagLenWithIo;
+  } else if ((availableLen % tagLenWithoutIo) == 0) {
+    tagLen = tagLenWithoutIo;
+  }
+  if (availableLen < (uint16_t)(count * tagLen)) {
+    count = availableLen / tagLen;
   }
   _tagCount = count;
 
   for (uint8_t i = 0; i < count; i++) {
-    uint16_t offset = 2 + i * 11;
+    uint16_t offset = 2 + i * tagLen;
+    uint8_t centerOffset = (tagLen == tagLenWithIo) ? 4 : 3;
     _tags[i].tagIndex = data[offset];
     _tags[i].tagType = (eTagType_t)data[offset + 1];
     _tags[i].scopeType = (eTagRangeType_t)data[offset + 2];
-    _tags[i].centerX = readSignBitInt16(&data[offset + 3]);
-    _tags[i].centerY = readSignBitInt16(&data[offset + 5]);
-    _tags[i].width = readUint16(&data[offset + 7]);
-    _tags[i].height = readUint16(&data[offset + 9]);
+    _tags[i].ioIndex = (tagLen == tagLenWithIo) ? data[offset + 3] : 0;
+    _tags[i].centerX = readSignBitInt16(&data[offset + centerOffset]);
+    _tags[i].centerY = readSignBitInt16(&data[offset + centerOffset + 2]);
+    _tags[i].width = readUint16(&data[offset + centerOffset + 4]);
+    _tags[i].height = readUint16(&data[offset + centerOffset + 6]);
   }
 }
 

@@ -32,6 +32,8 @@ getPresenceState	KEYWORD2
 getMotionState	KEYWORD2
 setTrajectoryTrackEnable	KEYWORD2
 getTrajectoryTrackEnable	KEYWORD2
+setCheckToActiveFrames	KEYWORD2
+getCheckToActiveFrames	KEYWORD2
 getTargetInfo	KEYWORD2
 getTargetList	KEYWORD2
 getTargetCount	KEYWORD2
@@ -106,7 +108,7 @@ eUnknown	LITERAL1
 eTagTypeNone	LITERAL1
 eTagTypeEnterExit	LITERAL1
 eTagTypeApproachAway	LITERAL1
-eTagTypeMotionStatic	LITERAL1
+eTagTypePeopleCounting	LITERAL1
 eTagTypeNoise	LITERAL1
 
 eTagRangeCircle	LITERAL1

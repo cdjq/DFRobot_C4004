@@ -219,8 +219,24 @@ pip3 install pyserial
    * @param enable: 接收启用状态的指针。
    * @n          true: 已启用，false: 已禁用。
    * @return true: 查询成功，false: 查询失败。
-   */
+  */
   bool getTrajectoryTrackEnable(bool *enable);
+
+  /**
+   * @fn setCheckToActiveFrames
+   * @brief 设置检查状态切换到活跃状态的确认帧数。
+   * @param frames: 帧数。
+   * @return true: 设置成功，false: 设置失败。
+   */
+  bool setCheckToActiveFrames(uint8_t frames);
+
+  /**
+   * @fn getCheckToActiveFrames
+   * @brief 查询检查状态切换到活跃状态的确认帧数。
+   * @param frames: 接收帧数的指针。
+   * @return true: 查询成功，false: 查询失败。
+   */
+  bool getCheckToActiveFrames(uint8_t *frames);
 
   /**
    * @fn getTargetInfo
@@ -290,6 +306,7 @@ pip3 install pyserial
    * @param mode: 数据获取模式。
    * @n          eGetDataActive: 读取前主动查询最新标签配置。
    * @n          eGetDataReport: 从缓存数据中读取标签配置。
+   * @n          每个标签中的 ioIndex: IO 联动索引，0 表示不使用，2-6 表示绑定 IO2-IO6。
    * @return uint8_t: 读取到的标签数量。
    */
   uint8_t getTags(sTagConfig_t *tags, uint8_t maxTags, eGetDataMode_t mode = eGetDataActive);
@@ -301,6 +318,7 @@ pip3 install pyserial
    * @n          tagIndex: 标签索引。
    * @n          tagType: 标签类型。
    * @n          scopeType: 标签范围类型。
+   * @n          ioIndex: IO 联动索引，0 表示不使用，2-6 表示绑定 IO2-IO6。
    * @n          width: 标签宽度或圆形半径，单位为 cm。
    * @n          height: 标签高度，单位为 cm。
    * @return eTagSetStatus_t: 标签设置状态。
@@ -335,6 +353,7 @@ pip3 install pyserial
    * @brief 使用坐标模式从列表中批量设置标签配置。
    * @param tags: 标签配置列表的指针。
    * @param tagCount: 列表中的标签数量。
+   * @n          每个标签中的 ioIndex: IO 联动索引，0 表示不使用，2-6 表示绑定 IO2-IO6。
    * @return true: 设置成功，false: 设置失败。
    * @note 可以以坐标形式设置标签，无需满足轨迹数量为 1 的要求。
    * @note 最多设置 32 个标签。

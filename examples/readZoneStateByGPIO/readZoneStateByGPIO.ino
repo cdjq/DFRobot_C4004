@@ -57,28 +57,31 @@ void setup()
 
   sTagConfig_t setTags[5];
 
-  // Set tag 0, type is PeopleCounting, range is Rectangle, center is (0, 100), width/height is (120, 120)
+  // Set tag 0, bind to IO2, type is PeopleCounting, range is Rectangle, center is (0, 100), width/height is (120, 120)
   setTags[0].tagIndex = 0;
   setTags[0].tagType = eTagTypePeopleCounting;
   setTags[0].scopeType = eTagRangeRectangle;
+  setTags[0].ioIndex = 2;
   setTags[0].centerX = 0;
   setTags[0].centerY = 100;
   setTags[0].width = 120;
   setTags[0].height = 120;
 
-  // Set tag 1, type is PeopleCounting, range is Rectangle, center is (100, 220), width/height is (120, 120)
+  // Set tag 1, bind to IO3, type is PeopleCounting, range is Rectangle, center is (100, 220), width/height is (120, 120)
   setTags[1].tagIndex = 1;
   setTags[1].tagType = eTagTypePeopleCounting;
   setTags[1].scopeType = eTagRangeRectangle;
+  setTags[1].ioIndex = 3;
   setTags[1].centerX = 100;
   setTags[1].centerY = 220;
   setTags[1].width = 120;
   setTags[1].height = 120;
 
-  // Set tag 2, type is PeopleCounting, range is Circle, center is (-80, 350), radius is 80
+  // Set tag 2, bind to IO4, type is PeopleCounting, range is Circle, center is (-80, 350), radius is 80
   setTags[2].tagIndex = 2;
   setTags[2].tagType = eTagTypePeopleCounting;
   setTags[2].scopeType = eTagRangeCircle;
+  setTags[2].ioIndex = 4;
   setTags[2].centerX = -80;
   setTags[2].centerY = 350;
   setTags[2].width = 80;
@@ -89,19 +92,21 @@ void setup()
    * height correspond to the rectangle dimensions respectively.
   */
 
-  // Set tag 3, type is PeopleCounting, range is Rectangle, center is (0, 500), width/height is (160, 160)
+  // Set tag 3, bind to IO5, type is PeopleCounting, range is Rectangle, center is (0, 500), width/height is (160, 160)
   setTags[3].tagIndex = 3;
   setTags[3].tagType = eTagTypePeopleCounting;
   setTags[3].scopeType = eTagRangeRectangle;
+  setTags[3].ioIndex = 5;
   setTags[3].centerX = 0;
   setTags[3].centerY = 500;
   setTags[3].width = 160;
   setTags[3].height = 160;
 
-  // Set tag 4, type is PeopleCounting, range is Rectangle, center is (-100, 620), width/height is (100, 120)
+  // Set tag 4, bind to IO6, type is PeopleCounting, range is Rectangle, center is (-100, 620), width/height is (100, 120)
   setTags[4].tagIndex = 4;
   setTags[4].tagType = eTagTypePeopleCounting;
   setTags[4].scopeType = eTagRangeRectangle;
+  setTags[4].ioIndex = 6;
   setTags[4].centerX = -100;
   setTags[4].centerY = 620;
   setTags[4].width = 100;

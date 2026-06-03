@@ -91,8 +91,10 @@
 #define CMD_TRAJECTORY_QUERY_TARGET           0x82
 #define CMD_TRAJECTORY_SET_TRAJECTORY_LED     0x0B
 #define CMD_TRAJECTORY_SET_MOTION_LED         0x0C
+#define CMD_TRAJECTORY_SET_CHECK_TO_ACTIVE_FRAMES    0x0D
 #define CMD_TRAJECTORY_QUERY_TRAJECTORY_LED   0x8B
 #define CMD_TRAJECTORY_QUERY_MOTION_LED       0x8C
+#define CMD_TRAJECTORY_QUERY_CHECK_TO_ACTIVE_FRAMES  0x8D
 
 #define CMD_DETECTION_RANGE_QUERY_TAGS            0x91
 #define CMD_DETECTION_RANGE_SET_TAG               0x11
@@ -290,6 +292,7 @@ typedef struct {
   uint8_t tagIndex;
   eTagType_t tagType;
   eTagRangeType_t scopeType;
+  uint8_t ioIndex;       // 0: unused; 2-6: IO2-IO6 linkage
   int16_t centerX;
   int16_t centerY;
   uint16_t width;
@@ -521,6 +524,22 @@ public:
   bool getTrajectoryTrackEnable(bool *enable);
 
   /**
+   * @fn setCheckToActiveFrames
+   * @brief Set the frame count used to confirm transition from check state to active state.
+   * @param frames: Frame count.
+   * @return true: Set succeeded, false: Set failed.
+  */
+  bool setCheckToActiveFrames(uint8_t frames);
+
+  /**
+   * @fn getCheckToActiveFrames
+   * @brief Query the frame count used to confirm transition from check state to active state.
+   * @param frames: Pointer to receive frame count.
+   * @return true: Query succeeded, false: Query failed.
+  */
+  bool getCheckToActiveFrames(uint8_t *frames);
+
+  /**
    * @fn getTargetInfo
    * @brief Get the target information of the DFRobot C4004 sensor.
    * @param index: Target index.
@@ -588,6 +607,7 @@ public:
    * @param mode: Data acquisition mode.
    * @n          eGetDataActive: Query latest tag configuration before reading.
    * @n          eGetDataReport: Read tag configuration from cached data.
+   * @n          ioIndex in each tag: 0 means unused; 2-6 maps to IO2-IO6.
    * @return uint8_t: Number of tags read.
   */
   uint8_t getTags(sTagConfig_t *tags, uint8_t maxTags, eGetDataMode_t mode = eGetDataActive);
@@ -599,6 +619,7 @@ public:
    * @n          tagIndex: Tag index.
    * @n          tagType: Tag type.
    * @n          scopeType: Tag range type.
+   * @n          ioIndex: IO linkage index. 0 means unused; 2-6 maps to IO2-IO6.
    * @n          width: Tag width or circle radius, in cm.
    * @n          height: Tag height, in cm.
    * @return eTagSetStatus_t: Tag set status.
@@ -633,6 +654,7 @@ public:
    * @brief Set tag configurations from a list in coordinate mode.
    * @param tags: Pointer to the tag configuration list.
    * @param tagCount: Number of tags in the list.
+   * @n          ioIndex in each tag: 0 means unused; 2-6 maps to IO2-IO6.
    * @return true: Set succeeded, false: Set failed.
    * @note The labels can be set in the form of coordinates, and there is no need to meet the requirement that the number of tracks is 1
    * @note Set up to 32 tags at most.

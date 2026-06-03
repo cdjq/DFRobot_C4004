@@ -85,6 +85,21 @@ void setup()
     Serial.println(F("Read current trajectory tracking function enable failed."));
   }
 
+  if (c4004.setCheckToActiveFrames(3)) {
+    Serial.println(F("Set check-to-active frames success!"));
+  } else {
+    Serial.println(F("Set check-to-active frames failed!"));
+  }
+  delay(50);
+
+  uint8_t checkToActiveFrames = 0;
+  if (c4004.getCheckToActiveFrames(&checkToActiveFrames)) {
+    Serial.print(F("Current check-to-active frames: "));
+    Serial.println(checkToActiveFrames);
+  } else {
+    Serial.println(F("Read current check-to-active frames failed."));
+  }
+
   if (c4004.setMotionLed(true)) {
     Serial.println(F("Set motion LED success!"));
   } else {

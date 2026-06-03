@@ -223,6 +223,22 @@ pip3 install pyserial
   bool getTrajectoryTrackEnable(bool *enable);
 
   /**
+   * @fn setCheckToActiveFrames
+   * @brief Set the frame count used to confirm transition from check state to active state.
+   * @param frames: Frame count.
+   * @return true: Set succeeded, false: Set failed.
+  */
+  bool setCheckToActiveFrames(uint8_t frames);
+
+  /**
+   * @fn getCheckToActiveFrames
+   * @brief Query the frame count used to confirm transition from check state to active state.
+   * @param frames: Pointer to receive frame count.
+   * @return true: Query succeeded, false: Query failed.
+  */
+  bool getCheckToActiveFrames(uint8_t *frames);
+
+  /**
    * @fn getTargetInfo
    * @brief Get the target information of the DFRobot C4004 sensor.
    * @param index: Target index.
@@ -290,6 +306,7 @@ pip3 install pyserial
    * @param mode: Data acquisition mode.
    * @n          eGetDataActive: Query latest tag configuration before reading.
    * @n          eGetDataReport: Read tag configuration from cached data.
+   * @n          ioIndex in each tag: 0 means unused; 2-6 maps to IO2-IO6.
    * @return uint8_t: Number of tags read.
   */
   uint8_t getTags(sTagConfig_t *tags, uint8_t maxTags, eGetDataMode_t mode = eGetDataActive);
@@ -301,6 +318,7 @@ pip3 install pyserial
    * @n          tagIndex: Tag index.
    * @n          tagType: Tag type.
    * @n          scopeType: Tag range type.
+   * @n          ioIndex: IO linkage index. 0 means unused; 2-6 maps to IO2-IO6.
    * @n          width: Tag width or circle radius, in cm.
    * @n          height: Tag height, in cm.
    * @return eTagSetStatus_t: Tag set status.
@@ -335,6 +353,7 @@ pip3 install pyserial
    * @brief Set tag configurations from a list in coordinate mode.
    * @param tags: Pointer to the tag configuration list.
    * @param tagCount: Number of tags in the list.
+   * @n          ioIndex in each tag: 0 means unused; 2-6 maps to IO2-IO6.
    * @return true: Set succeeded, false: Set failed.
    * @note The labels can be set in the form of coordinates, and there is no need to meet the requirement that the number of tracks is 1
    * @note Set up to 32 tags at most.
