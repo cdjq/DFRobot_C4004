@@ -31,8 +31,6 @@ void setup()
   Serial.println(F("DFRobot C4004 begin success."));
   Serial.println(F("===================Product Info==================="));
 
-  Serial.print(F("Current product model: "));
-  Serial.println(c4004.getProductModel());
   Serial.print(F("Current hardware version: "));
   Serial.println(c4004.getHardwareVersion());
   Serial.print(F("Current firmware version: "));
