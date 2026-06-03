@@ -295,7 +295,7 @@ typedef struct {
   uint8_t tagIndex;
   eTagType_t tagType;
   eTagRangeType_t scopeType;
-  uint8_t ioIndex;       // Used by tag-setting APIs only; parsed tag data keeps this field 0.
+  uint8_t ioIndex;       // 0: unused; 2-6: IO2-IO6 linkage
   int16_t centerX;
   int16_t centerY;
   uint16_t width;
@@ -611,6 +611,7 @@ public:
    * @param mode: Data acquisition mode.
    * @n          eGetDataActive: Query latest tag configuration before reading.
    * @n          eGetDataReport: Read tag configuration from cached data.
+   * @n          ioIndex in each tag: 0 means unused; 2-6 maps to IO2-IO6.
    * @return uint8_t: Number of tags read.
   */
   uint8_t getTags(sTagConfig_t *tags, uint8_t maxTags, eGetDataMode_t mode = eGetDataActive);

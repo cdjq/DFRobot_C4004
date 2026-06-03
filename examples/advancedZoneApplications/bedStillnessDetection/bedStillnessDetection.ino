@@ -95,6 +95,7 @@ void setup()
   setTags[0].tagIndex = BED_TAG_INDEX;
   setTags[0].tagType = eTagTypePeopleCounting;
   setTags[0].scopeType = eTagRangeRectangle;
+  setTags[0].ioIndex = 0;
   setTags[0].centerX = -50;
   setTags[0].centerY = 300;
   setTags[0].width = 300;
@@ -103,6 +104,7 @@ void setup()
   setTags[1].tagIndex = BEDROOM_TAG_INDEX;
   setTags[1].tagType = eTagTypePeopleCounting;
   setTags[1].scopeType = eTagRangeRectangle;
+  setTags[1].ioIndex = 0;
   setTags[1].centerX = 0;
   setTags[1].centerY = 350;
   setTags[1].width = 400;
@@ -111,6 +113,7 @@ void setup()
   setTags[2].tagIndex = BEDROOM_DOOR_TAG_INDEX;
   setTags[2].tagType = eTagTypeApproachAway;
   setTags[2].scopeType = eTagRangeRectangle;
+  setTags[2].ioIndex = 0;
   setTags[2].centerX = 100;
   setTags[2].centerY = 700;
   setTags[2].width = 80;

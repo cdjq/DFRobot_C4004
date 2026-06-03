@@ -521,17 +521,15 @@ eTagSetStatus_t DFRobot_C4004::setTag(const sTagConfig_t &tag)
   }
   if (status == eTagSetSuccess) {
     bool updated = false;
-    sTagConfig_t cachedTag = tag;
-    cachedTag.ioIndex = 0;
     for (uint8_t i = 0; i < _tagCount; i++) {
       if (_tags[i].tagIndex == tag.tagIndex) {
-        _tags[i] = cachedTag;
+        _tags[i] = tag;
         updated = true;
         break;
       }
     }
     if (!updated && _tagCount < MAX_TAGS) {
-      _tags[_tagCount++] = cachedTag;
+      _tags[_tagCount++] = tag;
     }
   }
   return status;
@@ -620,11 +618,10 @@ bool DFRobot_C4004::setTagsFromConfig(const sTagConfig_t *tags, uint8_t tagCount
     offset += 2;
   }
   ret = requestFrame(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_SET_TAGS_FROM_CONFIG, data, offset, &packet);
-  if (ret) {
+  if (ret && packet.len < 2) {
     _tagCount = tagCount;
     for (uint8_t i = 0; i < _tagCount; i++) {
       _tags[i] = tags[i];
-      _tags[i].ioIndex = 0;
     }
   }
   return ret;
@@ -1300,7 +1297,7 @@ void DFRobot_C4004::parseTargets(const uint8_t *data, uint16_t len)
 
 void DFRobot_C4004::parseTagList(const uint8_t *data, uint16_t len)
 {
-  const uint8_t tagLen = 11;
+  const uint8_t tagLen = 12;
   uint16_t availableLen = 0;
   uint16_t total = 0;
   uint8_t count = 0;
@@ -1327,11 +1324,11 @@ void DFRobot_C4004::parseTagList(const uint8_t *data, uint16_t len)
     _tags[i].tagIndex = data[offset];
     _tags[i].tagType = (eTagType_t)data[offset + 1];
     _tags[i].scopeType = (eTagRangeType_t)data[offset + 2];
-    _tags[i].ioIndex = 0;
-    _tags[i].centerX = readSignBitInt16(&data[offset + 3]);
-    _tags[i].centerY = readSignBitInt16(&data[offset + 5]);
-    _tags[i].width = readUint16(&data[offset + 7]);
-    _tags[i].height = readUint16(&data[offset + 9]);
+    _tags[i].ioIndex = data[offset + 3];
+    _tags[i].centerX = readSignBitInt16(&data[offset + 4]);
+    _tags[i].centerY = readSignBitInt16(&data[offset + 6]);
+    _tags[i].width = readUint16(&data[offset + 8]);
+    _tags[i].height = readUint16(&data[offset + 10]);
   }
 }
 

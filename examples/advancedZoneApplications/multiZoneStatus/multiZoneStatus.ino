@@ -163,6 +163,7 @@ void setup()
  *   tagIndex : Tag index. It must be unique for each tag.
  *   tagType  : Tag function, such as PeopleCounting, ApproachAway, or Noise.
  *   scopeType: Tag shape. Use eTagRangeRectangle or eTagRangeCircle.
+ *   ioIndex  : IO linkage index. 0 means unused; 2-6 maps to IO2-IO6.
  *   centerX  : Tag center X coordinate, in cm.
  *   centerY  : Tag center Y coordinate, in cm.
  *   width    : Rectangle width, or circle radius, in cm.
@@ -177,6 +178,7 @@ void setup()
   tags[0].tagIndex = TAG_GAME;
   tags[0].tagType = eTagTypePeopleCounting;
   tags[0].scopeType = eTagRangeCircle;
+  tags[0].ioIndex = 0;
   tags[0].centerX = -100;
   tags[0].centerY = 550;
   tags[0].width = 80;
@@ -185,6 +187,7 @@ void setup()
   tags[1].tagIndex = TAG_SOFA;
   tags[1].tagType = eTagTypePeopleCounting;
   tags[1].scopeType = eTagRangeRectangle;
+  tags[1].ioIndex = 0;
   tags[1].centerX = 100;
   tags[1].centerY = 450;
   tags[1].width = 100;
@@ -193,6 +196,7 @@ void setup()
   tags[2].tagIndex = TAG_HOME_DOOR;
   tags[2].tagType = eTagTypeApproachAway;
   tags[2].scopeType = eTagRangeRectangle;
+  tags[2].ioIndex = 0;
   tags[2].centerX = 100;
   tags[2].centerY = 700;
   tags[2].width = 80;
@@ -201,6 +205,7 @@ void setup()
   tags[3].tagIndex = TAG_KITCHEN_DOOR;
   tags[3].tagType = eTagTypeApproachAway;
   tags[3].scopeType = eTagRangeRectangle;
+  tags[3].ioIndex = 0;
   tags[3].centerX = -100;
   tags[3].centerY = 700;
   tags[3].width = 80;
@@ -209,6 +214,7 @@ void setup()
   tags[4].tagIndex = TAG_DINING;
   tags[4].tagType = eTagTypePeopleCounting;
   tags[4].scopeType = eTagRangeRectangle;
+  tags[4].ioIndex = 0;
   tags[4].centerX = 50;
   tags[4].centerY = 150;
   tags[4].width = 300;
@@ -217,6 +223,7 @@ void setup()
   tags[5].tagIndex = TAG_CURTAIN;
   tags[5].tagType = eTagTypeNoise;
   tags[5].scopeType = eTagRangeRectangle;
+  tags[5].ioIndex = 0;
   tags[5].centerX = -150;
   tags[5].centerY = 300;
   tags[5].width = 50;
@@ -225,6 +232,7 @@ void setup()
   tags[6].tagIndex = TAG_PLANT;
   tags[6].tagType = eTagTypeNoise;
   tags[6].scopeType = eTagRangeCircle;
+  tags[6].ioIndex = 0;
   tags[6].centerX = -50;
   tags[6].centerY = 400;
   tags[6].width = 40;

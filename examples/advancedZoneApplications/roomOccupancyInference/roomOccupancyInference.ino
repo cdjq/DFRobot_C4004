@@ -169,6 +169,7 @@ void setup()
   tags[0].tagIndex = TAG_LIVING_ROOM;
   tags[0].tagType = eTagTypePeopleCounting;
   tags[0].scopeType = eTagRangeRectangle;
+  tags[0].ioIndex = 0;
   tags[0].centerX = LIVING_ROOM_CENTER_X_CM;
   tags[0].centerY = LIVING_ROOM_CENTER_Y_CM;
   tags[0].width = LIVING_ROOM_SIZE_X_CM;
@@ -177,6 +178,7 @@ void setup()
   tags[1].tagIndex = TAG_KITCHEN;
   tags[1].tagType = eTagTypePeopleCounting;
   tags[1].scopeType = eTagRangeRectangle;
+  tags[1].ioIndex = 0;
   tags[1].centerX = KITCHEN_CENTER_X_CM;
   tags[1].centerY = KITCHEN_CENTER_Y_CM;
   tags[1].width = KITCHEN_SIZE_X_CM;
@@ -185,6 +187,7 @@ void setup()
   tags[2].tagIndex = TAG_KITCHEN_DOOR;
   tags[2].tagType = eTagTypeEnterExit;
   tags[2].scopeType = eTagRangeRectangle;
+  tags[2].ioIndex = 0;
   tags[2].centerX = DOOR_CENTER_X_CM;
   tags[2].centerY = DOOR_CENTER_Y_CM;
   tags[2].width = DOOR_SIZE_X_CM;

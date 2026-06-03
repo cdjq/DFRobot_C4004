@@ -306,6 +306,7 @@ pip3 install pyserial
    * @param mode: 数据获取模式。
    * @n          eGetDataActive: 读取前主动查询最新标签配置。
    * @n          eGetDataReport: 从缓存数据中读取标签配置。
+   * @n          每个标签中的 ioIndex: IO 联动索引，0 表示不使用，2-6 表示绑定 IO2-IO6。
    * @return uint8_t: 读取到的标签数量。
    */
   uint8_t getTags(sTagConfig_t *tags, uint8_t maxTags, eGetDataMode_t mode = eGetDataActive);
