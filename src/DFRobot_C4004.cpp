@@ -1280,6 +1280,7 @@ void DFRobot_C4004::parseTargets(const uint8_t *data, uint16_t len)
   uint8_t count = 0;
 
   if (data == NULL) {
+    _targetCount = 0;
     return;
   }
   count = len / targetLen;
@@ -1291,7 +1292,7 @@ void DFRobot_C4004::parseTargets(const uint8_t *data, uint16_t len)
   for (uint8_t i = 0; i < count; i++) {
     uint16_t offset = i * targetLen;
     _targets[i].index = data[offset];
-    _targets[i].kinesia = data[offset + 1];
+    _targets[i].targetSize = data[offset + 1];
     _targets[i].targetFeature = (eTargetFeature_t)data[offset + 2];
     _targets[i].x = readSignBitInt16(&data[offset + 3]);
     _targets[i].y = readSignBitInt16(&data[offset + 5]);

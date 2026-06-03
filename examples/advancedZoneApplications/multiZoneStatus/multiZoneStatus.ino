@@ -5,7 +5,6 @@
  * @n tags in code. It keeps the last event result for each tag, prints a summary table
  * @n every 3 seconds or when a tag event arrives, and drives outputs based on
  * @n game-area and sofa-area people counting results.
- * @n Tag event reports do not include IO index; IO linkage belongs to tag configuration.
  * @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
  * @license The MIT License (MIT)
  * @author JiaLi(zhixin.liu@dfrobot.com)
@@ -149,7 +148,7 @@ void setup()
     Serial.println(F("Set boundary detection range failed."));
   }
 
-  sTagConfig_t tags[TAG_TOTAL];
+  sTagConfig_t tags[TAG_TOTAL] = {};
 
 /**
  * Tag configuration note:
@@ -164,7 +163,6 @@ void setup()
  *   tagIndex : Tag index. It must be unique for each tag.
  *   tagType  : Tag function, such as PeopleCounting, ApproachAway, or Noise.
  *   scopeType: Tag shape. Use eTagRangeRectangle or eTagRangeCircle.
- *   ioIndex  : IO linkage index in tag configuration. Tag events do not report it.
  *   centerX  : Tag center X coordinate, in cm.
  *   centerY  : Tag center Y coordinate, in cm.
  *   width    : Rectangle width, or circle radius, in cm.
@@ -179,7 +177,6 @@ void setup()
   tags[0].tagIndex = TAG_GAME;
   tags[0].tagType = eTagTypePeopleCounting;
   tags[0].scopeType = eTagRangeCircle;
-  tags[0].ioIndex = 0;
   tags[0].centerX = -100;
   tags[0].centerY = 550;
   tags[0].width = 80;
@@ -188,7 +185,6 @@ void setup()
   tags[1].tagIndex = TAG_SOFA;
   tags[1].tagType = eTagTypePeopleCounting;
   tags[1].scopeType = eTagRangeRectangle;
-  tags[1].ioIndex = 0;
   tags[1].centerX = 100;
   tags[1].centerY = 450;
   tags[1].width = 100;
@@ -197,7 +193,6 @@ void setup()
   tags[2].tagIndex = TAG_HOME_DOOR;
   tags[2].tagType = eTagTypeApproachAway;
   tags[2].scopeType = eTagRangeRectangle;
-  tags[2].ioIndex = 0;
   tags[2].centerX = 100;
   tags[2].centerY = 700;
   tags[2].width = 80;
@@ -206,7 +201,6 @@ void setup()
   tags[3].tagIndex = TAG_KITCHEN_DOOR;
   tags[3].tagType = eTagTypeApproachAway;
   tags[3].scopeType = eTagRangeRectangle;
-  tags[3].ioIndex = 0;
   tags[3].centerX = -100;
   tags[3].centerY = 700;
   tags[3].width = 80;
@@ -215,7 +209,6 @@ void setup()
   tags[4].tagIndex = TAG_DINING;
   tags[4].tagType = eTagTypePeopleCounting;
   tags[4].scopeType = eTagRangeRectangle;
-  tags[4].ioIndex = 0;
   tags[4].centerX = 50;
   tags[4].centerY = 150;
   tags[4].width = 300;
@@ -224,7 +217,6 @@ void setup()
   tags[5].tagIndex = TAG_CURTAIN;
   tags[5].tagType = eTagTypeNoise;
   tags[5].scopeType = eTagRangeRectangle;
-  tags[5].ioIndex = 0;
   tags[5].centerX = -150;
   tags[5].centerY = 300;
   tags[5].width = 50;
@@ -233,7 +225,6 @@ void setup()
   tags[6].tagIndex = TAG_PLANT;
   tags[6].tagType = eTagTypeNoise;
   tags[6].scopeType = eTagRangeCircle;
-  tags[6].ioIndex = 0;
   tags[6].centerX = -50;
   tags[6].centerY = 400;
   tags[6].width = 40;
@@ -253,7 +244,6 @@ void setup()
 
   Serial.println(F("==================================================================="));
   Serial.println(F("Room occupancy inference started."));
-  Serial.println(F("Tag events do not include IO index; IO is only tag configuration."));
   Serial.println(F("Rule 1: Game area has person -> TV IO HIGH immediately; no person for 5s -> LOW."));
   Serial.println(F("Rule 2: Sofa static-only for 5s -> Light PWM 150; motion for 5s -> 0; no person for 5s -> 255."));
   Serial.println(F("==================================================================="));

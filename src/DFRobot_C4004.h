@@ -267,7 +267,10 @@ typedef struct {
  */
 typedef struct {
   uint8_t index;
-  uint8_t kinesia;
+  union {
+    uint8_t targetSize;
+    uint8_t kinesia;     // Backward-compatible alias for targetSize.
+  };
   eTargetFeature_t targetFeature;
   int16_t x;
   int16_t y;

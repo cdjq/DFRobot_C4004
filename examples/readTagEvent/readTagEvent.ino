@@ -82,7 +82,7 @@ void printTagList(const char *title, sTagConfig_t *tags, uint8_t count)
     return;
   }
 
-  Serial.println("Idx\tType\t\tRange\t\tIO\tCenterX\tCenterY\tWidth\tHeight");
+  Serial.println("Idx\tType\t\tRange\t\tCenterX\tCenterY\tWidth\tHeight");
   Serial.println("----------------------------------------------------------------------");
   for (uint8_t i = 0; i < count; i++) {
     const char *typeText = tagTypeToString(tags[i].tagType);
@@ -101,8 +101,6 @@ void printTagList(const char *title, sTagConfig_t *tags, uint8_t count)
     } else {
       Serial.print("\t");
     }
-    Serial.print(tags[i].ioIndex);
-    Serial.print("\t");
     Serial.print(tags[i].centerX);
     Serial.print("\t");
     Serial.print(tags[i].centerY);
@@ -148,13 +146,12 @@ void setup()
     Serial.println("Clear all tags failed.");
   }
 
-  sTagConfig_t setTags[5];
+  sTagConfig_t setTags[5] = {};
 
   // Set tag 0, type is None, range is Rectangle, center is (0, 100), width/height is (120, 120)
   setTags[0].tagIndex = 0;
   setTags[0].tagType = eTagTypeNone;
   setTags[0].scopeType = eTagRangeRectangle;
-  setTags[0].ioIndex = 0;
   setTags[0].centerX = 0;
   setTags[0].centerY = 100;
   setTags[0].width = 120;
@@ -164,7 +161,6 @@ void setup()
   setTags[1].tagIndex = 1;
   setTags[1].tagType = eTagTypeEnterExit;
   setTags[1].scopeType = eTagRangeRectangle;
-  setTags[1].ioIndex = 0;
   setTags[1].centerX = 100;
   setTags[1].centerY = 220;
   setTags[1].width = 120;
@@ -174,7 +170,6 @@ void setup()
   setTags[2].tagIndex = 2;
   setTags[2].tagType = eTagTypeApproachAway;
   setTags[2].scopeType = eTagRangeCircle;
-  setTags[2].ioIndex = 0;
   setTags[2].centerX = -80;
   setTags[2].centerY = 350;
   setTags[2].width = 80;
@@ -189,7 +184,6 @@ void setup()
   setTags[3].tagIndex = 3;
   setTags[3].tagType = eTagTypePeopleCounting;
   setTags[3].scopeType = eTagRangeRectangle;
-  setTags[3].ioIndex = 0;
   setTags[3].centerX = 0;
   setTags[3].centerY = 500;
   setTags[3].width = 160;
@@ -199,7 +193,6 @@ void setup()
   setTags[4].tagIndex = 4;
   setTags[4].tagType = eTagTypeNoise;
   setTags[4].scopeType = eTagRangeRectangle;
-  setTags[4].ioIndex = 0;
   setTags[4].centerX = -100;
   setTags[4].centerY = 620;
   setTags[4].width = 100;
@@ -214,8 +207,6 @@ void setup()
   sTagConfig_t tags[MAX_TAGS];
   uint8_t count = c4004.getTags(tags, MAX_TAGS);
   printTagList("Active tag list after setup:", tags, count);
-  Serial.println("Note: TagEventReport does not include IO index; IO above is tag configuration only.");
-  Serial.println();
 }
 
 void loop()

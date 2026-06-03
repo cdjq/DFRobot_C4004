@@ -29,6 +29,8 @@ const char *targetFeatureToString(eTargetFeature_t feature)
     return "Static";
   } else if (feature == eMotion) {
     return "Motion";
+  } else if (feature == eUncertain) {
+    return "Uncertain";
   }
   return "Unknown";
 }
@@ -43,13 +45,13 @@ void printTrajectoryData(const sTargetInfo_t *targets, uint8_t count)
     return;
   }
 
-  Serial.println("Row\tID\tKinesia\tFeature\tX\tY\tSpeed");
+  Serial.println("Row\tID\tSize\tFeature\tX\tY\tSpeed");
   for (uint8_t i = 0; i < count; i++) {
     Serial.print(i);
     Serial.print("\t");
     Serial.print(targets[i].index);
     Serial.print("\t");
-    Serial.print(targets[i].kinesia);
+    Serial.print(targets[i].targetSize);
     Serial.print("\t");
     Serial.print(targetFeatureToString(targets[i].targetFeature));
     Serial.print("\t");

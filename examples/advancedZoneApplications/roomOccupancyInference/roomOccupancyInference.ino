@@ -4,8 +4,6 @@
  * @details This example configures living-room, kitchen, and kitchen-door tags.
  * @n The kitchen-door tag is EnterExit. Enter events increment the kitchen
  * @n people count, and exit events decrement it.
- * @n Tag event reports do not include IO index; inference uses tag index and
- * @n EnterExit event value.
  * @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
  * @license The MIT License (MIT)
  * @author JiaLi(zhixin.liu@dfrobot.com)
@@ -166,12 +164,11 @@ void setup()
     Serial.println(F("Clear all tags failed."));
   }
 
-  sTagConfig_t tags[3];
+  sTagConfig_t tags[3] = {};
 
   tags[0].tagIndex = TAG_LIVING_ROOM;
   tags[0].tagType = eTagTypePeopleCounting;
   tags[0].scopeType = eTagRangeRectangle;
-  tags[0].ioIndex = 0;
   tags[0].centerX = LIVING_ROOM_CENTER_X_CM;
   tags[0].centerY = LIVING_ROOM_CENTER_Y_CM;
   tags[0].width = LIVING_ROOM_SIZE_X_CM;
@@ -180,7 +177,6 @@ void setup()
   tags[1].tagIndex = TAG_KITCHEN;
   tags[1].tagType = eTagTypePeopleCounting;
   tags[1].scopeType = eTagRangeRectangle;
-  tags[1].ioIndex = 0;
   tags[1].centerX = KITCHEN_CENTER_X_CM;
   tags[1].centerY = KITCHEN_CENTER_Y_CM;
   tags[1].width = KITCHEN_SIZE_X_CM;
@@ -189,7 +185,6 @@ void setup()
   tags[2].tagIndex = TAG_KITCHEN_DOOR;
   tags[2].tagType = eTagTypeEnterExit;
   tags[2].scopeType = eTagRangeRectangle;
-  tags[2].ioIndex = 0;
   tags[2].centerX = DOOR_CENTER_X_CM;
   tags[2].centerY = DOOR_CENTER_Y_CM;
   tags[2].width = DOOR_SIZE_X_CM;
@@ -222,7 +217,6 @@ void setup()
   Serial.println(F("============================================================"));
   Serial.println(F("Kitchen occupancy inference started."));
   Serial.println(F("Direction: kitchen-door Enter/Exit tag event."));
-  Serial.println(F("Tag events do not include IO index; use tag index and event value."));
   Serial.println(F("Kitchen people count increments on Enter and decrements on Exit."));
   Serial.println(F("Living-room count is printed only and does not affect kitchen state."));
   Serial.println(F("Kitchen tag is configured for range/tag testing only."));
