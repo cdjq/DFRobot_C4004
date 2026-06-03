@@ -306,7 +306,6 @@ pip3 install pyserial
    * @param mode: Data acquisition mode.
    * @n          eGetDataActive: Query latest tag configuration before reading.
    * @n          eGetDataReport: Read tag configuration from cached data.
-   * @n          ioIndex in each tag: 0 means unused; 2-6 maps to IO2-IO6.
    * @return uint8_t: Number of tags read.
   */
   uint8_t getTags(sTagConfig_t *tags, uint8_t maxTags, eGetDataMode_t mode = eGetDataActive);
@@ -366,7 +365,7 @@ pip3 install pyserial
    * @param tagInfo: Pointer to receive reported tag event information.
    * @return true: Get succeeded, false: No valid reported tag event or invalid parameter.
    * @note This API reads report cache only. Call getReportedInfo() first to receive new report data.
-   * @note Tag event reports do not include ioIndex. Query tag configuration with getTags() when IO linkage is needed.
+   * @note Tag event reports do not include ioIndex.
   */
   bool getTagInfo(sTagInfo_t *tagInfo);
 

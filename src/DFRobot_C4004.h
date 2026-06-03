@@ -295,7 +295,7 @@ typedef struct {
   uint8_t tagIndex;
   eTagType_t tagType;
   eTagRangeType_t scopeType;
-  uint8_t ioIndex;       // 0: unused; 2-6: IO2-IO6 linkage
+  uint8_t ioIndex;       // Used by tag-setting APIs only; parsed tag data keeps this field 0.
   int16_t centerX;
   int16_t centerY;
   uint16_t width;
@@ -305,7 +305,7 @@ typedef struct {
 /**
  * @struct sTagInfo_t
  * @brief Last tag event decoded from an active report.
- * @note Tag event reports do not include ioIndex; IO linkage belongs to tag configuration.
+ * @note Tag event reports do not include ioIndex.
  */
 typedef struct {
   uint8_t tagIndex;
@@ -611,7 +611,6 @@ public:
    * @param mode: Data acquisition mode.
    * @n          eGetDataActive: Query latest tag configuration before reading.
    * @n          eGetDataReport: Read tag configuration from cached data.
-   * @n          ioIndex in each tag: 0 means unused; 2-6 maps to IO2-IO6.
    * @return uint8_t: Number of tags read.
   */
   uint8_t getTags(sTagConfig_t *tags, uint8_t maxTags, eGetDataMode_t mode = eGetDataActive);
@@ -671,7 +670,7 @@ public:
    * @param tagInfo: Pointer to receive reported tag event information.
    * @return true: Get succeeded, false: No valid reported tag event or invalid parameter.
    * @note This API reads report cache only. Call getReportedInfo() to receive new report data first.
-   * @note Tag event reports do not include ioIndex. Query tag configuration with getTags() when IO linkage is needed.
+   * @note Tag event reports do not include ioIndex.
   */
   bool getTagInfo(sTagInfo_t *tagInfo);
 

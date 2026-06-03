@@ -306,7 +306,6 @@ pip3 install pyserial
    * @param mode: 数据获取模式。
    * @n          eGetDataActive: 读取前主动查询最新标签配置。
    * @n          eGetDataReport: 从缓存数据中读取标签配置。
-   * @n          每个标签中的 ioIndex: IO 联动索引，0 表示不使用，2-6 表示绑定 IO2-IO6。
    * @return uint8_t: 读取到的标签数量。
    */
   uint8_t getTags(sTagConfig_t *tags, uint8_t maxTags, eGetDataMode_t mode = eGetDataActive);
@@ -365,7 +364,7 @@ pip3 install pyserial
    * @brief 获取从主动上报包（CTRL 0x07, CMD 0x1B）解码的最新标签事件。
    * @param tagInfo: 接收上报标签事件信息的指针。
    * @return true: 获取成功，false: 无有效上报标签事件或参数无效。
-   * @note 标签事件上报不包含 ioIndex；如需 IO 联动索引，请通过 getTags() 查询标签配置。
+   * @note 标签事件上报不包含 ioIndex。
    * @note 此 API 仅读取上报缓存。请先调用 getReportedInfo() 接收新的上报数据。
    */
   bool getTagInfo(sTagInfo_t *tagInfo);
