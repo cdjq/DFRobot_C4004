@@ -45,7 +45,7 @@ const uint16_t KITCHEN_SIZE_Y_CM = 400;
 const int16_t DOOR_CENTER_X_CM = 0;
 const int16_t DOOR_CENTER_Y_CM = 400;
 const uint16_t DOOR_SIZE_X_CM = 100;
-const uint16_t DOOR_SIZE_Y_CM = 50;
+const uint16_t DOOR_SIZE_Y_CM = 100;
 
 uint8_t livingMotionCount = 0;
 uint8_t livingStaticCount = 0;
