@@ -108,20 +108,14 @@ void setup()
 
   sFourSidedRange range;
   range.mode = eRangeFourSide;
-  range.xPositiveCm = 200;
-  range.xNegativeCm = -200;
-  range.yPositiveCm = 700;
+  range.xPositiveCm = 500;
+  range.xNegativeCm = -500;
+  range.yPositiveCm = 800;
   range.yNegativeCm = 0;
   if (c4004.setFourSidedRangeMode(range)) {
     Serial.println("Set boundary detection range success.");
   } else {
     Serial.println("Set boundary detection range failed.");
-  }
-
-  if (c4004.setTrajectoryTrackEnable(true)) {
-    Serial.println("Set trajectory track enable success.");
-  } else {
-    Serial.println("Set trajectory track enable failed.");
   }
 
   if (c4004.setTrajectoryLed(true)) {
@@ -135,6 +129,13 @@ void setup()
   } else {
     Serial.println("Set motion LED failed.");
   }
+
+  if (c4004.setTrajectoryTrackEnable(true)) {
+    Serial.println("Set trajectory track enable success.");
+  } else {
+    Serial.println("Set trajectory track enable failed.");
+  }
+
 }
 
 void loop()
