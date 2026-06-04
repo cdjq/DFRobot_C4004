@@ -1334,32 +1334,24 @@ void DFRobot_C4004::parseTagList(const uint8_t *data, uint16_t len)
 
 void DFRobot_C4004::parseTagEvent(const uint8_t *data, uint16_t len)
 {
-  eTagType_t cachedType = (eTagType_t)0xFF;
-
-  if (data == NULL || len < 6) {
+  if (data == NULL || len < 8) {
     _tagInfoValid = false;
     return;
   }
 
-  for (uint8_t i = 0; i < _tagCount; i++) {
-    if (_tags[i].tagIndex == data[0]) {
-      cachedType = _tags[i].tagType;
-      break;
-    }
-  }
-
   memset(&_tagInfo, 0, sizeof(_tagInfo));
   _tagInfo.tagIndex = data[0];
-  _tagInfo.tagType = cachedType;
-  _tagInfo.centerX = readSignBitInt16(&data[1]);
-  _tagInfo.centerY = readSignBitInt16(&data[3]);
+  _tagInfo.tagType = (eTagType_t)data[1];
+  _tagInfo.ioIndex = data[2];
+  _tagInfo.centerX = readSignBitInt16(&data[3]);
+  _tagInfo.centerY = readSignBitInt16(&data[5]);
   if (_tagInfo.tagType == eTagTypeEnterExit) {
-    _tagInfo.enterExit = data[5];
+    _tagInfo.enterExit = data[7];
   } else if (_tagInfo.tagType == eTagTypeApproachAway) {
-    _tagInfo.motionDir = data[5];
+    _tagInfo.motionDir = data[7];
   } else if (_tagInfo.tagType == eTagTypePeopleCounting) {
-    _tagInfo.motionNum = (data[5] >> 4) & 0x0F;
-    _tagInfo.staticNum = data[5] & 0x0F;
+    _tagInfo.motionNum = (data[7] >> 4) & 0x0F;
+    _tagInfo.staticNum = data[7] & 0x0F;
   }
   _tagInfoValid = true;
 }

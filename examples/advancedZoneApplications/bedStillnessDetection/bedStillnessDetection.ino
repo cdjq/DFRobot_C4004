@@ -140,7 +140,7 @@ void updatePeopleCountsFromTagReport()
     eReportedEvent_t event = c4004.getReportedInfo(5);
     if (event == eEventTag) {
       sTagInfo_t tagInfo;
-      if (c4004.getTagInfo(&tagInfo)) {
+      if (c4004.getTagInfo(&tagInfo) && tagInfo.tagType == eTagTypePeopleCounting) {
         if (tagInfo.tagIndex == BED_TAG_INDEX) {
           bedMotionCount = tagInfo.motionNum;
           bedStaticCount = tagInfo.staticNum;

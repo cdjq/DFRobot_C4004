@@ -88,6 +88,7 @@ void initTagCacheFromConfig(const sTagConfig_t *tags, uint8_t count)
     }
     tagCache[index].tagIndex = tags[i].tagIndex;
     tagCache[index].tagType = tags[i].tagType;
+    tagCache[index].ioIndex = tags[i].ioIndex;
     tagCache[index].centerX = tags[i].centerX;
     tagCache[index].centerY = tags[i].centerY;
     if (index == TAG_HOME_DOOR || index == TAG_KITCHEN_DOOR) {
@@ -266,6 +267,8 @@ void loop()
     sTagInfo_t tagInfo;
     if (c4004.getTagInfo(&tagInfo) && tagInfo.tagIndex < TAG_TOTAL) {
       tagCache[tagInfo.tagIndex].tagIndex = tagInfo.tagIndex;
+      tagCache[tagInfo.tagIndex].tagType = tagInfo.tagType;
+      tagCache[tagInfo.tagIndex].ioIndex = tagInfo.ioIndex;
       tagCache[tagInfo.tagIndex].centerX = tagInfo.centerX;
       tagCache[tagInfo.tagIndex].centerY = tagInfo.centerY;
       tagCache[tagInfo.tagIndex].enterExit = tagInfo.enterExit;
@@ -332,7 +335,7 @@ void loop()
     lastPrintMs = nowMs;
     Serial.println(F("==================================================================="));
     Serial.println(F("Tag Cache Table"));
-    Serial.println(F("Idx\tName\t\tType\t\tCenterX\tCenterY\tMotion\tStatic\tDir\tEnterExit"));
+    Serial.println(F("Idx\tName\t\tType\t\tIO\tCenterX\tCenterY\tMotion\tStatic\tDir\tEnterExit"));
     for (uint8_t i = 0; i < TAG_TOTAL; i++) {
       Serial.print(i);
       Serial.print(F("\t"));
@@ -347,6 +350,8 @@ void loop()
       if (strlen(typeText) < 8) {
         Serial.print(F("\t"));
       }
+      Serial.print(F("\t"));
+      Serial.print(tagCache[i].ioIndex);
       Serial.print(F("\t"));
       Serial.print(tagCache[i].centerX);
       Serial.print(F("\t"));

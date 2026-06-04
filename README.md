@@ -366,7 +366,7 @@ pip3 install pyserial
    * @param tagInfo: Pointer to receive reported tag event information.
    * @return true: Get succeeded, false: No valid reported tag event or invalid parameter.
    * @note This API reads report cache only. Call getReportedInfo() first to receive new report data.
-   * @note Tag event reports do not include ioIndex.
+   * @note Tag event reports include ioIndex.
   */
   bool getTagInfo(sTagInfo_t *tagInfo);
 

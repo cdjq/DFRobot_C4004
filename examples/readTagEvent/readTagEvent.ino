@@ -50,6 +50,8 @@ void printTagEvent(const sTagInfo_t &info)
   Serial.println(line);
   snprintf(line, sizeof(line), "Tag Type  : %s", tagTypeToString(info.tagType));
   Serial.println(line);
+  snprintf(line, sizeof(line), "IO Index  : %u", info.ioIndex);
+  Serial.println(line);
   snprintf(line, sizeof(line), "Center XY : %d / %d", info.centerX, info.centerY);
   Serial.println(line);
 

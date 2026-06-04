@@ -108,9 +108,9 @@ void processTagEvent()
     return;
   }
 
-  if (tagInfo.tagIndex == TAG_LIVING_ROOM) {
+  if (tagInfo.tagIndex == TAG_LIVING_ROOM && tagInfo.tagType == eTagTypePeopleCounting) {
     processLivingRoomTag(tagInfo);
-  } else if (tagInfo.tagIndex == TAG_KITCHEN_DOOR) {
+  } else if (tagInfo.tagIndex == TAG_KITCHEN_DOOR && tagInfo.tagType == eTagTypeEnterExit) {
     processKitchenDoorTag(tagInfo);
   }
 }
