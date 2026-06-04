@@ -21,6 +21,9 @@ DFRobot_C4004 c4004(&Serial1, 115200);
 #endif
 
 const int16_t TARGET_Y_DISABLE_CM = 200;
+static const uint8_t SINGLE_PERSON_CONFIRM_TIMES = 5;
+static const uint16_t PEOPLE_QUERY_INTERVAL_MS = 1000;
+
 bool trajectoryDisabled = false;
 
 const char *targetFeatureToString(eTargetFeature_t feature)
@@ -91,6 +94,37 @@ void disableTrajectoryAndLeds(void)
   }
 }
 
+void waitForSinglePersonInRange(void)
+{
+  uint8_t confirmCount = 0;
+
+  Serial.println("Waiting until active people count is 1 for 5 times.");
+  while (confirmCount < SINGLE_PERSON_CONFIRM_TIMES) {
+    uint32_t startTime = millis();
+    uint8_t peopleCount = c4004.getPeopleTime(eGetDataActive);
+
+    Serial.print("Active people count: ");
+    Serial.print(peopleCount);
+
+    if (peopleCount == 1) {
+      confirmCount++;
+    } else {
+      confirmCount = 0;
+    }
+
+    Serial.print("  confirm: ");
+    Serial.print(confirmCount);
+    Serial.print("/");
+    Serial.println(SINGLE_PERSON_CONFIRM_TIMES);
+
+    while ((uint32_t)(millis() - startTime) < PEOPLE_QUERY_INTERVAL_MS) {
+      c4004.getReportedInfo(10);
+    }
+  }
+
+  Serial.println("Single-person condition confirmed.");
+}
+
 void setup()
 {
   Serial.begin(115200);
@@ -129,6 +163,8 @@ void setup()
   } else {
     Serial.println("Set motion LED failed.");
   }
+
+  waitForSinglePersonInRange();
 
   if (c4004.setTrajectoryTrackEnable(true)) {
     Serial.println("Set trajectory track enable success.");
