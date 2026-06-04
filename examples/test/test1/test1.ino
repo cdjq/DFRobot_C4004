@@ -94,19 +94,20 @@ void disableTrajectoryAndLeds(void)
   }
 }
 
-void waitForSinglePersonInRange(void)
+void waitForSingleTarget(void)
 {
   uint8_t confirmCount = 0;
 
-  Serial.println("Waiting until active people count is 1 for 5 times.");
+  Serial.println("Waiting until active target count is 1 for 5 times.");
   while (confirmCount < SINGLE_PERSON_CONFIRM_TIMES) {
     uint32_t startTime = millis();
-    uint8_t peopleCount = c4004.getPeopleTime(eGetDataActive);
+    sTargetInfo_t targets[MAX_TARGETS];
+    uint8_t targetCount = c4004.getTargetList(targets, MAX_TARGETS, eGetDataActive);
 
-    Serial.print("Active people count: ");
-    Serial.print(peopleCount);
+    Serial.print("Active target count: ");
+    Serial.print(targetCount);
 
-    if (peopleCount == 1) {
+    if (targetCount == 1) {
       confirmCount++;
     } else {
       confirmCount = 0;
@@ -122,7 +123,7 @@ void waitForSinglePersonInRange(void)
     }
   }
 
-  Serial.println("Single-person condition confirmed.");
+  Serial.println("Single-target condition confirmed.");
 }
 
 void setup()
@@ -164,7 +165,7 @@ void setup()
     Serial.println("Set motion LED failed.");
   }
 
-  waitForSinglePersonInRange();
+  waitForSingleTarget();
 
   if (c4004.setTrajectoryTrackEnable(true)) {
     Serial.println("Set trajectory track enable success.");
