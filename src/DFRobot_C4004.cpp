@@ -589,16 +589,21 @@ bool DFRobot_C4004::clearAllTags(void)
 
 bool DFRobot_C4004::setTagsFromConfig(const sTagConfig_t *tags, uint8_t tagCount)
 {
+  const uint8_t tagLen = 12;
   uint8_t data[MAX_PAYLOAD];
   uint16_t offset = 0;
+  uint16_t expectedLen = 0;
   sPacket_t packet;
-  bool ret = false;
 
   if (tags == NULL && tagCount > 0) {
     return false;
   }
   if (tagCount > MAX_TAGS) {
-    tagCount = MAX_TAGS;
+    return false;
+  }
+  expectedLen = 2 + (uint16_t)tagCount * tagLen;
+  if (expectedLen > MAX_PAYLOAD) {
+    return false;
   }
 
   writeUint16(&data[offset], tagCount);
@@ -617,14 +622,18 @@ bool DFRobot_C4004::setTagsFromConfig(const sTagConfig_t *tags, uint8_t tagCount
     writeUint16(&data[offset], tags[i].height);
     offset += 2;
   }
-  ret = requestFrame(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_SET_TAGS_FROM_CONFIG, data, offset, &packet);
-  if (ret && packet.len < 2) {
-    _tagCount = tagCount;
-    for (uint8_t i = 0; i < _tagCount; i++) {
-      _tags[i] = tags[i];
-    }
+  if (!requestFrame(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_SET_TAGS_FROM_CONFIG, data, offset, &packet)) {
+    return false;
   }
-  return ret;
+  if (packet.len != expectedLen) {
+    return false;
+  }
+  if (readUint16(packet.data) != tagCount) {
+    return false;
+  }
+
+  parseTagList(packet.data, packet.len);
+  return (_tagCount == tagCount);
 }
 
 bool DFRobot_C4004::setFourSidedRangeMode(sFourSidedRange &range)
@@ -1162,8 +1171,6 @@ eReportedEvent_t DFRobot_C4004::handlePacket(const sPacket_t *packet)
   } else if (packet->control == CTRL_TRAJECTORY && packet->cmd == CMD_TRAJECTORY_QUERY_MOTION_LED && packet->len > 0) {
     _motionLed = packet->data[0];
   } else if (packet->control == CTRL_DETECTION_RANGE && packet->cmd == CMD_DETECTION_RANGE_QUERY_TAGS) {
-    parseTagList(packet->data, packet->len);
-  } else if (packet->control == CTRL_DETECTION_RANGE && packet->cmd == CMD_DETECTION_RANGE_SET_TAGS_FROM_CONFIG && packet->len >= 2) {
     parseTagList(packet->data, packet->len);
   } else if (packet->control == CTRL_DETECTION_RANGE && packet->cmd == CMD_DETECTION_RANGE_TAG_REPORT) {
     parseTagEvent(packet->data, packet->len);
