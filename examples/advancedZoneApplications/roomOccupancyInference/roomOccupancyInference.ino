@@ -2,8 +2,9 @@
  * @file roomOccupancyInference.ino
  * @brief Infer kitchen occupancy from kitchen-door enter/exit tag events.
  * @details This example configures living-room, kitchen, and kitchen-door tags.
- * @n The kitchen-door tag is EnterExit. Enter events increment the kitchen
- * @n people count, and exit events decrement it.
+ * @n The kitchen-door tag is EnterExit relative to the living-room range.
+ * @n Enter-living-room events decrement the kitchen people count, and
+ * @n exit-living-room events increment it.
  * @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
  * @license The MIT License (MIT)
  * @author JiaLi(zhixin.liu@dfrobot.com)
@@ -59,10 +60,10 @@ const char *lastDoorEvent = "None";
 const char *doorEventToText(uint8_t enterExit)
 {
   if (enterExit == 0) {
-    return "Enter";
+    return "Enter living room";
   }
   if (enterExit == 1) {
-    return "Exit";
+    return "Exit living room";
   }
   return "Unknown";
 }
@@ -78,14 +79,14 @@ void processKitchenDoorTag(const sTagInfo_t &tagInfo)
 {
   if (tagInfo.enterExit == 0) {
     kitchenDoorEnterCount++;
-    kitchenInferredPeople++;
-    lastDoorEvent = "Enter";
-  } else if (tagInfo.enterExit == 1) {
-    kitchenDoorExitCount++;
     if (kitchenInferredPeople > 0) {
       kitchenInferredPeople--;
     }
-    lastDoorEvent = "Exit";
+    lastDoorEvent = "Enter living room";
+  } else if (tagInfo.enterExit == 1) {
+    kitchenDoorExitCount++;
+    kitchenInferredPeople++;
+    lastDoorEvent = "Exit living room";
   } else {
     lastDoorEvent = "Unknown";
   }
@@ -219,8 +220,8 @@ void setup()
 
   Serial.println(F("============================================================"));
   Serial.println(F("Kitchen occupancy inference started."));
-  Serial.println(F("Direction: kitchen-door Enter/Exit tag event."));
-  Serial.println(F("Kitchen people count increments on Enter and decrements on Exit."));
+  Serial.println(F("Direction: kitchen-door Enter/Exit tag event relative to living room."));
+  Serial.println(F("Kitchen people count decrements on Enter living room and increments on Exit living room."));
   Serial.println(F("Living-room count is printed only and does not affect kitchen state."));
   Serial.println(F("Kitchen tag is configured for range/tag testing only."));
   Serial.println(F("============================================================"));
