@@ -151,7 +151,7 @@ void setup()
   range.mode = eRangeFourSide;
   range.xPositiveCm = 200;
   range.xNegativeCm = -200;
-  range.yPositiveCm = 700;
+  range.yPositiveCm = 400;
   range.yNegativeCm = 0;
   if (c4004.setFourSidedRangeMode(range)) {
     Serial.println(F("Set boundary detection range success."));
