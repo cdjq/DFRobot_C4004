@@ -141,6 +141,13 @@ void setup()
   Serial.print("Current firmware version: ");
   Serial.println(c4004.getFirmwareVersion());
 
+  if (c4004.setCheckToActiveFrames(7)) {
+    Serial.println("Set check-to-active frames success.");
+  } else {
+    Serial.println("Set check-to-active frames failed.");
+  }
+  delay(50);
+
   sFourSidedRange range;
   range.mode = eRangeFourSide;
   range.xPositiveCm = 500;
@@ -167,7 +174,7 @@ void setup()
 
   waitForSingleTarget();
 
-  if (c4004.setTrajectoryTrackEnable(true)) {
+  if (c4004.setTrajectoryRangeMode(true)) {
     Serial.println("Set trajectory track enable success.");
   } else {
     Serial.println("Set trajectory track enable failed.");
