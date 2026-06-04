@@ -189,11 +189,11 @@ typedef enum {
  * @brief Tag property type.
  */
 typedef enum {
-  eTagTypeNone            = 0x00,
-  eTagTypeEnterExit       = 0x01,  ///> Enter or exit mode
-  eTagTypeApproachAway    = 0x02,  ///> Near and far mode
-  eTagTypePeopleCounting  = 0x03,  ///> Moving, stationary, people counting
-  eTagTypeNoise           = 0x04   ///> Noise
+  eTagNone                = 0x00,
+  eTagBoundary            = 0x01,  ///> Boundary mode
+  eTagApproachAway        = 0x02,  ///> Near and far mode
+  eTagPeopleCounting      = 0x03,  ///> Moving, stationary, people counting
+  eTagNoise               = 0x04   ///> Noise
 } eTagType_t;
 
 /**

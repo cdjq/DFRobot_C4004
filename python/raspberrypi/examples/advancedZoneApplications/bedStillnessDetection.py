@@ -81,6 +81,12 @@ def setup_sensor_and_tags():
     time.sleep(1)
   print('DFRobot C4004 begin success.')
 
+  if c4004.set_check_to_active_frames(7):
+    print('Set check-to-active frames success.')
+  else:
+    print('Set check-to-active frames failed.')
+  time.sleep(0.05)
+
   if c4004.set_presence_enable(True):
     print('Set presence enable success.')
   else:
@@ -106,6 +112,7 @@ def setup_sensor_and_tags():
   #   tag_index : Tag index. It must be unique for each tag.
   #   tag_type  : Tag function, such as PeopleCounting or ApproachAway.
   #   scope_type: Tag shape. Use TAG_RANGE_RECTANGLE or TAG_RANGE_CIRCLE.
+  #   io_index  : IO linkage index. 0 means unused; 2-6 maps to IO2-IO6.
   #   center_x  : Tag center X coordinate, in cm.
   #   center_y  : Tag center Y coordinate, in cm.
   #   width     : Rectangle width, or circle radius, in cm.
@@ -120,8 +127,9 @@ def setup_sensor_and_tags():
 
   bed = TagConfig()
   bed.tag_index = BED_TAG_INDEX
-  bed.tag_type = c4004.TAG_TYPE_PEOPLE_COUNTING
+  bed.tag_type = c4004.TAG_PEOPLE_COUNTING
   bed.scope_type = c4004.TAG_RANGE_RECTANGLE
+  bed.io_index = 0
   bed.center_x = -50
   bed.center_y = 300
   bed.width = 300
@@ -130,8 +138,9 @@ def setup_sensor_and_tags():
 
   bedroom = TagConfig()
   bedroom.tag_index = BEDROOM_TAG_INDEX
-  bedroom.tag_type = c4004.TAG_TYPE_PEOPLE_COUNTING
+  bedroom.tag_type = c4004.TAG_PEOPLE_COUNTING
   bedroom.scope_type = c4004.TAG_RANGE_RECTANGLE
+  bedroom.io_index = 0
   bedroom.center_x = 0
   bedroom.center_y = 350
   bedroom.width = 400
@@ -140,8 +149,9 @@ def setup_sensor_and_tags():
 
   door = TagConfig()
   door.tag_index = BEDROOM_DOOR_TAG_INDEX
-  door.tag_type = c4004.TAG_TYPE_APPROACH_AWAY
+  door.tag_type = c4004.TAG_APPROACH_AWAY
   door.scope_type = c4004.TAG_RANGE_RECTANGLE
+  door.io_index = 0
   door.center_x = 100
   door.center_y = 700
   door.width = 80
@@ -173,7 +183,7 @@ def update_people_counts_from_tag_report():
     if event != c4004.EVENT_TAG:
       continue
     info = c4004.get_tag_info()
-    if info is None or info.tag_type != c4004.TAG_TYPE_PEOPLE_COUNTING:
+    if info is None or info.tag_type != c4004.TAG_PEOPLE_COUNTING:
       continue
     if info.tag_index == BED_TAG_INDEX:
       bed_motion_count = info.motion_num

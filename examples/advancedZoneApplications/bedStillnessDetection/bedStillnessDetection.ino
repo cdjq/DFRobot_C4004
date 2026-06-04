@@ -93,7 +93,7 @@ void setup()
   sTagConfig_t setTags[3] = {};
 
   setTags[0].tagIndex = BED_TAG_INDEX;
-  setTags[0].tagType = eTagTypePeopleCounting;
+  setTags[0].tagType = eTagPeopleCounting;
   setTags[0].scopeType = eTagRangeRectangle;
   setTags[0].ioIndex = 0;
   setTags[0].centerX = -50;
@@ -102,7 +102,7 @@ void setup()
   setTags[0].height = 250;
 
   setTags[1].tagIndex = BEDROOM_TAG_INDEX;
-  setTags[1].tagType = eTagTypePeopleCounting;
+  setTags[1].tagType = eTagPeopleCounting;
   setTags[1].scopeType = eTagRangeRectangle;
   setTags[1].ioIndex = 0;
   setTags[1].centerX = 0;
@@ -111,7 +111,7 @@ void setup()
   setTags[1].height = 700;
 
   setTags[2].tagIndex = BEDROOM_DOOR_TAG_INDEX;
-  setTags[2].tagType = eTagTypeApproachAway;
+  setTags[2].tagType = eTagApproachAway;
   setTags[2].scopeType = eTagRangeRectangle;
   setTags[2].ioIndex = 0;
   setTags[2].centerX = 100;
@@ -140,7 +140,7 @@ void updatePeopleCountsFromTagReport()
     eReportedEvent_t event = c4004.getReportedInfo(5);
     if (event == eEventTag) {
       sTagInfo_t tagInfo;
-      if (c4004.getTagInfo(&tagInfo) && tagInfo.tagType == eTagTypePeopleCounting) {
+      if (c4004.getTagInfo(&tagInfo) && tagInfo.tagType == eTagPeopleCounting) {
         if (tagInfo.tagIndex == BED_TAG_INDEX) {
           bedMotionCount = tagInfo.motionNum;
           bedStaticCount = tagInfo.staticNum;

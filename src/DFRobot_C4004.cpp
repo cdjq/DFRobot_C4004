@@ -1352,11 +1352,11 @@ void DFRobot_C4004::parseTagEvent(const uint8_t *data, uint16_t len)
   _tagInfo.ioIndex = data[2];
   _tagInfo.centerX = readSignBitInt16(&data[3]);
   _tagInfo.centerY = readSignBitInt16(&data[5]);
-  if (_tagInfo.tagType == eTagTypeEnterExit) {
+  if (_tagInfo.tagType == eTagBoundary) {
     _tagInfo.enterExit = data[7];
-  } else if (_tagInfo.tagType == eTagTypeApproachAway) {
+  } else if (_tagInfo.tagType == eTagApproachAway) {
     _tagInfo.motionDir = data[7];
-  } else if (_tagInfo.tagType == eTagTypePeopleCounting) {
+  } else if (_tagInfo.tagType == eTagPeopleCounting) {
     _tagInfo.motionNum = (data[7] >> 4) & 0x0F;
     _tagInfo.staticNum = data[7] & 0x0F;
   }

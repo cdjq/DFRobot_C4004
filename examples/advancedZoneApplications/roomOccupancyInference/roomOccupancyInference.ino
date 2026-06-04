@@ -1,8 +1,8 @@
 /*!
  * @file roomOccupancyInference.ino
- * @brief Infer kitchen occupancy from kitchen-door enter/exit tag events.
+ * @brief Infer kitchen occupancy from kitchen-door boundary tag events.
  * @details This example configures living-room, kitchen, and kitchen-door tags.
- * @n The kitchen-door tag is EnterExit relative to the living-room range.
+ * @n The kitchen-door tag is Boundary relative to the living-room range.
  * @n Enter-living-room events decrement the kitchen people count, and
  * @n exit-living-room events increment it.
  * @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
@@ -109,9 +109,9 @@ void processTagEvent()
     return;
   }
 
-  if (tagInfo.tagIndex == TAG_LIVING_ROOM && tagInfo.tagType == eTagTypePeopleCounting) {
+  if (tagInfo.tagIndex == TAG_LIVING_ROOM && tagInfo.tagType == eTagPeopleCounting) {
     processLivingRoomTag(tagInfo);
-  } else if (tagInfo.tagIndex == TAG_KITCHEN_DOOR && tagInfo.tagType == eTagTypeEnterExit) {
+  } else if (tagInfo.tagIndex == TAG_KITCHEN_DOOR && tagInfo.tagType == eTagBoundary) {
     processKitchenDoorTag(tagInfo);
   }
 }
@@ -168,7 +168,7 @@ void setup()
   sTagConfig_t tags[3] = {};
 
   tags[0].tagIndex = TAG_LIVING_ROOM;
-  tags[0].tagType = eTagTypePeopleCounting;
+  tags[0].tagType = eTagPeopleCounting;
   tags[0].scopeType = eTagRangeRectangle;
   tags[0].ioIndex = 0;
   tags[0].centerX = LIVING_ROOM_CENTER_X_CM;
@@ -177,7 +177,7 @@ void setup()
   tags[0].height = LIVING_ROOM_SIZE_Y_CM;
 
   tags[1].tagIndex = TAG_KITCHEN;
-  tags[1].tagType = eTagTypePeopleCounting;
+  tags[1].tagType = eTagPeopleCounting;
   tags[1].scopeType = eTagRangeRectangle;
   tags[1].ioIndex = 0;
   tags[1].centerX = KITCHEN_CENTER_X_CM;
@@ -186,7 +186,7 @@ void setup()
   tags[1].height = KITCHEN_SIZE_Y_CM;
 
   tags[2].tagIndex = TAG_KITCHEN_DOOR;
-  tags[2].tagType = eTagTypeEnterExit;
+  tags[2].tagType = eTagBoundary;
   tags[2].scopeType = eTagRangeRectangle;
   tags[2].ioIndex = 0;
   tags[2].centerX = DOOR_CENTER_X_CM;
@@ -220,7 +220,7 @@ void setup()
 
   Serial.println(F("============================================================"));
   Serial.println(F("Kitchen occupancy inference started."));
-  Serial.println(F("Direction: kitchen-door Enter/Exit tag event relative to living room."));
+  Serial.println(F("Direction: kitchen-door Boundary tag event relative to living room."));
   Serial.println(F("Kitchen people count decrements on Enter living room and increments on Exit living room."));
   Serial.println(F("Living-room count is printed only and does not affect kitchen state."));
   Serial.println(F("Kitchen tag is configured for range/tag testing only."));

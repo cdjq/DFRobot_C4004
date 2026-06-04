@@ -59,15 +59,15 @@ uint32_t sofaEmptyStartMs = 0;
 
 const char *tagTypeToText(eTagType_t type)
 {
-  if (type == eTagTypeNone) {
+  if (type == eTagNone) {
     return "None";
-  } else if (type == eTagTypeEnterExit) {
-    return "EnterExit";
-  } else if (type == eTagTypeApproachAway) {
+  } else if (type == eTagBoundary) {
+    return "Boundary";
+  } else if (type == eTagApproachAway) {
     return "ApproachAway";
-  } else if (type == eTagTypePeopleCounting) {
+  } else if (type == eTagPeopleCounting) {
     return "PeopleCount";
-  } else if (type == eTagTypeNoise) {
+  } else if (type == eTagNoise) {
     return "Noise";
   }
   return "Unknown";
@@ -78,7 +78,7 @@ void initTagCacheFromConfig(const sTagConfig_t *tags, uint8_t count)
   for (uint8_t i = 0; i < TAG_TOTAL; i++) {
     memset(&tagCache[i], 0, sizeof(sTagInfo_t));
     tagCache[i].tagIndex = i;
-    tagCache[i].tagType = eTagTypeNone;
+    tagCache[i].tagType = eTagNone;
   }
 
   for (uint8_t i = 0; i < count; i++) {
@@ -177,7 +177,7 @@ void setup()
   }
 
   tags[0].tagIndex = TAG_GAME;
-  tags[0].tagType = eTagTypePeopleCounting;
+  tags[0].tagType = eTagPeopleCounting;
   tags[0].scopeType = eTagRangeCircle;
   tags[0].ioIndex = 0;
   tags[0].centerX = -100;
@@ -186,7 +186,7 @@ void setup()
   tags[0].height = 0;
 
   tags[1].tagIndex = TAG_SOFA;
-  tags[1].tagType = eTagTypePeopleCounting;
+  tags[1].tagType = eTagPeopleCounting;
   tags[1].scopeType = eTagRangeRectangle;
   tags[1].ioIndex = 0;
   tags[1].centerX = 100;
@@ -195,7 +195,7 @@ void setup()
   tags[1].height = 300;
 
   tags[2].tagIndex = TAG_HOME_DOOR;
-  tags[2].tagType = eTagTypeApproachAway;
+  tags[2].tagType = eTagApproachAway;
   tags[2].scopeType = eTagRangeRectangle;
   tags[2].ioIndex = 0;
   tags[2].centerX = 100;
@@ -204,7 +204,7 @@ void setup()
   tags[2].height = 40;
 
   tags[3].tagIndex = TAG_KITCHEN_DOOR;
-  tags[3].tagType = eTagTypeApproachAway;
+  tags[3].tagType = eTagApproachAway;
   tags[3].scopeType = eTagRangeRectangle;
   tags[3].ioIndex = 0;
   tags[3].centerX = -100;
@@ -213,7 +213,7 @@ void setup()
   tags[3].height = 40;
 
   tags[4].tagIndex = TAG_DINING;
-  tags[4].tagType = eTagTypePeopleCounting;
+  tags[4].tagType = eTagPeopleCounting;
   tags[4].scopeType = eTagRangeRectangle;
   tags[4].ioIndex = 0;
   tags[4].centerX = 50;
@@ -222,7 +222,7 @@ void setup()
   tags[4].height = 150;
 
   tags[5].tagIndex = TAG_CURTAIN;
-  tags[5].tagType = eTagTypeNoise;
+  tags[5].tagType = eTagNoise;
   tags[5].scopeType = eTagRangeRectangle;
   tags[5].ioIndex = 0;
   tags[5].centerX = -150;
@@ -231,7 +231,7 @@ void setup()
   tags[5].height = 300;
 
   tags[6].tagIndex = TAG_PLANT;
-  tags[6].tagType = eTagTypeNoise;
+  tags[6].tagType = eTagNoise;
   tags[6].scopeType = eTagRangeCircle;
   tags[6].ioIndex = 0;
   tags[6].centerX = -50;
@@ -335,7 +335,7 @@ void loop()
     lastPrintMs = nowMs;
     Serial.println(F("==================================================================="));
     Serial.println(F("Tag Cache Table"));
-    Serial.println(F("Idx\tName\t\tType\t\tIO\tCenterX\tCenterY\tMotion\tStatic\tDir\tEnterExit"));
+    Serial.println(F("Idx\tName\t\tType\t\tIO\tCenterX\tCenterY\tMotion\tStatic\tDir\tBoundary"));
     for (uint8_t i = 0; i < TAG_TOTAL; i++) {
       Serial.print(i);
       Serial.print(F("\t"));
@@ -358,28 +358,28 @@ void loop()
       Serial.print(tagCache[i].centerY);
       Serial.print(F("\t"));
 
-      if (tagCache[i].tagType == eTagTypePeopleCounting) {
+      if (tagCache[i].tagType == eTagPeopleCounting) {
         Serial.print(tagCache[i].motionNum);
       } else {
         Serial.print(0);
       }
       Serial.print(F("\t"));
 
-      if (tagCache[i].tagType == eTagTypePeopleCounting) {
+      if (tagCache[i].tagType == eTagPeopleCounting) {
         Serial.print(tagCache[i].staticNum);
       } else {
         Serial.print(0);
       }
       Serial.print(F("\t"));
 
-      if (tagCache[i].tagType == eTagTypeApproachAway) {
+      if (tagCache[i].tagType == eTagApproachAway) {
         Serial.print(tagCache[i].motionDir);
       } else {
         Serial.print(F("-"));
       }
       Serial.print(F("\t"));
 
-      if (tagCache[i].tagType == eTagTypeEnterExit) {
+      if (tagCache[i].tagType == eTagBoundary) {
         Serial.println(tagCache[i].enterExit);
       } else {
         Serial.println(F("-"));

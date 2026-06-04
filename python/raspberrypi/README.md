@@ -176,6 +176,20 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
       @return True or False
     '''
 
+  def set_check_to_active_frames(self, frames):
+    '''!
+      @brief Set the frame count used to confirm transition from check state to active state.
+      @param frames: frame count, valid range 1-7
+      @return True or False
+    '''
+
+  def get_check_to_active_frames(self, frames):
+    '''!
+      @brief Get the frame count used to confirm transition from check state to active state.
+      @param frames: output container (list/dict/object.value)
+      @return True or False
+    '''
+
   def get_target_list(self, mode=GET_DATA_ACTIVE):
     '''!
       @brief Get target list.
@@ -238,6 +252,7 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
     '''!
       @brief Set one tag (size mode).
       @param tag: TagConfig object
+      @n   tag.io_index: IO linkage index. 0 means unused; 2-6 maps to IO2-IO6.
       @return tag set status code
       @n   TAG_SET_COMM_ERROR
       @n   TAG_SET_SUCCESS
@@ -263,6 +278,7 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
     '''!
       @brief Set tags in coordinate mode.
       @param tags: iterable of TagConfig
+      @n   tag.io_index in each tag: IO linkage index. 0 means unused; 2-6 maps to IO2-IO6.
       @return True or False
     '''
 
@@ -270,6 +286,7 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
     '''!
       @brief Get last tag event decoded from report cache.
       @return TagInfo object, or None if no valid event.
+      @note Tag event reports include info.io_index.
     '''
 
   def set_four_sided_range_mode(self, range_info):

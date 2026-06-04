@@ -24,15 +24,15 @@ c4004 = DFRobot_C4004('/dev/ttyAMA0', 115200)
 
 
 def tag_type_to_string(tag_type):
-  if tag_type == c4004.TAG_TYPE_NONE:
+  if tag_type == c4004.TAG_NONE:
     return 'None'
-  if tag_type == c4004.TAG_TYPE_ENTER_EXIT:
-    return 'EnterExit'
-  if tag_type == c4004.TAG_TYPE_APPROACH_AWAY:
+  if tag_type == c4004.TAG_BOUNDARY:
+    return 'Boundary'
+  if tag_type == c4004.TAG_APPROACH_AWAY:
     return 'ApproachAway'
-  if tag_type == c4004.TAG_TYPE_PEOPLE_COUNTING:
+  if tag_type == c4004.TAG_PEOPLE_COUNTING:
     return 'PeopleCounting'
-  if tag_type == c4004.TAG_TYPE_NOISE:
+  if tag_type == c4004.TAG_NOISE:
     return 'Noise'
   return 'Unknown'
 
@@ -45,13 +45,15 @@ def print_tag_event(info):
   print('============================TagEventReport============================')
   print('======================================================================')
   print('Tag Index : %d' % info.tag_index)
+  print('Tag Type  : %s' % tag_type_to_string(info.tag_type))
+  print('IO Index  : %d' % info.io_index)
   print('Center XY : %d / %d' % (info.center_x, info.center_y))
 
-  if info.tag_type == c4004.TAG_TYPE_ENTER_EXIT:
-    print('Event     : EnterExit (%s)' % ('Enter' if info.enter_exit == 0 else 'Exit'))
-  elif info.tag_type == c4004.TAG_TYPE_APPROACH_AWAY:
+  if info.tag_type == c4004.TAG_BOUNDARY:
+    print('Event     : Boundary (%s)' % ('Enter' if info.enter_exit == 0 else 'Exit'))
+  elif info.tag_type == c4004.TAG_APPROACH_AWAY:
     print('Event     : MotionDirection (%s)' % ('Approach' if info.motion_dir == 0 else 'Away'))
-  elif info.tag_type == c4004.TAG_TYPE_PEOPLE_COUNTING:
+  elif info.tag_type == c4004.TAG_PEOPLE_COUNTING:
     print('Event     : PeopleCounting (M:%d S:%d)' % (info.motion_num, info.static_num))
   else:
     print('Event     : %s' % tag_type_to_string(info.tag_type))
@@ -68,7 +70,7 @@ def print_tag_list(title, tags):
     print('')
     return
 
-  print('Idx\tType\t\tRange\t\tCenterX\tCenterY\tWidth\tHeight')
+  print('Idx\tType\t\tRange\t\tIO\tCenterX\tCenterY\tWidth\tHeight')
   print('----------------------------------------------------------------------')
   for tag in tags:
     type_text = tag_type_to_string(tag.tag_type)
@@ -86,7 +88,12 @@ def print_tag_list(title, tags):
     else:
       line += '\t'
 
-    line += '%d\t%d\t%d\t%d' % (tag.center_x, tag.center_y, tag.width, tag.height)
+    line += '%d\t%d\t%d\t%d\t%d' % (
+      tag.io_index,
+      tag.center_x,
+      tag.center_y,
+      tag.width,
+      tag.height)
     print(line)
   print('')
 
@@ -95,6 +102,12 @@ def main():
   while not c4004.begin():
     print('DFRobot C4004 begin failed, retrying...')
     time.sleep(1)
+
+  if c4004.set_check_to_active_frames(7):
+    print('Set check-to-active frames success.')
+  else:
+    print('Set check-to-active frames failed.')
+  time.sleep(0.05)
 
   range_info = FourSidedRange()
   range_info.mode = c4004.RANGE_FOUR_SIDE
@@ -116,8 +129,9 @@ def main():
 
   tag0 = TagConfig()
   tag0.tag_index = 0
-  tag0.tag_type = c4004.TAG_TYPE_NONE
+  tag0.tag_type = c4004.TAG_NONE
   tag0.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag0.io_index = 0
   tag0.center_x = 0
   tag0.center_y = 100
   tag0.width = 120
@@ -126,8 +140,9 @@ def main():
 
   tag1 = TagConfig()
   tag1.tag_index = 1
-  tag1.tag_type = c4004.TAG_TYPE_ENTER_EXIT
+  tag1.tag_type = c4004.TAG_BOUNDARY
   tag1.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag1.io_index = 0
   tag1.center_x = 100
   tag1.center_y = 220
   tag1.width = 120
@@ -136,8 +151,9 @@ def main():
 
   tag2 = TagConfig()
   tag2.tag_index = 2
-  tag2.tag_type = c4004.TAG_TYPE_APPROACH_AWAY
+  tag2.tag_type = c4004.TAG_APPROACH_AWAY
   tag2.scope_type = c4004.TAG_RANGE_CIRCLE
+  tag2.io_index = 0
   tag2.center_x = -80
   tag2.center_y = 350
   tag2.width = 80
@@ -146,8 +162,9 @@ def main():
 
   tag3 = TagConfig()
   tag3.tag_index = 3
-  tag3.tag_type = c4004.TAG_TYPE_PEOPLE_COUNTING
+  tag3.tag_type = c4004.TAG_PEOPLE_COUNTING
   tag3.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag3.io_index = 0
   tag3.center_x = 0
   tag3.center_y = 500
   tag3.width = 160
@@ -156,8 +173,9 @@ def main():
 
   tag4 = TagConfig()
   tag4.tag_index = 4
-  tag4.tag_type = c4004.TAG_TYPE_NOISE
+  tag4.tag_type = c4004.TAG_NOISE
   tag4.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag4.io_index = 0
   tag4.center_x = -100
   tag4.center_y = 620
   tag4.width = 100

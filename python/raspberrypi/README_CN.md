@@ -176,6 +176,20 @@ RX         | TXD
       @return True or False
     '''
 
+  def set_check_to_active_frames(self, frames):
+    '''!
+      @brief 设置 check 状态切换到 active 状态的确认帧数。
+      @param frames: 帧数，有效范围 1-7
+      @return True or False
+    '''
+
+  def get_check_to_active_frames(self, frames):
+    '''!
+      @brief 读取 check 状态切换到 active 状态的确认帧数。
+      @param frames: 输出容器(list/dict/object.value)
+      @return True or False
+    '''
+
   def get_target_list(self, mode=GET_DATA_ACTIVE):
     '''!
       @brief 获取目标列表。
@@ -238,6 +252,7 @@ RX         | TXD
     '''!
       @brief 单标签设置（尺寸模式）。
       @param tag: TagConfig 对象
+      @n   tag.io_index: IO 联动索引，0 表示不使用，2-6 表示绑定 IO2-IO6。
       @return 标签设置状态码
       @n   TAG_SET_COMM_ERROR
       @n   TAG_SET_SUCCESS
@@ -263,6 +278,7 @@ RX         | TXD
     '''!
       @brief 坐标模式批量设置标签。
       @param tags: TagConfig 可迭代对象
+      @n   每个 tag.io_index: IO 联动索引，0 表示不使用，2-6 表示绑定 IO2-IO6。
       @return True or False
     '''
 
@@ -270,6 +286,7 @@ RX         | TXD
     '''!
       @brief 获取最近一次标签上报事件（缓存）。
       @return TagInfo 对象；若无有效事件则返回 None。
+      @note 标签事件上报包含 info.io_index。
     '''
 
   def set_four_sided_range_mode(self, range_info):
@@ -323,21 +340,21 @@ RX         | TXD
       @return 模式值
     '''
 
-  def get_people_count_info(self, mode=GET_DATA_ACTIVE):
+  def get_people_time(self, mode=GET_DATA_ACTIVE):
     '''!
       @brief 获取人数统计值。
       @param mode: 数据模式
       @return 人数值
     '''
 
-  def set_people_report_interval(self, interval):
+  def set_real_time_people_time(self, interval):
     '''!
       @brief 设置人数上报周期。
       @param interval: 秒
       @return True or False
     '''
 
-  def get_people_report_interval(self):
+  def get_real_time_people_time(self):
     '''!
       @brief 获取人数上报周期。
       @return 秒
@@ -349,14 +366,14 @@ RX         | TXD
       @return True or False
     '''
 
-  def set_trajectory_generate_distance(self, distance_cm):
+  def set_track_meters(self, distance_cm):
     '''!
       @brief 设置轨迹生成距离阈值。
       @param distance_cm: 阈值(cm)
       @return True or False
     '''
 
-  def get_trajectory_generate_distance(self):
+  def get_track_meters(self):
     '''!
       @brief 获取轨迹生成距离阈值。
       @return 阈值(cm)

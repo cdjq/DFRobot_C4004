@@ -30,6 +30,12 @@ def main():
     time.sleep(1)
   print('DFRobot C4004 begin success.')
 
+  if c4004.set_check_to_active_frames(7):
+    print('Set check-to-active frames success.')
+  else:
+    print('Set check-to-active frames failed.')
+  time.sleep(0.05)
+
   if c4004.set_motion_led(True):
     print('Set motion LED success.')
   else:

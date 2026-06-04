@@ -22,19 +22,19 @@ DFRobot_C4004 c4004(&Serial1, 115200);
 
 const char *tagTypeToString(eTagType_t type)
 {
-  if (type == eTagTypeNone) {
+  if (type == eTagNone) {
     return "None";
   }
-  if (type == eTagTypeEnterExit) {
-    return "EnterExit";
+  if (type == eTagBoundary) {
+    return "Boundary";
   }
-  if (type == eTagTypeApproachAway) {
+  if (type == eTagApproachAway) {
     return "ApproachAway";
   }
-  if (type == eTagTypePeopleCounting) {
+  if (type == eTagPeopleCounting) {
     return "PeopleCounting";
   }
-  if (type == eTagTypeNoise) {
+  if (type == eTagNoise) {
     return "Noise";
   }
   return "Unknown";
@@ -55,13 +55,13 @@ void printTagEvent(const sTagInfo_t &info)
   snprintf(line, sizeof(line), "Center XY : %d / %d", info.centerX, info.centerY);
   Serial.println(line);
 
-  if (info.tagType == eTagTypeEnterExit) {
-    snprintf(line, sizeof(line), "Event     : EnterExit (%s)", info.enterExit == 0 ? "Enter" : "Exit");
+  if (info.tagType == eTagBoundary) {
+    snprintf(line, sizeof(line), "Event     : Boundary (%s)", info.enterExit == 0 ? "Enter" : "Exit");
     Serial.println(line);
-  } else if (info.tagType == eTagTypeApproachAway) {
+  } else if (info.tagType == eTagApproachAway) {
     snprintf(line, sizeof(line), "Event     : MotionDirection (%s)", info.motionDir == 0 ? "Approach" : "Away");
     Serial.println(line);
-  } else if (info.tagType == eTagTypePeopleCounting) {
+  } else if (info.tagType == eTagPeopleCounting) {
     snprintf(line, sizeof(line), "Event     : PeopleCounting (M:%u S:%u)", info.motionNum, info.staticNum);
     Serial.println(line);
   } else {
@@ -154,7 +154,7 @@ void setup()
 
   // Set tag 0, type is None, range is Rectangle, center is (0, 100), width/height is (120, 120)
   setTags[0].tagIndex = 0;
-  setTags[0].tagType = eTagTypeNone;
+  setTags[0].tagType = eTagNone;
   setTags[0].scopeType = eTagRangeRectangle;
   setTags[0].ioIndex = 0;
   setTags[0].centerX = 0;
@@ -162,9 +162,9 @@ void setup()
   setTags[0].width = 120;
   setTags[0].height = 120;
 
-  // Set tag 1, type is EnterExit, range is Rectangle, center is (100, 220), width/height is (120, 120)
+  // Set tag 1, type is Boundary, range is Rectangle, center is (100, 220), width/height is (120, 120)
   setTags[1].tagIndex = 1;
-  setTags[1].tagType = eTagTypeEnterExit;
+  setTags[1].tagType = eTagBoundary;
   setTags[1].scopeType = eTagRangeRectangle;
   setTags[1].ioIndex = 0;
   setTags[1].centerX = 100;
@@ -174,7 +174,7 @@ void setup()
 
   // Set tag 2, type is ApproachAway, range is Circle, center is (-80, 350), radius is 80
   setTags[2].tagIndex = 2;
-  setTags[2].tagType = eTagTypeApproachAway;
+  setTags[2].tagType = eTagApproachAway;
   setTags[2].scopeType = eTagRangeCircle;
   setTags[2].ioIndex = 0;
   setTags[2].centerX = -80;
@@ -189,7 +189,7 @@ void setup()
 
   // Set tag 3, type is PeopleCounting, range is Rectangle, center is (0, 500), width/height is (160, 160)
   setTags[3].tagIndex = 3;
-  setTags[3].tagType = eTagTypePeopleCounting;
+  setTags[3].tagType = eTagPeopleCounting;
   setTags[3].scopeType = eTagRangeRectangle;
   setTags[3].ioIndex = 0;
   setTags[3].centerX = 0;
@@ -199,7 +199,7 @@ void setup()
 
   // Set tag 4, type is Noise, range is Rectangle, center is (-100, 620), width/height is (100, 120)
   setTags[4].tagIndex = 4;
-  setTags[4].tagType = eTagTypeNoise;
+  setTags[4].tagType = eTagNoise;
   setTags[4].scopeType = eTagRangeRectangle;
   setTags[4].ioIndex = 0;
   setTags[4].centerX = -100;

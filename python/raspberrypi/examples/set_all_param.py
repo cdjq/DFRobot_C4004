@@ -72,6 +72,18 @@ def main():
   else:
     print('Read current trajectory tracking function enable failed.')
 
+  if c4004.set_check_to_active_frames(7):
+    print('Set check-to-active frames success!')
+  else:
+    print('Set check-to-active frames failed!')
+  time.sleep(0.05)
+
+  check_to_active_frames = [0]
+  if c4004.get_check_to_active_frames(check_to_active_frames):
+    print('Current check-to-active frames:', check_to_active_frames[0])
+  else:
+    print('Read current check-to-active frames failed.')
+
   if c4004.set_motion_led(True):
     print('Set motion LED success!')
   else:

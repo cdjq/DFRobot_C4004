@@ -28,6 +28,8 @@ def target_feature_to_string(feature):
     return 'Static'
   if feature == c4004.MOTION:
     return 'Motion'
+  if feature == c4004.UNCERTAIN:
+    return 'Uncertain'
   return 'Unknown'
 
 
@@ -46,12 +48,12 @@ def print_trajectory_data(data_mode):
   if len(targets) == 0:
     print('No target.')
   else:
-    print('Row\tID\tKinesia\tFeature\tX\tY\tSpeed')
+    print('Row\tID\tSize\tFeature\tX\tY\tSpeed')
     for i, target in enumerate(targets):
       print('%d\t%d\t%d\t%s\t%d\t%d\t%d' % (
         i,
         target.index,
-        target.kinesia,
+        target.target_size,
         target_feature_to_string(target.target_feature),
         target.x,
         target.y,
@@ -64,6 +66,12 @@ def main():
     print('DFRobot C4004 begin failed, retrying...')
     time.sleep(1)
   print('DFRobot C4004 begin success.')
+
+  if c4004.set_check_to_active_frames(7):
+    print('Set check-to-active frames success.')
+  else:
+    print('Set check-to-active frames failed.')
+  time.sleep(0.05)
 
   range_info = FourSidedRange()
   range_info.mode = c4004.RANGE_FOUR_SIDE

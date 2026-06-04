@@ -29,7 +29,6 @@ def main():
     time.sleep(1)
   print('DFRobot C4004 begin success.')
 
-  print('Product model:', c4004.get_product_model())
   print('Hardware version:', c4004.get_hardware_version())
   print('Firmware version:', c4004.get_firmware_version())
 

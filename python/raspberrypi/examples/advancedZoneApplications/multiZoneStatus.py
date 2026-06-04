@@ -72,15 +72,15 @@ _pwm = None
 
 
 def tag_type_to_text(tag_type):
-  if tag_type == c4004.TAG_TYPE_NONE:
+  if tag_type == c4004.TAG_NONE:
     return 'None'
-  if tag_type == c4004.TAG_TYPE_ENTER_EXIT:
-    return 'EnterExit'
-  if tag_type == c4004.TAG_TYPE_APPROACH_AWAY:
+  if tag_type == c4004.TAG_BOUNDARY:
+    return 'Boundary'
+  if tag_type == c4004.TAG_APPROACH_AWAY:
     return 'ApproachAway'
-  if tag_type == c4004.TAG_TYPE_PEOPLE_COUNTING:
+  if tag_type == c4004.TAG_PEOPLE_COUNTING:
     return 'PeopleCount'
-  if tag_type == c4004.TAG_TYPE_NOISE:
+  if tag_type == c4004.TAG_NOISE:
     return 'Noise'
   return 'Unknown'
 
@@ -88,7 +88,8 @@ def tag_type_to_text(tag_type):
 def make_empty_cache(index):
   return {
     'tag_index': index,
-    'tag_type': c4004.TAG_TYPE_NONE,
+    'tag_type': c4004.TAG_NONE,
+    'io_index': 0,
     'center_x': 0,
     'center_y': 0,
     'enter_exit': 0,
@@ -107,6 +108,7 @@ def init_tag_cache_from_config(tags):
       continue
     tag_cache[index]['tag_index'] = index
     tag_cache[index]['tag_type'] = tag.tag_type
+    tag_cache[index]['io_index'] = tag.io_index
     tag_cache[index]['center_x'] = tag.center_x
     tag_cache[index]['center_y'] = tag.center_y
     if index in (TAG_HOME_DOOR, TAG_KITCHEN_DOOR):
@@ -155,6 +157,12 @@ def setup_sensor_and_tags():
     time.sleep(1)
   print('DFRobot C4004 begin success.')
 
+  if c4004.set_check_to_active_frames(7):
+    print('Set check-to-active frames success.')
+  else:
+    print('Set check-to-active frames failed.')
+  time.sleep(0.05)
+
   if c4004.set_presence_enable(True):
     print('Set presence enable success.')
   else:
@@ -185,6 +193,7 @@ def setup_sensor_and_tags():
   #   tag_index : Tag index. It must be unique for each tag.
   #   tag_type  : Tag function, such as PeopleCounting, ApproachAway, or Noise.
   #   scope_type: Tag shape. Use TAG_RANGE_RECTANGLE or TAG_RANGE_CIRCLE.
+  #   io_index  : IO linkage index. 0 means unused; 2-6 maps to IO2-IO6.
   #   center_x  : Tag center X coordinate, in cm.
   #   center_y  : Tag center Y coordinate, in cm.
   #   width     : Rectangle width, or circle radius, in cm.
@@ -199,8 +208,9 @@ def setup_sensor_and_tags():
 
   tag = TagConfig()
   tag.tag_index = TAG_GAME
-  tag.tag_type = c4004.TAG_TYPE_PEOPLE_COUNTING
+  tag.tag_type = c4004.TAG_PEOPLE_COUNTING
   tag.scope_type = c4004.TAG_RANGE_CIRCLE
+  tag.io_index = 0
   tag.center_x = -100
   tag.center_y = 550
   tag.width = 80
@@ -209,8 +219,9 @@ def setup_sensor_and_tags():
 
   tag = TagConfig()
   tag.tag_index = TAG_SOFA
-  tag.tag_type = c4004.TAG_TYPE_PEOPLE_COUNTING
+  tag.tag_type = c4004.TAG_PEOPLE_COUNTING
   tag.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag.io_index = 0
   tag.center_x = 100
   tag.center_y = 450
   tag.width = 100
@@ -219,8 +230,9 @@ def setup_sensor_and_tags():
 
   tag = TagConfig()
   tag.tag_index = TAG_HOME_DOOR
-  tag.tag_type = c4004.TAG_TYPE_APPROACH_AWAY
+  tag.tag_type = c4004.TAG_APPROACH_AWAY
   tag.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag.io_index = 0
   tag.center_x = 100
   tag.center_y = 700
   tag.width = 80
@@ -229,8 +241,9 @@ def setup_sensor_and_tags():
 
   tag = TagConfig()
   tag.tag_index = TAG_KITCHEN_DOOR
-  tag.tag_type = c4004.TAG_TYPE_APPROACH_AWAY
+  tag.tag_type = c4004.TAG_APPROACH_AWAY
   tag.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag.io_index = 0
   tag.center_x = -100
   tag.center_y = 700
   tag.width = 80
@@ -239,8 +252,9 @@ def setup_sensor_and_tags():
 
   tag = TagConfig()
   tag.tag_index = TAG_DINING
-  tag.tag_type = c4004.TAG_TYPE_PEOPLE_COUNTING
+  tag.tag_type = c4004.TAG_PEOPLE_COUNTING
   tag.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag.io_index = 0
   tag.center_x = 50
   tag.center_y = 150
   tag.width = 300
@@ -249,8 +263,9 @@ def setup_sensor_and_tags():
 
   tag = TagConfig()
   tag.tag_index = TAG_CURTAIN
-  tag.tag_type = c4004.TAG_TYPE_NOISE
+  tag.tag_type = c4004.TAG_NOISE
   tag.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag.io_index = 0
   tag.center_x = -150
   tag.center_y = 300
   tag.width = 50
@@ -259,8 +274,9 @@ def setup_sensor_and_tags():
 
   tag = TagConfig()
   tag.tag_index = TAG_PLANT
-  tag.tag_type = c4004.TAG_TYPE_NOISE
+  tag.tag_type = c4004.TAG_NOISE
   tag.scope_type = c4004.TAG_RANGE_CIRCLE
+  tag.io_index = 0
   tag.center_x = -50
   tag.center_y = 400
   tag.width = 40
@@ -287,16 +303,16 @@ def setup_sensor_and_tags():
 def print_tag_cache_table():
   print('===================================================================')
   print('Tag Cache Table')
-  print('Idx\tName\t\tType\t\tCenterX\tCenterY\tMotion\tStatic\tDir\tEnterExit')
+  print('Idx\tName\t\tType\t\tIO\tCenterX\tCenterY\tMotion\tStatic\tDir\tBoundary')
   for i in range(TAG_TOTAL):
     info = tag_cache[i]
     name = TAG_NAMES[i]
     type_text = tag_type_to_text(info['tag_type'])
 
-    motion_num = info['motion_num'] if info['tag_type'] == c4004.TAG_TYPE_PEOPLE_COUNTING else 0
-    static_num = info['static_num'] if info['tag_type'] == c4004.TAG_TYPE_PEOPLE_COUNTING else 0
-    motion_dir = str(info['motion_dir']) if info['tag_type'] == c4004.TAG_TYPE_APPROACH_AWAY else '-'
-    enter_exit = str(info['enter_exit']) if info['tag_type'] == c4004.TAG_TYPE_ENTER_EXIT else '-'
+    motion_num = info['motion_num'] if info['tag_type'] == c4004.TAG_PEOPLE_COUNTING else 0
+    static_num = info['static_num'] if info['tag_type'] == c4004.TAG_PEOPLE_COUNTING else 0
+    motion_dir = str(info['motion_dir']) if info['tag_type'] == c4004.TAG_APPROACH_AWAY else '-'
+    enter_exit = str(info['enter_exit']) if info['tag_type'] == c4004.TAG_BOUNDARY else '-'
 
     line = '%d\t%s' % (i, name)
     if len(name) < 8:
@@ -304,7 +320,8 @@ def print_tag_cache_table():
     line += '\t%s' % type_text
     if len(type_text) < 8:
       line += '\t'
-    line += '\t%d\t%d\t%d\t%d\t%s\t%s' % (
+    line += '\t%d\t%d\t%d\t%d\t%d\t%s\t%s' % (
+      info['io_index'],
       info['center_x'],
       info['center_y'],
       motion_num,
@@ -342,6 +359,7 @@ def main():
           cache = tag_cache[info.tag_index]
           cache['tag_index'] = info.tag_index
           cache['tag_type'] = info.tag_type
+          cache['io_index'] = info.io_index
           cache['center_x'] = info.center_x
           cache['center_y'] = info.center_y
           cache['enter_exit'] = info.enter_exit

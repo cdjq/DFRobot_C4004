@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*
 '''!
   @file roomOccupancyInference.py
-  @brief Infer kitchen occupancy from doorway crossing coordinates.
-  @details Configure living-room, kitchen, and kitchen-door tags.
-  @n The kitchen-door tag is ApproachAway. A crossing session starts when a
-  @n target approaches the door and ends when a target moves away from the door.
-  @n For both events, the closest active target to the door center is used.
-  @n Direction is inferred from the start/end coordinate zones only.
-  @n This is logical inference only, not direct detection inside the kitchen.
+  @brief Infer kitchen occupancy from kitchen-door boundary tag events.
+  @details This example configures living-room, kitchen, and kitchen-door tags.
+  @n The kitchen-door tag is Boundary relative to the living-room range.
+  @n Enter-living-room events decrement the kitchen people count, and
+  @n exit-living-room events increment it.
   @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
   @license The MIT License (MIT)
   @author JiaLi(zhixin.liu@dfrobot.com)
@@ -32,8 +30,12 @@ PORT = '/dev/ttyAMA0'
 c4004 = DFRobot_C4004(PORT, 115200)
 
 TAG_LIVING_ROOM = 0
-TAG_KITCHEN = 1
+TAG_KITCHEN = 1       # Configured only; kitchen people count uses door enter/exit events.
 TAG_KITCHEN_DOOR = 2
+
+CHECK_TO_ACTIVE_FRAMES = 2
+NO_PERSON_DELAY_S = 5
+TRACK_EXISTS_TIME_S = 1
 
 LIVING_ROOM_CENTER_X_CM = 0
 LIVING_ROOM_CENTER_Y_CM = 200
@@ -48,231 +50,25 @@ KITCHEN_SIZE_Y_CM = 400
 DOOR_CENTER_X_CM = 0
 DOOR_CENTER_Y_CM = 400
 DOOR_SIZE_X_CM = 100
-DOOR_SIZE_Y_CM = 50
-
-LINK_WINDOW_S = 4.0
-
-INFER_NONE = 0
-INFER_ENTER_KITCHEN = 1
-INFER_EXIT_KITCHEN = 2
-
-ZONE_UNKNOWN = 0
-ZONE_LIVING_ROOM = 1
-ZONE_KITCHEN = 2
+DOOR_SIZE_Y_CM = 100
 
 living_motion_count = 0
 living_static_count = 0
 living_people_count = 0
 
-kitchen_occupied = False
+kitchen_door_enter_count = 0
+kitchen_door_exit_count = 0
 kitchen_inferred_people = 0
-
-door_session_active = False
-door_start_zone = ZONE_UNKNOWN
-door_start_target_x = 0
-door_start_target_y = 0
-door_session_start_s = 0.0
-
-last_evidence = 'None'
+kitchen_occupied = False
+last_door_event = 'None'
 
 
-def infer_dir_to_text(direction):
-  if direction == INFER_ENTER_KITCHEN:
-    return 'EnterKitchen'
-  if direction == INFER_EXIT_KITCHEN:
-    return 'ExitKitchen'
-  return 'None'
-
-
-def zone_to_text(zone):
-  if zone == ZONE_LIVING_ROOM:
-    return 'LivingRoom'
-  if zone == ZONE_KITCHEN:
-    return 'Kitchen'
+def door_event_to_text(enter_exit):
+  if enter_exit == 0:
+    return 'Enter living room'
+  if enter_exit == 1:
+    return 'Exit living room'
   return 'Unknown'
-
-
-def get_point_zone(x, y):
-  living_min_x = LIVING_ROOM_CENTER_X_CM - LIVING_ROOM_SIZE_X_CM // 2
-  living_max_x = LIVING_ROOM_CENTER_X_CM + LIVING_ROOM_SIZE_X_CM // 2
-  living_min_y = LIVING_ROOM_CENTER_Y_CM - LIVING_ROOM_SIZE_Y_CM // 2
-  living_max_y = LIVING_ROOM_CENTER_Y_CM + LIVING_ROOM_SIZE_Y_CM // 2
-
-  kitchen_min_x = KITCHEN_CENTER_X_CM - KITCHEN_SIZE_X_CM // 2
-  kitchen_max_x = KITCHEN_CENTER_X_CM + KITCHEN_SIZE_X_CM // 2
-  kitchen_min_y = KITCHEN_CENTER_Y_CM - KITCHEN_SIZE_Y_CM // 2
-  kitchen_max_y = KITCHEN_CENTER_Y_CM + KITCHEN_SIZE_Y_CM // 2
-
-  in_living_room = (living_min_x <= x <= living_max_x and living_min_y <= y < living_max_y)
-  in_kitchen = (kitchen_min_x <= x <= kitchen_max_x and kitchen_min_y < y <= kitchen_max_y)
-
-  if in_living_room and not in_kitchen:
-    return ZONE_LIVING_ROOM
-  if in_kitchen and not in_living_room:
-    return ZONE_KITCHEN
-  return ZONE_UNKNOWN
-
-
-def get_closest_target_to_door():
-  targets = c4004.get_target_list(c4004.GET_DATA_ACTIVE)
-  if len(targets) == 0:
-    return None
-
-  closest_target = None
-  closest_dist_sq = None
-  for target in targets:
-    dx = target.x - DOOR_CENTER_X_CM
-    dy = target.y - DOOR_CENTER_Y_CM
-    dist_sq = dx * dx + dy * dy
-    if closest_dist_sq is None or dist_sq < closest_dist_sq:
-      closest_dist_sq = dist_sq
-      closest_target = target
-  return closest_target
-
-
-def print_coordinate_evidence(title, start_zone, start_x, start_y, end_zone, end_x, end_y):
-  print('------------------------------------------------------------')
-  print(title)
-  print('Approach coordinate    : (%d, %d), %s' % (start_x, start_y, zone_to_text(start_zone)))
-  print('Away coordinate        : (%d, %d), %s' % (end_x, end_y, zone_to_text(end_zone)))
-
-
-def clear_door_session():
-  global door_session_active
-  global door_start_zone
-  global door_start_target_x
-  global door_start_target_y
-  global door_session_start_s
-
-  door_session_active = False
-  door_start_zone = ZONE_UNKNOWN
-  door_start_target_x = 0
-  door_start_target_y = 0
-  door_session_start_s = 0.0
-
-
-def confirm_kitchen_event(direction, evidence):
-  global kitchen_occupied
-  global kitchen_inferred_people
-  global last_evidence
-
-  if direction == INFER_NONE:
-    return
-
-  if direction == INFER_ENTER_KITCHEN:
-    kitchen_inferred_people += 1
-  elif kitchen_inferred_people > 0:
-    kitchen_inferred_people -= 1
-
-  kitchen_occupied = kitchen_inferred_people > 0
-  last_evidence = evidence
-
-  print('------------------------------------------------------------')
-  print('Kitchen inference event : %s' % infer_dir_to_text(direction))
-  print('Evidence                : %s' % evidence)
-  print('Kitchen inferred people : %d' % kitchen_inferred_people)
-  print('Kitchen occupied        : %s' % ('YES' if kitchen_occupied else 'NO'))
-
-
-def start_door_session():
-  global door_session_active
-  global door_start_zone
-  global door_start_target_x
-  global door_start_target_y
-  global door_session_start_s
-  global last_evidence
-
-  target = get_closest_target_to_door()
-  if target is None:
-    clear_door_session()
-    last_evidence = 'approach door: no target'
-    print('------------------------------------------------------------')
-    print('Door session ignored    : approach door, no active target')
-    return
-
-  door_session_active = True
-  door_start_zone = get_point_zone(target.x, target.y)
-  door_start_target_x = target.x
-  door_start_target_y = target.y
-  door_session_start_s = time.time()
-  last_evidence = 'approach door coordinate recorded'
-
-  print('------------------------------------------------------------')
-  print('Door session started    : approach door')
-  print('Approach coordinate    : (%d, %d), %s' % (
-    door_start_target_x,
-    door_start_target_y,
-    zone_to_text(door_start_zone)))
-
-
-def finish_door_session():
-  global last_evidence
-
-  if not door_session_active:
-    last_evidence = 'leave door without approach'
-    print('------------------------------------------------------------')
-    print('Door session ignored    : leave door without approach')
-    return
-
-  if time.time() - door_session_start_s > LINK_WINDOW_S:
-    last_evidence = 'door session timeout'
-    print('------------------------------------------------------------')
-    print('Door session ignored    : timeout before leave door')
-    clear_door_session()
-    return
-
-  target = get_closest_target_to_door()
-  if target is None:
-    last_evidence = 'leave door: no target'
-    print('------------------------------------------------------------')
-    print('Door session ignored    : leave door, no active target')
-    clear_door_session()
-    return
-
-  end_zone = get_point_zone(target.x, target.y)
-  direction = INFER_NONE
-  evidence = 'invalid door coordinate zones'
-
-  if door_start_zone == ZONE_LIVING_ROOM and end_zone == ZONE_KITCHEN:
-    direction = INFER_ENTER_KITCHEN
-    evidence = 'living room to kitchen crossing'
-  elif door_start_zone == ZONE_KITCHEN and end_zone == ZONE_LIVING_ROOM:
-    direction = INFER_EXIT_KITCHEN
-    evidence = 'kitchen to living room crossing'
-
-  if direction == INFER_NONE:
-    title = 'Door crossing ignored  : invalid coordinate zones'
-  else:
-    title = 'Door crossing confirmed: valid coordinate zones'
-
-  print_coordinate_evidence(
-    title,
-    door_start_zone,
-    door_start_target_x,
-    door_start_target_y,
-    end_zone,
-    target.x,
-    target.y)
-
-  if direction == INFER_NONE:
-    last_evidence = evidence
-  else:
-    confirm_kitchen_event(direction, evidence)
-
-  clear_door_session()
-
-
-def check_door_session_timeout():
-  global last_evidence
-
-  if not door_session_active:
-    return
-
-  if time.time() - door_session_start_s > LINK_WINDOW_S:
-    last_evidence = 'door session timeout'
-    print('------------------------------------------------------------')
-    print('Door session cleared    : timeout')
-    clear_door_session()
 
 
 def process_living_room_tag(info):
@@ -285,18 +81,42 @@ def process_living_room_tag(info):
   living_people_count = living_motion_count + living_static_count
 
 
+def process_kitchen_door_tag(info):
+  global kitchen_door_enter_count
+  global kitchen_door_exit_count
+  global kitchen_inferred_people
+  global kitchen_occupied
+  global last_door_event
+
+  if info.enter_exit == 0:
+    kitchen_door_enter_count += 1
+    if kitchen_inferred_people > 0:
+      kitchen_inferred_people -= 1
+    last_door_event = 'Enter living room'
+  elif info.enter_exit == 1:
+    kitchen_door_exit_count += 1
+    kitchen_inferred_people += 1
+    last_door_event = 'Exit living room'
+  else:
+    last_door_event = 'Unknown'
+
+  kitchen_occupied = kitchen_inferred_people > 0
+
+  print('------------------------------------------------------------')
+  print('Kitchen door event      : %s' % door_event_to_text(info.enter_exit))
+  print('Kitchen inferred people : %d' % kitchen_inferred_people)
+  print('Kitchen occupied        : %s' % ('YES' if kitchen_occupied else 'NO'))
+
+
 def process_tag_event():
   info = c4004.get_tag_info()
   if info is None:
     return
 
-  if info.tag_index == TAG_LIVING_ROOM and info.tag_type == c4004.TAG_TYPE_PEOPLE_COUNTING:
+  if info.tag_index == TAG_LIVING_ROOM and info.tag_type == c4004.TAG_PEOPLE_COUNTING:
     process_living_room_tag(info)
-  elif info.tag_index == TAG_KITCHEN_DOOR and info.tag_type == c4004.TAG_TYPE_APPROACH_AWAY:
-    if info.motion_dir == 0:
-      start_door_session()
-    elif info.motion_dir == 1:
-      finish_door_session()
+  elif info.tag_index == TAG_KITCHEN_DOOR and info.tag_type == c4004.TAG_BOUNDARY:
+    process_kitchen_door_tag(info)
 
 
 def setup_sensor_and_tags():
@@ -310,11 +130,23 @@ def setup_sensor_and_tags():
   else:
     print('Set presence enable failed.')
 
+  if c4004.set_check_to_active_frames(CHECK_TO_ACTIVE_FRAMES):
+    print('Set check-to-active frames success.')
+  else:
+    print('Set check-to-active frames failed.')
+  time.sleep(0.05)
+
+  check_to_active_frames = [0]
+  if c4004.get_check_to_active_frames(check_to_active_frames):
+    print('Current check-to-active frames: %d' % check_to_active_frames[0])
+  else:
+    print('Read current check-to-active frames failed.')
+
   range_info = FourSidedRange()
   range_info.mode = c4004.RANGE_FOUR_SIDE
   range_info.x_positive_cm = 200
   range_info.x_negative_cm = -200
-  range_info.y_positive_cm = 700
+  range_info.y_positive_cm = 400
   range_info.y_negative_cm = 0
   if c4004.set_four_sided_range_mode(range_info):
     print('Set boundary detection range success.')
@@ -330,8 +162,9 @@ def setup_sensor_and_tags():
 
   living_room = TagConfig()
   living_room.tag_index = TAG_LIVING_ROOM
-  living_room.tag_type = c4004.TAG_TYPE_PEOPLE_COUNTING
+  living_room.tag_type = c4004.TAG_PEOPLE_COUNTING
   living_room.scope_type = c4004.TAG_RANGE_RECTANGLE
+  living_room.io_index = 0
   living_room.center_x = LIVING_ROOM_CENTER_X_CM
   living_room.center_y = LIVING_ROOM_CENTER_Y_CM
   living_room.width = LIVING_ROOM_SIZE_X_CM
@@ -340,8 +173,9 @@ def setup_sensor_and_tags():
 
   kitchen = TagConfig()
   kitchen.tag_index = TAG_KITCHEN
-  kitchen.tag_type = c4004.TAG_TYPE_PEOPLE_COUNTING
+  kitchen.tag_type = c4004.TAG_PEOPLE_COUNTING
   kitchen.scope_type = c4004.TAG_RANGE_RECTANGLE
+  kitchen.io_index = 0
   kitchen.center_x = KITCHEN_CENTER_X_CM
   kitchen.center_y = KITCHEN_CENTER_Y_CM
   kitchen.width = KITCHEN_SIZE_X_CM
@@ -350,8 +184,9 @@ def setup_sensor_and_tags():
 
   kitchen_door = TagConfig()
   kitchen_door.tag_index = TAG_KITCHEN_DOOR
-  kitchen_door.tag_type = c4004.TAG_TYPE_APPROACH_AWAY
+  kitchen_door.tag_type = c4004.TAG_BOUNDARY
   kitchen_door.scope_type = c4004.TAG_RANGE_RECTANGLE
+  kitchen_door.io_index = 0
   kitchen_door.center_x = DOOR_CENTER_X_CM
   kitchen_door.center_y = DOOR_CENTER_Y_CM
   kitchen_door.width = DOOR_SIZE_X_CM
@@ -368,17 +203,22 @@ def setup_sensor_and_tags():
   else:
     print('Set trajectory track enable failed.')
 
-  if c4004.set_track_exists_time(1):
+  if c4004.set_track_exists_time(TRACK_EXISTS_TIME_S):
     print('Set TrackExistsTime success.')
   else:
     print('Set TrackExistsTime failed.')
 
+  if c4004.set_unmanned_time(NO_PERSON_DELAY_S):
+    print('Set UnmannedTime success.')
+  else:
+    print('Set UnmannedTime failed.')
+
   print('============================================================')
   print('Kitchen occupancy inference started.')
-  print('Direction: approach coordinate zone + leave coordinate zone.')
+  print('Direction: kitchen-door Boundary tag event relative to living room.')
+  print('Kitchen people count decrements on Enter living room and increments on Exit living room.')
   print('Living-room count is printed only and does not affect kitchen state.')
-  print('Kitchen zone is configured but not used as direct occupancy evidence.')
-  print('Result is logical inference, not direct kitchen presence detection.')
+  print('Kitchen tag is configured for range/tag testing only.')
   print('============================================================')
 
 
@@ -386,9 +226,8 @@ def print_status():
   print('============================================================')
   print('Living motion/static    : %d/%d' % (living_motion_count, living_static_count))
   print('Living people           : %d' % living_people_count)
-  print('Door session active     : %s' % ('YES' if door_session_active else 'NO'))
-  print('Door start zone         : %s' % zone_to_text(door_start_zone))
-  print('Door start coordinate   : (%d, %d)' % (door_start_target_x, door_start_target_y))
+  print('Last kitchen door event : %s' % last_door_event)
+  print('Door enter/exit count   : %d/%d' % (kitchen_door_enter_count, kitchen_door_exit_count))
   print('Kitchen inferred people : %d' % kitchen_inferred_people)
   print('Kitchen occupied        : %s' % ('YES' if kitchen_occupied else 'NO'))
 
@@ -403,8 +242,6 @@ def main():
 
     if event == c4004.EVENT_TAG:
       process_tag_event()
-
-    check_door_session_timeout()
 
     if now_s - last_print_s >= 1.0:
       last_print_s = now_s

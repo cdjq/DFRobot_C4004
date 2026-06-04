@@ -29,6 +29,7 @@ class TargetInfo(object):
   '''! @brief One tracked target information block. '''
   def __init__(self):
     self.index = 0
+    self.target_size = 0
     self.kinesia = 0
     self.target_feature = 0
     self.x = 0
@@ -43,6 +44,7 @@ class TagConfig(object):
     self.tag_index = 0
     self.tag_type = 0
     self.scope_type = 1
+    self.io_index = 0
     self.center_x = 0
     self.center_y = 0
     self.width = 0
@@ -54,6 +56,7 @@ class TagInfo(object):
   def __init__(self):
     self.tag_index = 0
     self.tag_type = 0
+    self.io_index = 0
     self.center_x = 0
     self.center_y = 0
     self.enter_exit = 0
@@ -98,8 +101,8 @@ class DFRobot_C4004(object):
   FRAME_TAIL2 = 0x43
   QUERY_DATA = 0x0F
   MAX_TARGETS = 8
-  MAX_TAGS = 12
-  MAX_POINTS = 64
+  MAX_TAGS = 32
+  MAX_POINTS = 150
   MAX_PAYLOAD = 3 + MAX_POINTS * 4
 
   CTRL_SYSTEM = 0x01
@@ -146,8 +149,10 @@ class DFRobot_C4004(object):
   CMD_TRAJECTORY_QUERY_TARGET = 0x82
   CMD_TRAJECTORY_SET_TRAJECTORY_LED = 0x0B
   CMD_TRAJECTORY_SET_MOTION_LED = 0x0C
+  CMD_TRAJECTORY_SET_CHECK_TO_ACTIVE_FRAMES = 0x0D
   CMD_TRAJECTORY_QUERY_TRAJECTORY_LED = 0x8B
   CMD_TRAJECTORY_QUERY_MOTION_LED = 0x8C
+  CMD_TRAJECTORY_QUERY_CHECK_TO_ACTIVE_FRAMES = 0x8D
 
   CMD_DETECTION_RANGE_QUERY_TAGS = 0x91
   CMD_DETECTION_RANGE_SET_TAG = 0x11
@@ -201,12 +206,11 @@ class DFRobot_C4004(object):
   UNCERTAIN = 0x02
   UNKNOWN = 0xFF
 
-  TAG_TYPE_NONE = 0x00
-  TAG_TYPE_ENTER_EXIT = 0x01
-  TAG_TYPE_APPROACH_AWAY = 0x02
-  TAG_TYPE_PEOPLE_COUNTING = 0x03
-  TAG_TYPE_MOTION_STATIC = TAG_TYPE_PEOPLE_COUNTING  # Backward-compatible alias.
-  TAG_TYPE_NOISE = 0x04
+  TAG_NONE = 0x00
+  TAG_BOUNDARY = 0x01
+  TAG_APPROACH_AWAY = 0x02
+  TAG_PEOPLE_COUNTING = 0x03
+  TAG_NOISE = 0x04
 
   TAG_RANGE_CIRCLE = 0x00
   TAG_RANGE_RECTANGLE = 0x01
@@ -222,8 +226,6 @@ class DFRobot_C4004(object):
   RANGE_SIDE_RIGHT_EDGE = 0x02
   RANGE_HOTEL_CORRIDOR = 0x03
   RANGE_FOUR_SIDE = 0x04
-  # Backward-compatible alias.
-  RANGE_FOUR_SIDE_BOUNDARY = RANGE_FOUR_SIDE
   RANGE_TRAJECTORY = 0x05
   RANGE_CONFIG_FILE = 0x06
   RANGE_NO_BOUNDARY = 0x07
@@ -275,6 +277,7 @@ class DFRobot_C4004(object):
     elif hasattr(self.ser, 'is_open') and self.ser.is_open is False:
       self.ser.open()
 
+    time.sleep(0.05)
     start = time.time()
     while time.time() - start < 1.2:
       if self.is_init_finished():
@@ -344,8 +347,6 @@ class DFRobot_C4004(object):
       @param timeout Maximum wait time in seconds.
       @return Event type, such as EVENT_PRESENCE, EVENT_MOTION, EVENT_TRAJECTORY, etc.
     '''
-    if hasattr(self.ser, 'reset_input_buffer'):
-      self.ser.reset_input_buffer()
     packet = self._read_frame(timeout)
     if packet is None:
       return self.EVENT_NONE
@@ -368,6 +369,8 @@ class DFRobot_C4004(object):
       return 0
     if len(packet.data) >= 2:
       return self._u16(packet.data, 0)
+    if len(packet.data) == 1:
+      return packet.data[0]
     return 0
 
   def get_hardware_version(self):
@@ -515,10 +518,7 @@ class DFRobot_C4004(object):
     '''
     value = self._query_byte(self.CTRL_PRESENCE, self.CMD_PRESENCE_QUERY_STATE)
     if value is not None:
-      if value in (self.NO_PRESENCE, self.PRESENCE, self.PRESENCE_UNKNOWN):
-        self._presence = value
-      else:
-        self._presence = self.PRESENCE_UNKNOWN
+      self._presence = value
     return self._presence
 
   def get_presence_state(self):
@@ -535,10 +535,7 @@ class DFRobot_C4004(object):
     '''
     value = self._query_byte(self.CTRL_PRESENCE, self.CMD_PRESENCE_QUERY_MOTION)
     if value is not None:
-      if value in (self.MOTION_NONE, self.MOTION_STATIC, self.MOTION_ACTIVE, self.MOTION_UNKNOWN):
-        self._motion_state = value
-      else:
-        self._motion_state = self.MOTION_UNKNOWN
+      self._motion_state = value
     return self._motion_state
 
   def set_trajectory_track_enable(self, enable):
@@ -576,14 +573,30 @@ class DFRobot_C4004(object):
       return True
     return False
 
-  # Backward-compatible alias.
-  def trajectory_track_enable(self, enable):
+  def set_check_to_active_frames(self, frames):
     '''!
-      @brief Backward-compatible alias of set_trajectory_track_enable.
-      @param enable true to enable, false to disable.
+      @brief Set the frame count used to confirm transition from check state to active state.
+      @param frames Frame count, valid range: 1-7.
       @return true if succeeded, otherwise false.
     '''
-    return self.set_trajectory_track_enable(enable)
+    frames = int(frames)
+    if frames < 1 or frames > 7:
+      return False
+    return self._set_byte(self.CTRL_TRAJECTORY, self.CMD_TRAJECTORY_SET_CHECK_TO_ACTIVE_FRAMES, frames)
+
+  def get_check_to_active_frames(self, frames):
+    '''!
+      @brief Query the frame count used to confirm transition from check state to active state.
+      @param frames Output container for frame count.
+      @n Supported output containers: list/dict/object(with value field).
+      @return true if succeeded, otherwise false.
+    '''
+    if frames is None:
+      return False
+    value = self._query_byte(self.CTRL_TRAJECTORY, self.CMD_TRAJECTORY_QUERY_CHECK_TO_ACTIVE_FRAMES)
+    if value is None:
+      return False
+    return self._set_output_value(frames, value)
 
   def get_target_list(self, mode=GET_DATA_ACTIVE):
     '''!
@@ -689,7 +702,7 @@ class DFRobot_C4004(object):
       @n TAG_SET_COMM_ERROR / TAG_SET_SUCCESS / TAG_SET_TRACK_COUNT_ERROR / TAG_SET_ALREADY_USED / TAG_SET_INDEX_OUT_OF_RANGE.
       @note center_x/center_y fields are ignored by this API.
     '''
-    data = [tag.tag_index, tag.tag_type, tag.scope_type]
+    data = [tag.tag_index, tag.tag_type, tag.scope_type, tag.io_index]
     data += self._u16_bytes(tag.width)
     data += self._u16_bytes(tag.height)
     packet = self._request_frame(self.CTRL_DETECTION_RANGE, self.CMD_DETECTION_RANGE_SET_TAG, data)
@@ -699,6 +712,8 @@ class DFRobot_C4004(object):
       return self.TAG_SET_COMM_ERROR
     status = packet.data[3]
     if self.TAG_SET_SUCCESS <= status <= self.TAG_SET_INDEX_OUT_OF_RANGE:
+      if status == self.TAG_SET_SUCCESS:
+        self._upsert_tag_cache(tag)
       return status
     return self.TAG_SET_COMM_ERROR
 
@@ -715,7 +730,10 @@ class DFRobot_C4004(object):
       return False
     if len(packet.data) < 2:
       return False
-    return self._u16(packet.data, 0) == (tag_index & 0xFFFF)
+    if self._u16(packet.data, 0) != (tag_index & 0xFFFF):
+      return False
+    self._tags = [tag for tag in self._tags if tag.tag_index != (tag_index & 0xFF)]
+    return True
 
   def clear_all_tags(self):
     '''!
@@ -730,6 +748,7 @@ class DFRobot_C4004(object):
         return False
       if packet.data[0] != 0xFF:
         return False
+    self._tags = []
     return True
 
   def set_tags_from_config(self, tags):
@@ -739,15 +758,30 @@ class DFRobot_C4004(object):
       @return true if succeeded, otherwise false.
       @note The number of input tags is limited to MAX_TAGS.
     '''
-    tags = list(tags)[:self.MAX_TAGS]
+    if tags is None:
+      return False
+    tags = list(tags)
+    if len(tags) > self.MAX_TAGS:
+      return False
+    expected_len = 2 + len(tags) * 12
+    if expected_len > self.MAX_PAYLOAD:
+      return False
     data = self._u16_bytes(len(tags))
     for tag in tags:
-      data += [tag.tag_index, tag.tag_type, tag.scope_type]
+      data += [tag.tag_index, tag.tag_type, tag.scope_type, tag.io_index]
       data += self._sb16_bytes(tag.center_x)
       data += self._sb16_bytes(tag.center_y)
       data += self._u16_bytes(tag.width)
       data += self._u16_bytes(tag.height)
-    return self._request_frame(self.CTRL_DETECTION_RANGE, self.CMD_DETECTION_RANGE_SET_TAGS_FROM_CONFIG, data) is not None
+    packet = self._request_frame(self.CTRL_DETECTION_RANGE, self.CMD_DETECTION_RANGE_SET_TAGS_FROM_CONFIG, data)
+    if packet is None:
+      return False
+    if len(packet.data) != expected_len:
+      return False
+    if self._u16(packet.data, 0) != len(tags):
+      return False
+    self._parse_tag_list(packet.data)
+    return len(self._tags) == len(tags)
 
   def get_tag_info(self):
     '''!
@@ -806,6 +840,7 @@ class DFRobot_C4004(object):
       @return true if succeeded, otherwise false.
     '''
     data = [self.RANGE_TRAJECTORY, 1 if learning else 0]
+    self._flush_input()
     if not self._send_command(self.CTRL_DETECTION_RANGE, self.CMD_DETECTION_RANGE_SET_RANGE, data):
       return False
 
@@ -1073,7 +1108,53 @@ class DFRobot_C4004(object):
     packet = self._request_frame(control, cmd, [self.QUERY_DATA])
     if packet is None:
       return ''
-    return bytes([b for b in packet.data if b != 0 and 0x20 <= b <= 0x7E]).decode('ascii', errors='ignore')
+    return ''.join(chr(b) for b in packet.data if b != 0)
+
+  def _set_output_value(self, output, value):
+    if isinstance(output, list):
+      if len(output) == 0:
+        output.append(value)
+      else:
+        output[0] = value
+      return True
+    if isinstance(output, dict):
+      output['value'] = value
+      return True
+    if hasattr(output, 'value'):
+      output.value = value
+      return True
+    return False
+
+  def _copy_tag(self, tag):
+    copy = TagConfig()
+    copy.tag_index = tag.tag_index
+    copy.tag_type = tag.tag_type
+    copy.scope_type = tag.scope_type
+    copy.io_index = tag.io_index
+    copy.center_x = tag.center_x
+    copy.center_y = tag.center_y
+    copy.width = tag.width
+    copy.height = tag.height
+    return copy
+
+  def _upsert_tag_cache(self, tag):
+    copy = self._copy_tag(tag)
+    for i, cached in enumerate(self._tags):
+      if cached.tag_index == copy.tag_index:
+        self._tags[i] = copy
+        return
+    if len(self._tags) < self.MAX_TAGS:
+      self._tags.append(copy)
+
+  def _flush_input(self):
+    if self.ser is None:
+      return
+    if hasattr(self.ser, 'reset_input_buffer'):
+      self.ser.reset_input_buffer()
+      return
+    if hasattr(self.ser, 'in_waiting'):
+      while self.ser.in_waiting:
+        self.ser.read(self.ser.in_waiting)
 
   def _send_command(self, control, cmd, data):
     if self.ser is None:
@@ -1085,12 +1166,11 @@ class DFRobot_C4004(object):
     frame += data
     checksum = sum(frame) & 0xFF
     frame += bytearray([checksum, self.FRAME_TAIL1, self.FRAME_TAIL2])
-    if hasattr(self.ser, 'reset_input_buffer'):
-      self.ser.reset_input_buffer()
     self.ser.write(frame)
     return True
 
-  def _request_frame(self, control, cmd, data, timeout=0.25):
+  def _request_frame(self, control, cmd, data, timeout=0.2):
+    self._flush_input()
     if not self._send_command(control, cmd, data):
       return None
     start = time.time()
@@ -1152,17 +1232,9 @@ class DFRobot_C4004(object):
     elif packet.control == self.CTRL_PRESENCE and packet.cmd == self.CMD_PRESENCE_QUERY_ENABLE and len(packet.data) > 0:
       self._presence_enable = packet.data[0]
     elif packet.control == self.CTRL_PRESENCE and packet.cmd in (self.CMD_PRESENCE_REPORT, self.CMD_PRESENCE_QUERY_STATE) and len(packet.data) > 0:
-      value = packet.data[0]
-      if value in (self.NO_PRESENCE, self.PRESENCE, self.PRESENCE_UNKNOWN):
-        self._presence = value
-      else:
-        self._presence = self.PRESENCE_UNKNOWN
+      self._presence = packet.data[0]
     elif packet.control == self.CTRL_PRESENCE and packet.cmd in (self.CMD_PRESENCE_MOTION_REPORT, self.CMD_PRESENCE_QUERY_MOTION) and len(packet.data) > 0:
-      value = packet.data[0]
-      if value in (self.MOTION_NONE, self.MOTION_STATIC, self.MOTION_ACTIVE, self.MOTION_UNKNOWN):
-        self._motion_state = value
-      else:
-        self._motion_state = self.MOTION_UNKNOWN
+      self._motion_state = packet.data[0]
     elif packet.control == self.CTRL_TRAJECTORY and packet.cmd in (self.CMD_TRAJECTORY_TARGET_REPORT, self.CMD_TRAJECTORY_QUERY_TARGET):
       self._parse_targets(packet.data)
     elif packet.control == self.CTRL_TRAJECTORY and packet.cmd == self.CMD_TRAJECTORY_QUERY_TRAJECTORY_LED and len(packet.data) > 0:
@@ -1204,12 +1276,9 @@ class DFRobot_C4004(object):
       offset = i * target_len
       target = TargetInfo()
       target.index = data[offset]
-      target.kinesia = data[offset + 1]
-      feature = data[offset + 2]
-      if feature in (self.STATIC, self.MOTION, self.UNCERTAIN, self.UNKNOWN):
-        target.target_feature = feature
-      else:
-        target.target_feature = self.UNKNOWN
+      target.target_size = data[offset + 1]
+      target.kinesia = target.target_size
+      target.target_feature = data[offset + 2]
       target.x = self._sb16(data, offset + 3)
       target.y = self._sb16(data, offset + 5)
       target.height = self._sb16(data, offset + 7)
@@ -1220,36 +1289,42 @@ class DFRobot_C4004(object):
     self._tags = []
     if len(data) < 2:
       return
-    count = min(self._u16(data, 0), self.MAX_TAGS, (len(data) - 2) // 11)
+    tag_len = 12
+    count = min(self._u16(data, 0), self.MAX_TAGS)
+    available_len = len(data) - 2
+    if available_len < count * tag_len:
+      count = available_len // tag_len
     for i in range(count):
-      offset = 2 + i * 11
+      offset = 2 + i * tag_len
       tag = TagConfig()
       tag.tag_index = data[offset]
       tag.tag_type = data[offset + 1]
       tag.scope_type = data[offset + 2]
-      tag.center_x = self._sb16(data, offset + 3)
-      tag.center_y = self._sb16(data, offset + 5)
-      tag.width = self._u16(data, offset + 7)
-      tag.height = self._u16(data, offset + 9)
+      tag.io_index = data[offset + 3]
+      tag.center_x = self._sb16(data, offset + 4)
+      tag.center_y = self._sb16(data, offset + 6)
+      tag.width = self._u16(data, offset + 8)
+      tag.height = self._u16(data, offset + 10)
       self._tags.append(tag)
 
   def _parse_tag_event(self, data):
     info = TagInfo()
-    if len(data) < 7:
+    if len(data) < 8:
       self._tag_info = info
       self._tag_info_valid = False
       return
     info.tag_index = data[0]
     info.tag_type = data[1]
-    info.center_x = self._sb16(data, 2)
-    info.center_y = self._sb16(data, 4)
-    if info.tag_type == self.TAG_TYPE_ENTER_EXIT:
-      info.enter_exit = data[6]
-    elif info.tag_type == self.TAG_TYPE_APPROACH_AWAY:
-      info.motion_dir = data[6]
-    elif info.tag_type == self.TAG_TYPE_PEOPLE_COUNTING:
-      info.motion_num = (data[6] >> 4) & 0x0F
-      info.static_num = data[6] & 0x0F
+    info.io_index = data[2]
+    info.center_x = self._sb16(data, 3)
+    info.center_y = self._sb16(data, 5)
+    if info.tag_type == self.TAG_BOUNDARY:
+      info.enter_exit = data[7]
+    elif info.tag_type == self.TAG_APPROACH_AWAY:
+      info.motion_dir = data[7]
+    elif info.tag_type == self.TAG_PEOPLE_COUNTING:
+      info.motion_num = (data[7] >> 4) & 0x0F
+      info.static_num = data[7] & 0x0F
     self._tag_info = info
     self._tag_info_valid = True
 

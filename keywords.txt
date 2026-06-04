@@ -105,11 +105,11 @@ eMotion	LITERAL1
 eUncertain	LITERAL1
 eUnknown	LITERAL1
 
-eTagTypeNone	LITERAL1
-eTagTypeEnterExit	LITERAL1
-eTagTypeApproachAway	LITERAL1
-eTagTypePeopleCounting	LITERAL1
-eTagTypeNoise	LITERAL1
+eTagNone	LITERAL1
+eTagBoundary	LITERAL1
+eTagApproachAway	LITERAL1
+eTagPeopleCounting	LITERAL1
+eTagNoise	LITERAL1
 
 eTagRangeCircle	LITERAL1
 eTagRangeRectangle	LITERAL1

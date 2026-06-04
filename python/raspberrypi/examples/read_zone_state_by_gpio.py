@@ -40,6 +40,12 @@ def main():
     print('DFRobot C4004 begin failed, retrying...')
     time.sleep(1)
 
+  if c4004.set_check_to_active_frames(7):
+    print('Set check-to-active frames success.')
+  else:
+    print('Set check-to-active frames failed.')
+  time.sleep(0.05)
+
   range_info = FourSidedRange()
   range_info.mode = c4004.RANGE_FOUR_SIDE
   range_info.x_positive_cm = 200
@@ -60,8 +66,9 @@ def main():
 
   tag0 = TagConfig()
   tag0.tag_index = 0
-  tag0.tag_type = c4004.TAG_TYPE_PEOPLE_COUNTING
+  tag0.tag_type = c4004.TAG_PEOPLE_COUNTING
   tag0.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag0.io_index = 2
   tag0.center_x = 0
   tag0.center_y = 100
   tag0.width = 120
@@ -70,8 +77,9 @@ def main():
 
   tag1 = TagConfig()
   tag1.tag_index = 1
-  tag1.tag_type = c4004.TAG_TYPE_PEOPLE_COUNTING
+  tag1.tag_type = c4004.TAG_PEOPLE_COUNTING
   tag1.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag1.io_index = 3
   tag1.center_x = 100
   tag1.center_y = 220
   tag1.width = 120
@@ -80,8 +88,9 @@ def main():
 
   tag2 = TagConfig()
   tag2.tag_index = 2
-  tag2.tag_type = c4004.TAG_TYPE_PEOPLE_COUNTING
+  tag2.tag_type = c4004.TAG_PEOPLE_COUNTING
   tag2.scope_type = c4004.TAG_RANGE_CIRCLE
+  tag2.io_index = 4
   tag2.center_x = -80
   tag2.center_y = 350
   tag2.width = 80
@@ -90,8 +99,9 @@ def main():
 
   tag3 = TagConfig()
   tag3.tag_index = 3
-  tag3.tag_type = c4004.TAG_TYPE_PEOPLE_COUNTING
+  tag3.tag_type = c4004.TAG_PEOPLE_COUNTING
   tag3.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag3.io_index = 5
   tag3.center_x = 0
   tag3.center_y = 500
   tag3.width = 160
@@ -100,8 +110,9 @@ def main():
 
   tag4 = TagConfig()
   tag4.tag_index = 4
-  tag4.tag_type = c4004.TAG_TYPE_PEOPLE_COUNTING
+  tag4.tag_type = c4004.TAG_PEOPLE_COUNTING
   tag4.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag4.io_index = 6
   tag4.center_x = -100
   tag4.center_y = 620
   tag4.width = 100
