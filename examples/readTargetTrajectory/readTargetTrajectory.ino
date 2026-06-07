@@ -20,55 +20,55 @@ DFRobot_C4004 c4004(&Serial1, 115200, /*D2*/ D2, /*D3*/ D3);
 DFRobot_C4004 c4004(&Serial1, 115200);
 #endif
 
-const char *targetFeatureToString(eTargetFeature_t feature)
+const __FlashStringHelper *targetFeatureToString(eTargetFeature_t feature)
 {
   if (feature == eStatic) {
-    return "Static";
+    return F("Static");
   } else if (feature == eMotion) {
-    return "Motion";
+    return F("Motion");
   } else if (feature == eUncertain) {
-    return "Uncertain";
+    return F("Uncertain");
   } else {
-    return "Unknown";
+    return F("Unknown");
   }
 }
 
 void printTrajectoryData(eGetDataMode_t dataMode)
 {
-  const char *title = NULL;
-  const char *modeText = NULL;
+  const __FlashStringHelper *title = NULL;
+  const __FlashStringHelper *modeText = NULL;
   sTargetInfo_t targets[MAX_TARGETS];
   uint8_t count = c4004.getTargetList(targets, MAX_TARGETS, dataMode);
 
   if (dataMode == eGetDataActive) {
-    title = "======================TrajectoryActive=======================";
-    modeText = "Active Query";
+    title = F("======================TrajectoryActive=======================");
+    modeText = F("Active Query");
   } else {
-    title = "======================TrajectoryReport=======================";
-    modeText = "Passive Report";
+    title = F("======================TrajectoryReport=======================");
+    modeText = F("Passive Report");
   }
   Serial.println(title);
-  Serial.print("Mode: ");
+  Serial.print(F("Mode: "));
   Serial.println(modeText);
-  Serial.print("Target Count: ");
+  Serial.print(F("Target Count: "));
   Serial.println(count);
   if (count == 0) {
-    Serial.println("No target.");
+    Serial.println(F("No target."));
   } else {
-    Serial.println("Row\tID\tSize\tFeature\tX\tY\tSpeed");
+    Serial.println(F("Row\tID\tSize\tFeature\tX\tY\tSpeed"));
     for (uint8_t i = 0; i < count; i++) {
       Serial.print(i);
-      Serial.print("\t");
+      Serial.print(F("\t"));
       Serial.print(targets[i].index);
-      Serial.print("\t");
+      Serial.print(F("\t"));
       Serial.print(targets[i].targetSize);
-      Serial.print("\t");
+      Serial.print(F("\t"));
       Serial.print(targetFeatureToString(targets[i].targetFeature));
-      Serial.print("\t");
+      Serial.print(F("\t"));
       Serial.print(targets[i].x);
-      Serial.print("\t");
+      Serial.print(F("\t"));
       Serial.print(targets[i].y);
-      Serial.print("\t");
+      Serial.print(F("\t"));
       Serial.println(targets[i].speed);
     }
   }
@@ -80,14 +80,14 @@ void setup()
   Serial.begin(115200);
 
   while (!c4004.begin()) {
-    Serial.println("DFRobot C4004 begin failed, retrying...");
+    Serial.println(F("DFRobot C4004 begin failed, retrying..."));
     delay(1000);
   }
 
   if (c4004.setCheckToActiveFrames(7)) {
-    Serial.println("Set check-to-active frames success.");
+    Serial.println(F("Set check-to-active frames success."));
   } else {
-    Serial.println("Set check-to-active frames failed.");
+    Serial.println(F("Set check-to-active frames failed."));
   }
   delay(50);
 
@@ -98,27 +98,27 @@ void setup()
   range.yPositiveCm = 700;
   range.yNegativeCm = 0;
   if (c4004.setFourSidedRangeMode(range)) {
-    Serial.println("Set boundary detection range success.");
+    Serial.println(F("Set boundary detection range success."));
   } else {
-    Serial.println("Set boundary detection range failed.");
+    Serial.println(F("Set boundary detection range failed."));
   }
 
   if (c4004.setTrajectoryTrackEnable(true)) {
-    Serial.println("Set trajectory track enable success.");
+    Serial.println(F("Set trajectory track enable success."));
   } else {
-    Serial.println("Set trajectory track enable failed.");
+    Serial.println(F("Set trajectory track enable failed."));
   }
 
   if (c4004.setMotionLed(true)) {
-    Serial.println("Set motion LED success.");
+    Serial.println(F("Set motion LED success."));
   } else {
-    Serial.println("Set motion LED failed.");
+    Serial.println(F("Set motion LED failed."));
   }
 
   if (c4004.setTrajectoryLed(true)) {
-    Serial.println("Set trajectory LED success.");
+    Serial.println(F("Set trajectory LED success."));
   } else {
-    Serial.println("Set trajectory LED failed.");
+    Serial.println(F("Set trajectory LED failed."));
   }
 }
 

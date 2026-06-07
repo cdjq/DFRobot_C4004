@@ -43,9 +43,9 @@ const char *tagTypeToString(eTagType_t type)
 void printTagEvent(const sTagInfo_t &info)
 {
   char line[96];
-  Serial.println("======================================================================");
-  Serial.println("============================TagEventReport============================");
-  Serial.println("======================================================================");
+  Serial.println(F("======================================================================"));
+  Serial.println(F("============================TagEventReport============================"));
+  Serial.println(F("======================================================================"));
   snprintf(line, sizeof(line), "Tag Index : %u", info.tagIndex);
   Serial.println(line);
   snprintf(line, sizeof(line), "Tag Type  : %s", tagTypeToString(info.tagType));
@@ -71,46 +71,46 @@ void printTagEvent(const sTagInfo_t &info)
   Serial.println();
 }
 
-void printTagList(const char *title, sTagConfig_t *tags, uint8_t count)
+void printTagList(const __FlashStringHelper *title, sTagConfig_t *tags, uint8_t count)
 {
-  Serial.println("======================================================================");
+  Serial.println(F("======================================================================"));
   Serial.println(title);
-  Serial.println("----------------------------------------------------------------------");
-  Serial.print("Tag count: ");
+  Serial.println(F("----------------------------------------------------------------------"));
+  Serial.print(F("Tag count: "));
   Serial.println(count);
   if (count == 0) {
-    Serial.println("No tag.");
+    Serial.println(F("No tag."));
     Serial.println();
     return;
   }
 
-  Serial.println("Idx\tType\t\tRange\t\tIO\tCenterX\tCenterY\tWidth\tHeight");
-  Serial.println("----------------------------------------------------------------------");
+  Serial.println(F("Idx\tType\t\tRange\t\tIO\tCenterX\tCenterY\tWidth\tHeight"));
+  Serial.println(F("----------------------------------------------------------------------"));
   for (uint8_t i = 0; i < count; i++) {
     const char *typeText = tagTypeToString(tags[i].tagType);
     const char *rangeText = tags[i].scopeType == eTagRangeCircle ? "Circle" : "Rectangle";
     Serial.print(tags[i].tagIndex);
-    Serial.print("\t");
+    Serial.print(F("\t"));
     Serial.print(typeText);
     if (strlen(typeText) <= 8) {
-      Serial.print("\t\t");
+      Serial.print(F("\t\t"));
     } else {
-      Serial.print("\t");
+      Serial.print(F("\t"));
     }
     Serial.print(rangeText);
     if (strlen(rangeText) <= 8) {
-      Serial.print("\t\t");
+      Serial.print(F("\t\t"));
     } else {
-      Serial.print("\t");
+      Serial.print(F("\t"));
     }
     Serial.print(tags[i].ioIndex);
-    Serial.print("\t");
+    Serial.print(F("\t"));
     Serial.print(tags[i].centerX);
-    Serial.print("\t");
+    Serial.print(F("\t"));
     Serial.print(tags[i].centerY);
-    Serial.print("\t");
+    Serial.print(F("\t"));
     Serial.print(tags[i].width);
-    Serial.print("\t");
+    Serial.print(F("\t"));
     Serial.println(tags[i].height);
   }
   Serial.println();
@@ -121,14 +121,14 @@ void setup()
   Serial.begin(115200);
 
   while (!c4004.begin()) {
-    Serial.println("DFRobot C4004 begin failed, retrying...");
+    Serial.println(F("DFRobot C4004 begin failed, retrying..."));
     delay(1000);
   }
 
   if (c4004.setCheckToActiveFrames(7)) {
-    Serial.println("Set check-to-active frames success.");
+    Serial.println(F("Set check-to-active frames success."));
   } else {
-    Serial.println("Set check-to-active frames failed.");
+    Serial.println(F("Set check-to-active frames failed."));
   }
   delay(50);
 
@@ -139,15 +139,15 @@ void setup()
   range.yPositiveCm = 700;
   range.yNegativeCm = 0;
   if (c4004.setFourSidedRangeMode(range)) {
-    Serial.println("Set boundary detection range success.");
+    Serial.println(F("Set boundary detection range success."));
   } else {
-    Serial.println("Set boundary detection range failed.");
+    Serial.println(F("Set boundary detection range failed."));
   }
 
   if (c4004.clearAllTags()) {
-    Serial.println("Clear all tags success.");
+    Serial.println(F("Clear all tags success."));
   } else {
-    Serial.println("Clear all tags failed.");
+    Serial.println(F("Clear all tags failed."));
   }
 
   sTagConfig_t setTags[5] = {};
@@ -208,14 +208,14 @@ void setup()
   setTags[4].height = 120;
 
   if (c4004.setTagsFromConfig(setTags, 5)) {
-    Serial.println("Set 5 tags from config success.");
+    Serial.println(F("Set 5 tags from config success."));
   } else {
-    Serial.println("Set 5 tags from config failed.");
+    Serial.println(F("Set 5 tags from config failed."));
   }
 
   sTagConfig_t tags[MAX_TAGS];
   uint8_t count = c4004.getTags(tags, MAX_TAGS);
-  printTagList("Active tag list after setup:", tags, count);
+  printTagList(F("Active tag list after setup:"), tags, count);
 }
 
 void loop()

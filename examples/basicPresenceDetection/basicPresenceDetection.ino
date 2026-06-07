@@ -25,28 +25,28 @@ void setup()
   Serial.begin(115200);
 
   while (!c4004.begin()) {
-    Serial.println("DFRobot C4004 begin failed, retrying...");
+    Serial.println(F("DFRobot C4004 begin failed, retrying..."));
     delay(1000);
   }
-  Serial.println("DFRobot C4004 begin success.");
+  Serial.println(F("DFRobot C4004 begin success."));
 
   if (c4004.setCheckToActiveFrames(7)) {
-    Serial.println("Set check-to-active frames success.");
+    Serial.println(F("Set check-to-active frames success."));
   } else {
-    Serial.println("Set check-to-active frames failed.");
+    Serial.println(F("Set check-to-active frames failed."));
   }
   delay(50);
 
   if (c4004.setMotionLed(true)) {
-    Serial.println("Set motion LED success.");
+    Serial.println(F("Set motion LED success."));
   } else {
-    Serial.println("Set motion LED failed.");
+    Serial.println(F("Set motion LED failed."));
   }
 
   if (c4004.setTrajectoryLed(true)) {
-    Serial.println("Set trajectory LED success.");
+    Serial.println(F("Set trajectory LED success."));
   } else {
-    Serial.println("Set trajectory LED failed.");
+    Serial.println(F("Set trajectory LED failed."));
   }
 
   sFourSidedRange range;
@@ -56,30 +56,30 @@ void setup()
   range.yPositiveCm = 700;
   range.yNegativeCm = 0;
   if (c4004.setFourSidedRangeMode(range)) {
-    Serial.println("Set boundary detection range success.");
+    Serial.println(F("Set boundary detection range success."));
   } else {
-    Serial.println("Set boundary detection range failed.");
+    Serial.println(F("Set boundary detection range failed."));
   }
 
   if (c4004.setRealTimePeopleTime(2)) {
-    Serial.println("Set RealTimePeopleTime success.");
+    Serial.println(F("Set RealTimePeopleTime success."));
   } else {
-    Serial.println("Set RealTimePeopleTime failed.");
+    Serial.println(F("Set RealTimePeopleTime failed."));
   }
 
   if (c4004.setPresenceEnable(true)) {
-    Serial.println("Set presence enable success.");
+    Serial.println(F("Set presence enable success."));
   } else {
-    Serial.println("Set presence enable failed.");
+    Serial.println(F("Set presence enable failed."));
   }
 
   // Set to true if you want to clear the current people counter on boot.
   bool clearCountOnBoot = false;
   if (clearCountOnBoot) {
     if (c4004.clearPeopleCount()) {
-      Serial.println("Clear people count success.");
+      Serial.println(F("Clear people count success."));
     } else {
-      Serial.println("Clear people count failed.");
+      Serial.println(F("Clear people count failed."));
     }
   }
 }
@@ -90,51 +90,51 @@ void loop()
 
   if (event == eEventPresence) {
     ePresenceState_t presence = c4004.getPresenceState();
-    Serial.print("Human presence state: ");
+    Serial.print(F("Human presence state: "));
     if (presence == eNoPresence) {
-      Serial.println("None");
+      Serial.println(F("None"));
     } else if (presence == ePresence) {
-      Serial.println("Presence");
+      Serial.println(F("Presence"));
     }
   } else if (event == eEventMotion) {
     uint8_t motion = c4004.getMotionState();
-    Serial.print("Motion state: ");
+    Serial.print(F("Motion state: "));
     if (motion == eMotionStatic) {
-      Serial.println("Static");
+      Serial.println(F("Static"));
     } else if (motion == eMotionActive) {
-      Serial.println("Motion");
+      Serial.println(F("Motion"));
     } else {
-      Serial.println("None");
+      Serial.println(F("None"));
     }
   } else if (event == eEventPeopleCount) {
     uint8_t count = c4004.getPeopleTime(eGetDataReport);
-    Serial.print("Number of trajectories: ");
+    Serial.print(F("Number of trajectories: "));
     Serial.println(count);
   }
 
   static uint32_t lastQuery = 0;
   if (millis() - lastQuery > 2000) {
     lastQuery = millis();
-    Serial.print("Number of trajectories: ");
+    Serial.print(F("Number of trajectories: "));
     //Serial.println(c4004.getPeopleTime(eGetDataActive)); // Query active data
     Serial.println(c4004.getPeopleTime(eGetDataReport)); // Query report data
 
     ePresenceState_t queryPresence = c4004.getPresenceState();
-    Serial.print("Human presence state: ");
+    Serial.print(F("Human presence state: "));
     if (queryPresence == eNoPresence) {
-      Serial.println("None");
+      Serial.println(F("None"));
     } else if (queryPresence == ePresence) {
-      Serial.println("Presence");
+      Serial.println(F("Presence"));
     }
 
     eMotionState_t queryMotion = c4004.getMotionState();
-    Serial.print("Motion state: ");
+    Serial.print(F("Motion state: "));
     if (queryMotion == eMotionNone) {
-      Serial.println("None");
+      Serial.println(F("None"));
     } else if (queryMotion == eMotionStatic) {
-      Serial.println("Static");
+      Serial.println(F("Static"));
     } else if (queryMotion == eMotionActive) {
-      Serial.println("Motion");
+      Serial.println(F("Motion"));
     }
   }
 }

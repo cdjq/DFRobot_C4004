@@ -25,27 +25,27 @@ void setup()
   Serial.begin(115200);
 
   while (!c4004.begin()) {
-    Serial.println("DFRobot C4004 begin failed, retrying...");
+    Serial.println(F("DFRobot C4004 begin failed, retrying..."));
     delay(1000);
   }
 
-  Serial.print("Hardware version: ");
+  Serial.print(F("Hardware version: "));
   Serial.println(c4004.getHardwareVersion());
-  Serial.print("Firmware version: ");
+  Serial.print(F("Firmware version: "));
   Serial.println(c4004.getFirmwareVersion());
 
-  Serial.println("Factory reset...");
+  Serial.println(F("Module factory resetting..."));
   if (c4004.factoryReset()) {
-    Serial.println("Factory reset success.");
+    Serial.println(F("Factory reset success."));
   } else {
-    Serial.println("Factory reset failed.");
+    Serial.println(F("Factory reset failed."));
   }
 
-  Serial.println("Reboot module...");
+  Serial.println(F("Module rebooting ..."));
   if (c4004.reset()) {
-    Serial.println("Reboot command sent.");
+    Serial.println(F("Reboot success."));
   } else {
-    Serial.println("Reboot command failed.");
+    Serial.println(F("Reboot failed."));
   }
 }
 

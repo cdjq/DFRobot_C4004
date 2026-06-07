@@ -33,14 +33,14 @@ void setup()
   }
 
   while (!c4004.begin()) {
-    Serial.println("DFRobot C4004 begin failed, retrying...");
+    Serial.println(F("DFRobot C4004 begin failed, retrying..."));
     delay(1000);
   }
 
   if (c4004.setCheckToActiveFrames(7)) {
-    Serial.println("Set check-to-active frames success.");
+    Serial.println(F("Set check-to-active frames success."));
   } else {
-    Serial.println("Set check-to-active frames failed.");
+    Serial.println(F("Set check-to-active frames failed."));
   }
   delay(50);
 
@@ -51,15 +51,15 @@ void setup()
   range.yPositiveCm = 700;
   range.yNegativeCm = 0;
   if (c4004.setFourSidedRangeMode(range)) {
-    Serial.println("Set boundary detection range success.");
+    Serial.println(F("Set boundary detection range success."));
   } else {
-    Serial.println("Set boundary detection range failed.");
+    Serial.println(F("Set boundary detection range failed."));
   }
 
   if (c4004.clearAllTags()) {
-    Serial.println("Clear all tags success.");
+    Serial.println(F("Clear all tags success."));
   } else {
-    Serial.println("Clear all tags failed.");
+    Serial.println(F("Clear all tags failed."));
   }
 
   sTagConfig_t setTags[5];
@@ -120,21 +120,21 @@ void setup()
   setTags[4].height = 120;
 
   if (c4004.setTagsFromConfig(setTags, 5)) {
-    Serial.println("Set 5 tags from config success.");
+    Serial.println(F("Set 5 tags from config success."));
   } else {
-    Serial.println("Set 5 tags from config failed.");
+    Serial.println(F("Set 5 tags from config failed."));
   }
 
   if (c4004.setMotionLed(true)) {
-    Serial.println("Set motion LED success.");
+    Serial.println(F("Set motion LED success."));
   } else {
-    Serial.println("Set motion LED failed.");
+    Serial.println(F("Set motion LED failed."));
   }
 
   if (c4004.setRealTimePeopleTime(5)) {
-    Serial.println("Set RealTimePeopleTime success.");
+    Serial.println(F("Set RealTimePeopleTime success."));
   } else {
-    Serial.println("Set RealTimePeopleTime failed.");
+    Serial.println(F("Set RealTimePeopleTime failed."));
   }
 }
 
@@ -145,22 +145,22 @@ void loop()
   static uint32_t lastPrint = 0;
   if (millis() - lastPrint > 1000) {
     lastPrint = millis();
-    Serial.println("=============================================");
-    Serial.println("GPIO presence (HIGH=Presence, LOW=None):");
-    Serial.println("GPIO 1 = Whole area, GPIO 2-6 = Divided zones");
+    Serial.println(F("============================================="));
+    Serial.println(F("GPIO presence (HIGH=Presence, LOW=None):"));
+    Serial.println(F("GPIO 1 = Whole area, GPIO 2-6 = Divided zones"));
     for (uint8_t i = 0; i < 6; i++) {
       bool hasPresence = (digitalRead(zonePins[i]) == HIGH);
-      Serial.print("GPIO ");
+      Serial.print(F("GPIO "));
       Serial.print(i + 1);
       if (i == 0) {
-        Serial.print(" (Whole area): ");
+        Serial.print(F(" (Whole area): "));
       } else {
-        Serial.print(" (Zone ");
+        Serial.print(F(" (Zone "));
         Serial.print(i);
-        Serial.print("): ");
+        Serial.print(F("): "));
       }
-      Serial.println(hasPresence ? "Presence" : "None");
+      Serial.println(hasPresence ? F("Presence") : F("None"));
     }
-    Serial.println("=============================================");
+    Serial.println(F("============================================="));
   }
 }
