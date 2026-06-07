@@ -37,7 +37,11 @@
 
 #define MAX_TARGETS           8
 #define MAX_TAGS              32
+#ifdef ARDUINO
+#define MAX_POINTS            50
+#else
 #define MAX_POINTS            150
+#endif
 #define MAX_PAYLOAD           (3 + MAX_POINTS * 4)
 #define QUERY_DATA            0x0F
 #define FRAME_HEAD1           0x53
