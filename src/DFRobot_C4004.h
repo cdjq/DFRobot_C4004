@@ -36,7 +36,11 @@
 #endif
 
 #define MAX_TARGETS           8
+#if defined(ARDUINO_AVR_UNO)
+#define MAX_POINTS            64
+#else
 #define MAX_POINTS            150
+#endif
 #define MAX_PAYLOAD           (3 + MAX_POINTS * 4)
 #define QUERY_DATA            0x0F
 #define FRAME_HEAD1           0x53
