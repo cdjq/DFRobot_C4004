@@ -52,7 +52,7 @@ void setup()
 
   Serial.println(F(" ====================Init Params==================="));
 
-  sFourSidedRange range;
+  sFourSidedRange_t range;
   range.mode = eRangeFourSide;
   range.xPositiveCm = 500;
   range.xNegativeCm = -500;

@@ -44,7 +44,7 @@ void setup()
   }
   delay(50);
 
-  sFourSidedRange range;
+  sFourSidedRange_t range;
   range.mode = eRangeFourSide;
   range.xPositiveCm = 200;
   range.xNegativeCm = -200;

@@ -55,13 +55,13 @@ void printTrajectoryData(eGetDataMode_t dataMode)
   if (count == 0) {
     Serial.println(F("No target."));
   } else {
-    Serial.println(F("Row\tID\tSize\tFeature\tX\tY\tSpeed"));
+    Serial.println(F("Row\tID\tKinesia\tFeature\tX\tY\tSpeed"));
     for (uint8_t i = 0; i < count; i++) {
       Serial.print(i);
       Serial.print(F("\t"));
       Serial.print(targets[i].index);
       Serial.print(F("\t"));
-      Serial.print(targets[i].targetSize);
+      Serial.print(targets[i].kinesia);
       Serial.print(F("\t"));
       Serial.print(targetFeatureToString(targets[i].targetFeature));
       Serial.print(F("\t"));
@@ -91,7 +91,7 @@ void setup()
   }
   delay(50);
 
-  sFourSidedRange range;
+  sFourSidedRange_t range;
   range.mode = eRangeFourSide;
   range.xPositiveCm = 200;
   range.xNegativeCm = -200;

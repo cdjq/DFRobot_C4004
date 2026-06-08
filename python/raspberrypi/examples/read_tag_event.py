@@ -18,7 +18,7 @@ while cur_path != os.path.dirname(cur_path):
     sys.path.insert(0, cur_path)
     break
   cur_path = os.path.dirname(cur_path)
-from DFRobot_C4004 import DFRobot_C4004, TagConfig, FourSidedRange
+from DFRobot_C4004 import DFRobot_C4004, TagConfig, FourSidedRange_t
 
 c4004 = DFRobot_C4004('/dev/ttyAMA0', 115200)
 
@@ -109,7 +109,7 @@ def main():
     print('Set check-to-active frames failed.')
   time.sleep(0.05)
 
-  range_info = FourSidedRange()
+  range_info = FourSidedRange_t()
   range_info.mode = c4004.RANGE_FOUR_SIDE
   range_info.x_positive_cm = 200
   range_info.x_negative_cm = -200
@@ -187,7 +187,7 @@ def main():
   else:
     print('Set 5 tags from config failed.')
 
-  tags = c4004.get_tags(c4004.GET_DATA_ACTIVE)
+  tags = c4004.get_tags()
   print_tag_list('Active tag list after setup:', tags)
 
   while True:

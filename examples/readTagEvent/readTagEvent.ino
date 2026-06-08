@@ -132,7 +132,7 @@ void setup()
   }
   delay(50);
 
-  sFourSidedRange range;
+  sFourSidedRange_t range;
   range.mode = eRangeFourSide;
   range.xPositiveCm = 200;
   range.xNegativeCm = -200;
@@ -207,15 +207,15 @@ void setup()
   setTags[4].width = 100;
   setTags[4].height = 120;
 
-  if (c4004.setTagsFromConfig(setTags, 5)) {
+  const uint8_t setTagCount = (uint8_t)(sizeof(setTags) / sizeof(setTags[0]));
+  if (c4004.setTagsFromConfig(setTags, setTagCount)) {
     Serial.println(F("Set 5 tags from config success."));
   } else {
     Serial.println(F("Set 5 tags from config failed."));
   }
 
-  sTagConfig_t tags[MAX_TAGS];
-  uint8_t count = c4004.getTags(tags, MAX_TAGS);
-  printTagList(F("Active tag list after setup:"), tags, count);
+  uint8_t count = c4004.getTags(setTags, setTagCount);
+  printTagList(F("Active tag list after setup:"), setTags, count);
 }
 
 void loop()

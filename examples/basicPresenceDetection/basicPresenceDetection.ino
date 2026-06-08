@@ -49,7 +49,7 @@ void setup()
     Serial.println(F("Set trajectory LED failed."));
   }
 
-  sFourSidedRange range;
+  sFourSidedRange_t range;
   range.mode = eRangeFourSide;
   range.xPositiveCm = 200;
   range.xNegativeCm = -200;

@@ -241,10 +241,10 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
 
   def get_tags(self, mode=GET_DATA_ACTIVE):
     '''!
-      @brief Get all tag configs from cache.
+      @brief Get all tag configs from the device.
       @param mode: data mode
-      @n   GET_DATA_ACTIVE: query latest tag list before reading cache
-      @n   GET_DATA_REPORT: read from cache only
+      @n   GET_DATA_ACTIVE: active query
+      @n   GET_DATA_REPORT: currently behaves the same as active query
       @return List[TagConfig]
     '''
 
@@ -292,14 +292,14 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
   def set_four_sided_range_mode(self, range_info):
     '''!
       @brief Set four-side boundary range (mode 0x04).
-      @param range_info: FourSidedRange object
+      @param range_info: FourSidedRange_t object
       @return True or False
     '''
 
   def get_four_sided_range_mode(self, range_info):
     '''!
       @brief Get four-side boundary range.
-      @param range_info: FourSidedRange object for output
+      @param range_info: FourSidedRange_t object for output
       @return True or False
     '''
 

@@ -72,7 +72,7 @@ void setup()
     Serial.println(F("Set presence enable failed."));
   }
 
-  sFourSidedRange range;
+  sFourSidedRange_t range;
   range.mode = eRangeFourSide;
   range.xPositiveCm = 200;
   range.xNegativeCm = -200;

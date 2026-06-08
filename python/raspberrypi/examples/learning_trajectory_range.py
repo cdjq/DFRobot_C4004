@@ -20,7 +20,7 @@ while cur_path != os.path.dirname(cur_path):
     sys.path.insert(0, cur_path)
     break
   cur_path = os.path.dirname(cur_path)
-from DFRobot_C4004 import DFRobot_C4004, FourSidedRange
+from DFRobot_C4004 import DFRobot_C4004, FourSidedRange_t
 
 c4004 = DFRobot_C4004('/dev/ttyAMA0', 115200)
 
@@ -65,7 +65,7 @@ def wait_command():
 def setup_params():
   print(' ====================Init Params===================')
 
-  range_info = FourSidedRange()
+  range_info = FourSidedRange_t()
   range_info.mode = c4004.RANGE_FOUR_SIDE
   range_info.x_positive_cm = 500
   range_info.x_negative_cm = -500

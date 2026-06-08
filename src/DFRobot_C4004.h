@@ -36,12 +36,7 @@
 #endif
 
 #define MAX_TARGETS           8
-#define MAX_TAGS              32
-#ifdef ARDUINO
-#define MAX_POINTS            50
-#else
 #define MAX_POINTS            150
-#endif
 #define MAX_PAYLOAD           (3 + MAX_POINTS * 4)
 #define QUERY_DATA            0x0F
 #define FRAME_HEAD1           0x53
@@ -271,10 +266,7 @@ typedef struct {
  */
 typedef struct {
   uint8_t index;
-  union {
-    uint8_t targetSize;
-    uint8_t kinesia;     // Backward-compatible alias for targetSize.
-  };
+  uint8_t kinesia;
   eTargetFeature_t targetFeature;
   int16_t x;
   int16_t y;
@@ -324,7 +316,7 @@ typedef struct {
 } sTagInfo_t;
 
 /**
- * @struct sFourSidedRange
+ * @struct sFourSidedRange_t
  * @brief Four-side detection boundary settings.
  */
 typedef struct {
@@ -333,7 +325,7 @@ typedef struct {
   int16_t xNegativeCm;
   int16_t yPositiveCm;
   int16_t yNegativeCm;
-} sFourSidedRange;
+} sFourSidedRange_t;
 
 /**
  * @struct sPacket_t
@@ -612,12 +604,12 @@ public:
    * getTags
    * @brief Obtain all tag configuration information.
    * @param tags: Pointer to receive the tag configuration.
-   * @param maxTags: Maximum number of tags to be read.
-   * @param mode: Data acquisition mode.
-   * @n          eGetDataActive: Query latest tag configuration before reading.
-   * @n          eGetDataReport: Read tag configuration from cached data.
+   * @param maxTags: Maximum number of tags to be written into tags.
+   * @param mode: Data acquisition mode kept for compatibility.
+   * @n          eGetDataActive: Query latest tag configuration from the device.
+   * @n          eGetDataReport: Currently behaves the same as eGetDataActive.
    * @n          ioIndex in each tag: 0 means unused; 2-6 maps to IO2-IO6.
-   * @return uint8_t: Number of tags read.
+   * @return uint8_t: Actual number of tags returned by the device.
   */
   uint8_t getTags(sTagConfig_t *tags, uint8_t maxTags, eGetDataMode_t mode = eGetDataActive);
 
@@ -690,7 +682,7 @@ public:
    * @n          yNegativeCm: Negative y boundary, in cm.
    * @return true: Set succeeded, false: Set failed.
   */
-  bool setFourSidedRangeMode(sFourSidedRange &range);
+  bool setFourSidedRangeMode(sFourSidedRange_t &range);
 
   /**
    * @fn getFourSidedRangeMode
@@ -698,7 +690,7 @@ public:
    * @param range: Pointer to receive boundary range settings.
    * @return true: Get succeeded, false: Get failed.
   */
-  bool getFourSidedRangeMode(sFourSidedRange *range);
+  bool getFourSidedRangeMode(sFourSidedRange_t *range);
 
   /**
    * @fn setTrajectoryRangeMode
@@ -846,7 +838,7 @@ protected:
   String queryString(uint8_t control, uint8_t cmd);
 
   void parseTargets(const uint8_t *data, uint16_t len);
-  void parseTagList(const uint8_t *data, uint16_t len);
+  uint8_t parseTagList(const uint8_t *data, uint16_t len, sTagConfig_t *tags, uint8_t maxTags);
   void parseTagEvent(const uint8_t *data, uint16_t len);
   void parseBoundaryRange(const uint8_t *data, uint16_t len);
   void parsePeopleCount(const uint8_t *data, uint16_t len);
@@ -871,7 +863,6 @@ private:
   uint32_t _baud;
   uint8_t _rxpin;
   uint8_t _txpin;
-  uint16_t _timeoutMs;
   uint32_t _lastHeartbeatMs;
   bool _heartbeat;
   bool _initFinished;
@@ -882,11 +873,9 @@ private:
   uint8_t _motionLed;
   sTargetInfo_t _targets[MAX_TARGETS];
   uint8_t _targetCount;
-  sTagConfig_t _tags[MAX_TAGS];
-  uint8_t _tagCount;
   sTagInfo_t _tagInfo;
   bool _tagInfoValid;
-  sFourSidedRange _rangeInfo;
+  sFourSidedRange_t _rangeInfo;
   uint8_t _peopleCount;
 };
 

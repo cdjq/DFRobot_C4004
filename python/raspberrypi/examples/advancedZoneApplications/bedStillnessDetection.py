@@ -25,7 +25,7 @@ while cur_path != os.path.dirname(cur_path):
     break
   cur_path = os.path.dirname(cur_path)
 
-from DFRobot_C4004 import DFRobot_C4004, TagConfig, FourSidedRange
+from DFRobot_C4004 import DFRobot_C4004, TagConfig, FourSidedRange_t
 
 try:
   import RPi.GPIO as GPIO
@@ -92,7 +92,7 @@ def setup_sensor_and_tags():
   else:
     print('Set presence enable failed.')
 
-  range_info = FourSidedRange()
+  range_info = FourSidedRange_t()
   range_info.mode = c4004.RANGE_FOUR_SIDE
   range_info.x_positive_cm = 200
   range_info.x_negative_cm = -200

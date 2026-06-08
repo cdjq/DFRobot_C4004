@@ -147,7 +147,7 @@ void setup()
     Serial.println(F("Read current check-to-active frames failed."));
   }
 
-  sFourSidedRange range;
+  sFourSidedRange_t range;
   range.mode = eRangeFourSide;
   range.xPositiveCm = 200;
   range.xNegativeCm = -200;

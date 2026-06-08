@@ -29,7 +29,6 @@ class TargetInfo(object):
   '''! @brief One tracked target information block. '''
   def __init__(self):
     self.index = 0
-    self.target_size = 0
     self.kinesia = 0
     self.target_feature = 0
     self.x = 0
@@ -65,7 +64,7 @@ class TagInfo(object):
     self.static_num = 0
 
 
-class FourSidedRange(object):
+class FourSidedRange_t(object):
   '''! @brief Four-side detection boundary settings. '''
   def __init__(self):
     self.mode = 0xFF
@@ -73,6 +72,10 @@ class FourSidedRange(object):
     self.x_negative_cm = 0
     self.y_positive_cm = 0
     self.y_negative_cm = 0
+
+
+# Backward-compatible alias.
+FourSidedRange = FourSidedRange_t
 
 
 class Point(object):
@@ -101,9 +104,9 @@ class DFRobot_C4004(object):
   FRAME_TAIL2 = 0x43
   QUERY_DATA = 0x0F
   MAX_TARGETS = 8
-  MAX_TAGS = 32
   MAX_POINTS = 150
   MAX_PAYLOAD = 3 + MAX_POINTS * 4
+  _TAG_CONFIG_LIMIT = 32
 
   CTRL_SYSTEM = 0x01
   CTRL_PRODUCT_INFO = 0x02
@@ -261,10 +264,9 @@ class DFRobot_C4004(object):
     self._trajectory_led = 0xFF
     self._motion_led = 0xFF
     self._targets = []
-    self._tags = []
     self._tag_info = TagInfo()
     self._tag_info_valid = False
-    self._range_info = FourSidedRange()
+    self._range_info = FourSidedRange_t()
     self._people_count = 0
 
   def begin(self):
@@ -682,17 +684,18 @@ class DFRobot_C4004(object):
 
   def get_tags(self, mode=GET_DATA_ACTIVE):
     '''!
-      @brief Get all cached tag configurations.
-      @param mode Data acquisition mode.
-      @n GET_DATA_ACTIVE: Query latest tag list before reading cache.
-      @n GET_DATA_REPORT: Read from cache only.
+      @brief Get all tag configurations from the device.
+      @param mode Data acquisition mode kept for compatibility.
+      @n GET_DATA_ACTIVE: Active query.
+      @n GET_DATA_REPORT: Currently behaves the same as GET_DATA_ACTIVE.
       @return List of TagConfig objects.
     '''
     if isinstance(mode, bool):
       mode = self.GET_DATA_ACTIVE if mode else self.GET_DATA_REPORT
-    if mode == self.GET_DATA_ACTIVE:
-      self._request_frame(self.CTRL_DETECTION_RANGE, self.CMD_DETECTION_RANGE_QUERY_TAGS, [self.QUERY_DATA])
-    return list(self._tags)
+    packet = self._request_frame(self.CTRL_DETECTION_RANGE, self.CMD_DETECTION_RANGE_QUERY_TAGS, [self.QUERY_DATA])
+    if packet is None:
+      return []
+    return self._parse_tag_list(packet.data)
 
   def set_tag(self, tag):
     '''!
@@ -712,8 +715,6 @@ class DFRobot_C4004(object):
       return self.TAG_SET_COMM_ERROR
     status = packet.data[3]
     if self.TAG_SET_SUCCESS <= status <= self.TAG_SET_INDEX_OUT_OF_RANGE:
-      if status == self.TAG_SET_SUCCESS:
-        self._upsert_tag_cache(tag)
       return status
     return self.TAG_SET_COMM_ERROR
 
@@ -732,7 +733,6 @@ class DFRobot_C4004(object):
       return False
     if self._u16(packet.data, 0) != (tag_index & 0xFFFF):
       return False
-    self._tags = [tag for tag in self._tags if tag.tag_index != (tag_index & 0xFF)]
     return True
 
   def clear_all_tags(self):
@@ -748,7 +748,6 @@ class DFRobot_C4004(object):
         return False
       if packet.data[0] != 0xFF:
         return False
-    self._tags = []
     return True
 
   def set_tags_from_config(self, tags):
@@ -756,12 +755,12 @@ class DFRobot_C4004(object):
       @brief Set tag configurations in coordinate mode.
       @param tags Iterable of TagConfig objects.
       @return true if succeeded, otherwise false.
-      @note The number of input tags is limited to MAX_TAGS.
+      @note The number of input tags is limited to 32 by protocol.
     '''
     if tags is None:
       return False
     tags = list(tags)
-    if len(tags) > self.MAX_TAGS:
+    if len(tags) > self._TAG_CONFIG_LIMIT:
       return False
     expected_len = 2 + len(tags) * 12
     if expected_len > self.MAX_PAYLOAD:
@@ -780,8 +779,7 @@ class DFRobot_C4004(object):
       return False
     if self._u16(packet.data, 0) != len(tags):
       return False
-    self._parse_tag_list(packet.data)
-    return len(self._tags) == len(tags)
+    return True
 
   def get_tag_info(self):
     '''!
@@ -796,7 +794,7 @@ class DFRobot_C4004(object):
   def set_four_sided_range_mode(self, range_info):
     '''!
       @brief Set four-side boundary detection range (mode 0x04).
-      @param range_info FourSidedRange object.
+      @param range_info FourSidedRange_t object.
       @return true if succeeded, otherwise false.
       @note Position values use sign-bit int16 encoding (bit15: 0=positive, 1=negative).
     '''
@@ -818,7 +816,7 @@ class DFRobot_C4004(object):
   def get_four_sided_range_mode(self, range_info):
     '''!
       @brief Query and get four-side boundary detection range.
-      @param range_info FourSidedRange object to receive result.
+      @param range_info FourSidedRange_t object to receive result.
       @return true if succeeded, otherwise false.
     '''
     if range_info is None:
@@ -898,7 +896,7 @@ class DFRobot_C4004(object):
       @brief Query current detection range mode.
       @return Current mode value.
     '''
-    range_info = FourSidedRange()
+    range_info = FourSidedRange_t()
     if self.get_four_sided_range_mode(range_info):
       return range_info.mode
     return self._range_info.mode
@@ -1125,27 +1123,6 @@ class DFRobot_C4004(object):
       return True
     return False
 
-  def _copy_tag(self, tag):
-    copy = TagConfig()
-    copy.tag_index = tag.tag_index
-    copy.tag_type = tag.tag_type
-    copy.scope_type = tag.scope_type
-    copy.io_index = tag.io_index
-    copy.center_x = tag.center_x
-    copy.center_y = tag.center_y
-    copy.width = tag.width
-    copy.height = tag.height
-    return copy
-
-  def _upsert_tag_cache(self, tag):
-    copy = self._copy_tag(tag)
-    for i, cached in enumerate(self._tags):
-      if cached.tag_index == copy.tag_index:
-        self._tags[i] = copy
-        return
-    if len(self._tags) < self.MAX_TAGS:
-      self._tags.append(copy)
-
   def _flush_input(self):
     if self.ser is None:
       return
@@ -1241,8 +1218,6 @@ class DFRobot_C4004(object):
       self._trajectory_led = packet.data[0]
     elif packet.control == self.CTRL_TRAJECTORY and packet.cmd == self.CMD_TRAJECTORY_QUERY_MOTION_LED and len(packet.data) > 0:
       self._motion_led = packet.data[0]
-    elif packet.control == self.CTRL_DETECTION_RANGE and packet.cmd == self.CMD_DETECTION_RANGE_QUERY_TAGS:
-      self._parse_tag_list(packet.data)
     elif packet.control == self.CTRL_DETECTION_RANGE and packet.cmd == self.CMD_DETECTION_RANGE_TAG_REPORT:
       self._parse_tag_event(packet.data)
     elif packet.control == self.CTRL_DETECTION_RANGE and packet.cmd == self.CMD_DETECTION_RANGE_QUERY_RANGE:
@@ -1276,8 +1251,7 @@ class DFRobot_C4004(object):
       offset = i * target_len
       target = TargetInfo()
       target.index = data[offset]
-      target.target_size = data[offset + 1]
-      target.kinesia = target.target_size
+      target.kinesia = data[offset + 1]
       target.target_feature = data[offset + 2]
       target.x = self._sb16(data, offset + 3)
       target.y = self._sb16(data, offset + 5)
@@ -1286,11 +1260,13 @@ class DFRobot_C4004(object):
       self._targets.append(target)
 
   def _parse_tag_list(self, data):
-    self._tags = []
+    tags = []
     if len(data) < 2:
-      return
+      return tags
     tag_len = 12
-    count = min(self._u16(data, 0), self.MAX_TAGS)
+    count = self._u16(data, 0)
+    if count > 0xFF:
+      count = 0xFF
     available_len = len(data) - 2
     if available_len < count * tag_len:
       count = available_len // tag_len
@@ -1305,7 +1281,8 @@ class DFRobot_C4004(object):
       tag.center_y = self._sb16(data, offset + 6)
       tag.width = self._u16(data, offset + 8)
       tag.height = self._u16(data, offset + 10)
-      self._tags.append(tag)
+      tags.append(tag)
+    return tags
 
   def _parse_tag_event(self, data):
     info = TagInfo()

@@ -99,8 +99,8 @@ void initTagCacheFromConfig(const sTagConfig_t *tags, uint8_t count)
 
 bool initTagCacheFromDevice()
 {
-  sTagConfig_t tags[MAX_TAGS];
-  uint8_t count = c4004.getTags(tags, MAX_TAGS);
+  sTagConfig_t tags[TAG_TOTAL];
+  uint8_t count = c4004.getTags(tags, (uint8_t)(sizeof(tags) / sizeof(tags[0])));
 
   initTagCacheFromConfig(tags, count);
 
@@ -137,7 +137,7 @@ void setup()
     Serial.println(F("Set presence enable failed."));
   }
 
-  sFourSidedRange range;
+  sFourSidedRange_t range;
   range.mode = eRangeFourSide;
   range.xPositiveCm = 200;
   range.xNegativeCm = -200;

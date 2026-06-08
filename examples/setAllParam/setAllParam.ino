@@ -118,7 +118,7 @@ void setup()
   Serial.println(c4004.getTrajectoryLed() ? F("ON") : F("OFF"));
 
   Serial.println(F("====================Range Param==================="));
-  sFourSidedRange range;
+  sFourSidedRange_t range;
   range.mode = eRangeFourSide;
   range.xPositiveCm = 200;
   range.xNegativeCm = -200;
@@ -144,7 +144,7 @@ void setup()
   }
 
   if (mode == eRangeFourSide) {
-    sFourSidedRange currentRange;
+    sFourSidedRange_t currentRange;
     if (c4004.getFourSidedRangeMode(&currentRange)) {
       Serial.print(F("Current boundary x+/x-/y+/y- (cm): "));
       Serial.print(currentRange.xPositiveCm);
