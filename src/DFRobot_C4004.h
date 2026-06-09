@@ -866,6 +866,7 @@ private:
   uint32_t _baud;
   uint8_t _rxpin;
   uint8_t _txpin;
+  sPacket_t _rxPacket;
   bool _heartbeat;
   bool _initFinished;
   uint8_t _presenceEnable;

@@ -89,7 +89,7 @@ bool DFRobot_C4004::begin(void)
 bool DFRobot_C4004::isInitFinished(void)
 {
   uint8_t data = QUERY_DATA;
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
 
   if (requestFrame(CTRL_WORK_STATUS, CMD_WORK_STATUS_INIT_FINISHED_QUERY, &data, 1, &packet)) {
     if (packet.len > 0) {
@@ -107,7 +107,7 @@ bool DFRobot_C4004::isConnected(void)
 bool DFRobot_C4004::reset(void)
 {
   uint8_t data = QUERY_DATA;
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
   bool ret = requestFrame(CTRL_SYSTEM, CMD_SYSTEM_RESET, &data, 1, &packet);
   delay(100);
   return ret;
@@ -116,7 +116,7 @@ bool DFRobot_C4004::reset(void)
 bool DFRobot_C4004::factoryReset(void)
 {
   uint8_t data = QUERY_DATA;
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
   bool ret = requestFrame(CTRL_SYSTEM, CMD_SYSTEM_FACTORY_RESET, &data, 1, &packet);
   delay(100);
   return ret;
@@ -125,7 +125,7 @@ bool DFRobot_C4004::factoryReset(void)
 bool DFRobot_C4004::getHeartbeat(eGetDataMode_t mode)
 {
   uint8_t data = QUERY_DATA;
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
 
   if (mode == eGetDataReport) {
     return _heartbeat;
@@ -145,7 +145,7 @@ bool DFRobot_C4004::getHeartbeat(eGetDataMode_t mode)
 
 eReportedEvent_t DFRobot_C4004::getReportedInfo(uint16_t timeoutMs)
 {
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
 
   if (!readFrame(&packet, timeoutMs)) {
     return eEventNone;
@@ -161,7 +161,7 @@ String DFRobot_C4004::getProductModel(void)
 uint16_t DFRobot_C4004::getProductID(void)
 {
   uint8_t data = QUERY_DATA;
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
 
   if (!requestFrame(CTRL_PRODUCT_INFO, CMD_PRODUCT_ID_QUERY, &data, 1, &packet)) {
     return 0;
@@ -190,7 +190,7 @@ bool DFRobot_C4004::setInstallInfo(sInstallInfo_t &info)
   uint8_t angleData[6];
   uint8_t heightData[2];
   uint8_t modeData = (uint8_t)info.mode;
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
   int32_t xAngleProto = (int32_t)info.xAngle * 100;
   int32_t yAngleProto = (int32_t)info.yAngle * 100;
   int32_t zAngleProto = (int32_t)info.zAngle * 100;
@@ -231,7 +231,7 @@ bool DFRobot_C4004::setInstallInfo(sInstallInfo_t &info)
 bool DFRobot_C4004::getInstallInfo(sInstallInfo_t *info)
 {
   uint8_t data = QUERY_DATA;
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
 
   if (info == NULL) {
     return false;
@@ -261,7 +261,7 @@ bool DFRobot_C4004::getInstallInfo(sInstallInfo_t *info)
 bool DFRobot_C4004::setInstallHigh(int32_t hight)
 {
   uint8_t heightData[2];
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
 
   if (hight < 0 || hight > 0xFFFFL) {
     return false;
@@ -274,7 +274,7 @@ bool DFRobot_C4004::setInstallHigh(int32_t hight)
 bool DFRobot_C4004::getInstallHigh(int *hight)
 {
   uint8_t data = QUERY_DATA;
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
 
   if (hight == NULL) {
     return false;
@@ -365,7 +365,7 @@ bool DFRobot_C4004::getCheckToActiveFrames(uint8_t *frames)
 bool DFRobot_C4004::getTargetInfo(uint8_t index, sTargetInfo_t *targetInfo, eGetDataMode_t mode)
 {
   uint8_t data = QUERY_DATA;
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
 
   if (targetInfo == NULL) {
     return false;
@@ -391,7 +391,7 @@ bool DFRobot_C4004::getTargetInfo(uint8_t index, sTargetInfo_t *targetInfo, eGet
 uint8_t DFRobot_C4004::getTargetList(sTargetInfo_t *targetBuf, uint8_t maxCount, eGetDataMode_t mode)
 {
   uint8_t data = QUERY_DATA;
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
   uint8_t copyCount = 0;
 
   if (mode == eGetDataActive) {
@@ -456,7 +456,7 @@ bool DFRobot_C4004::getMotionLed(void)
 uint8_t DFRobot_C4004::getTags(sTagConfig_t *tags, uint8_t maxTags, eGetDataMode_t mode)
 {
   uint8_t data = QUERY_DATA;
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
   (void)mode;
 
   if (!requestFrame(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_QUERY_TAGS, &data, 1, &packet)) {
@@ -480,7 +480,7 @@ bool DFRobot_C4004::getTagInfo(sTagInfo_t *tagInfo)
 eTagSetStatus_t DFRobot_C4004::setTag(const sTagConfig_t &tag)
 {
   uint8_t data[8];
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
   eTagSetStatus_t status = eTagSetCommError;
 
   data[0] = tag.tagIndex;
@@ -509,7 +509,7 @@ eTagSetStatus_t DFRobot_C4004::setTag(const sTagConfig_t &tag)
 bool DFRobot_C4004::clearTag(uint16_t tagIndex)
 {
   uint8_t data[2];
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
   uint16_t respIndex = 0;
 
   writeUint16(data, tagIndex);
@@ -532,7 +532,7 @@ bool DFRobot_C4004::clearTag(uint16_t tagIndex)
 bool DFRobot_C4004::clearAllTags(void)
 {
   uint8_t clearAll = 0xFF;
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
 
   if (!requestFrame(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_CLEAR_TAG, &clearAll, 1, &packet)) {
     return false;
@@ -554,7 +554,7 @@ bool DFRobot_C4004::setTagsFromConfig(const sTagConfig_t *tags, uint8_t tagCount
   uint8_t data[MAX_PAYLOAD];
   uint16_t offset = 0;
   uint16_t expectedLen = 0;
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
 
   if (tags == NULL && tagCount > 0) {
     return false;
@@ -598,7 +598,7 @@ bool DFRobot_C4004::setTagsFromConfig(const sTagConfig_t *tags, uint8_t tagCount
 bool DFRobot_C4004::setFourSidedRangeMode(sFourSidedRange_t &range)
 {
   uint8_t data[9];
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
 
   data[0] = eRangeFourSide;
   writeSignBitInt16(&data[1], range.xPositiveCm);
@@ -617,7 +617,7 @@ bool DFRobot_C4004::setFourSidedRangeMode(sFourSidedRange_t &range)
 bool DFRobot_C4004::getFourSidedRangeMode(sFourSidedRange_t *range)
 {
   uint8_t data = QUERY_DATA;
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
 
   if (range == NULL) {
     return false;
@@ -632,7 +632,7 @@ bool DFRobot_C4004::getFourSidedRangeMode(sFourSidedRange_t *range)
 bool DFRobot_C4004::setTrajectoryRangeMode(bool learning)
 {
   uint8_t data[2];
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
   uint32_t startTime = 0;
 
   data[0] = eRangeTrajectory;
@@ -673,7 +673,7 @@ bool DFRobot_C4004::setConfigFileModePoints(const sPoint_t *points, uint16_t poi
   uint8_t data[3 + MAX_POINTS * 4];
   uint16_t offset = 0;
   uint16_t respCount = 0;
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
 
   if (points == NULL && pointCount > 0) {
     return false;
@@ -712,7 +712,7 @@ bool DFRobot_C4004::setConfigFileModePoints(const sPoint_t *points, uint16_t poi
 bool DFRobot_C4004::getTrajectoryRangeMode(sPoint_t *points, uint16_t *pointCount)
 {
   uint8_t data = QUERY_DATA;
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
   uint16_t count = 0;
 
   if (points == NULL || pointCount == NULL) {
@@ -750,7 +750,7 @@ bool DFRobot_C4004::getTrajectoryRangeMode(sPoint_t *points, uint16_t *pointCoun
 bool DFRobot_C4004::getConfigFileModePoints(sPoint_t *points, uint16_t *pointCount)
 {
   uint8_t data = QUERY_DATA;
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
   uint16_t count = 0;
 
   if (points == NULL || pointCount == NULL) {
@@ -788,7 +788,7 @@ bool DFRobot_C4004::getConfigFileModePoints(sPoint_t *points, uint16_t *pointCou
 eDetectionRangeMode_t DFRobot_C4004::getDetectionRangeMode(void)
 {
   uint8_t data = QUERY_DATA;
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
 
   if (!requestFrame(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_QUERY_RANGE, &data, 1, &packet)) {
     return _rangeInfo.mode;
@@ -799,7 +799,7 @@ eDetectionRangeMode_t DFRobot_C4004::getDetectionRangeMode(void)
 uint8_t DFRobot_C4004::getPeopleTime(eGetDataMode_t mode)
 {
   uint8_t data = QUERY_DATA;
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
 
   if (mode == eGetDataActive) {
     requestFrame(CTRL_PEOPLE_COUNT, CMD_PEOPLE_COUNT_QUERY_COUNT, &data, 1, &packet);
@@ -820,7 +820,7 @@ bool DFRobot_C4004::getRealTimePeopleTime(uint32_t *time)
 bool DFRobot_C4004::clearPeopleCount(void)
 {
   uint8_t data = QUERY_DATA;
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
   return requestFrame(CTRL_PEOPLE_COUNT, CMD_PEOPLE_COUNT_CLEAR_COUNT, &data, 1, &packet);
 }
 
@@ -1162,7 +1162,7 @@ eReportedEvent_t DFRobot_C4004::classifyPacket(const sPacket_t *packet)
 bool DFRobot_C4004::queryByte(uint8_t control, uint8_t cmd, uint8_t *value)
 {
   uint8_t data = QUERY_DATA;
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
 
   if (value == NULL) {
     return false;
@@ -1176,14 +1176,14 @@ bool DFRobot_C4004::queryByte(uint8_t control, uint8_t cmd, uint8_t *value)
 
 bool DFRobot_C4004::setByte(uint8_t control, uint8_t cmd, uint8_t value)
 {
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
   return requestFrame(control, cmd, &value, 1, &packet);
 }
 
 bool DFRobot_C4004::queryUint32(uint8_t control, uint8_t cmd, uint32_t *value)
 {
   uint8_t data = QUERY_DATA;
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
 
   if (value == NULL) {
     return false;
@@ -1198,7 +1198,7 @@ bool DFRobot_C4004::queryUint32(uint8_t control, uint8_t cmd, uint32_t *value)
 bool DFRobot_C4004::setUint32(uint8_t control, uint8_t cmd, uint32_t value)
 {
   uint8_t data[4];
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
 
   writeUint32(data, value);
   return requestFrame(control, cmd, data, sizeof(data), &packet);
@@ -1207,7 +1207,7 @@ bool DFRobot_C4004::setUint32(uint8_t control, uint8_t cmd, uint32_t value)
 String DFRobot_C4004::queryString(uint8_t control, uint8_t cmd)
 {
   uint8_t data = QUERY_DATA;
-  sPacket_t packet;
+  sPacket_t &packet = _rxPacket;
   String ret = "";
 
   if (!requestFrame(control, cmd, &data, 1, &packet)) {
