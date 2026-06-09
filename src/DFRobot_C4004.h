@@ -869,7 +869,6 @@ private:
   sPacket_t _rxPacket;
   bool _heartbeat;
   bool _initFinished;
-  uint8_t _presenceEnable;
   ePresenceState_t _presence;
   eMotionState_t _motionState;
   uint8_t _trajectoryLed;

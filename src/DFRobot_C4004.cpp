@@ -47,7 +47,6 @@ void DFRobot_C4004::initObject(void)
 {
   _heartbeat = false;
   _initFinished = false;
-  _presenceEnable = 0xFF;
   _presence = ePresenceUnknown;
   _motionState = eMotionUnknown;
   _trajectoryLed = 0xFF;
@@ -290,11 +289,7 @@ bool DFRobot_C4004::getInstallHigh(int *hight)
 
 bool DFRobot_C4004::setPresenceEnable(bool enable)
 {
-  if (setByte(CTRL_PRESENCE, CMD_PRESENCE_SET_ENABLE, enable ? 1 : 0)) {
-    _presenceEnable = enable ? 1 : 0;
-    return true;
-  }
-  return false;
+  return setByte(CTRL_PRESENCE, CMD_PRESENCE_SET_ENABLE, enable ? 1 : 0);
 }
 
 bool DFRobot_C4004::getPresenceEnable(bool *enable)
@@ -307,7 +302,6 @@ bool DFRobot_C4004::getPresenceEnable(bool *enable)
   if (!queryByte(CTRL_PRESENCE, CMD_PRESENCE_QUERY_ENABLE, &value)) {
     return false;
   }
-  _presenceEnable = value;
   *enable = (value != 0);
   return true;
 }
@@ -551,10 +545,11 @@ bool DFRobot_C4004::clearAllTags(void)
 bool DFRobot_C4004::setTagsFromConfig(const sTagConfig_t *tags, uint8_t tagCount)
 {
   const uint8_t tagLen = 12;
-  uint8_t data[MAX_PAYLOAD];
+  uint8_t *data = _rxPacket.data;
   uint16_t offset = 0;
   uint16_t expectedLen = 0;
   sPacket_t &packet = _rxPacket;
+  uint32_t startTime = 0;
 
   if (tags == NULL && tagCount > 0) {
     return false;
@@ -583,16 +578,34 @@ bool DFRobot_C4004::setTagsFromConfig(const sTagConfig_t *tags, uint8_t tagCount
     writeUint16(&data[offset], tags[i].height);
     offset += 2;
   }
-  if (!requestFrame(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_SET_TAGS_FROM_CONFIG, data, offset, &packet)) {
+
+  flushInput();
+  if (!sendCommand(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_SET_TAGS_FROM_CONFIG, data, offset)) {
     return false;
   }
-  if (packet.len != expectedLen) {
-    return false;
+
+  startTime = millis();
+  while ((uint32_t)(millis() - startTime) < DEFAULT_TIMEOUT) {
+    uint16_t elapsed = (uint16_t)(millis() - startTime);
+    if (elapsed >= DEFAULT_TIMEOUT) {
+      break;
+    }
+    uint16_t leftTime = DEFAULT_TIMEOUT - elapsed;
+    if (!readFrame(&packet, leftTime)) {
+      continue;
+    }
+    handlePacket(&packet);
+    if (packet.control == CTRL_DETECTION_RANGE && packet.cmd == CMD_DETECTION_RANGE_SET_TAGS_FROM_CONFIG) {
+      if (packet.len != expectedLen) {
+        return false;
+      }
+      if (readUint16(packet.data) != tagCount) {
+        return false;
+      }
+      return true;
+    }
   }
-  if (readUint16(packet.data) != tagCount) {
-    return false;
-  }
-  return true;
+  return false;
 }
 
 bool DFRobot_C4004::setFourSidedRangeMode(sFourSidedRange_t &range)
@@ -670,10 +683,11 @@ bool DFRobot_C4004::setTrajectoryRangeMode(bool learning)
 
 bool DFRobot_C4004::setConfigFileModePoints(const sPoint_t *points, uint16_t pointCount)
 {
-  uint8_t data[3 + MAX_POINTS * 4];
+  uint8_t *data = _rxPacket.data;
   uint16_t offset = 0;
   uint16_t respCount = 0;
   sPacket_t &packet = _rxPacket;
+  uint32_t startTime = 0;
 
   if (points == NULL && pointCount > 0) {
     return false;
@@ -693,20 +707,35 @@ bool DFRobot_C4004::setConfigFileModePoints(const sPoint_t *points, uint16_t poi
     offset += 2;
   }
 
-  if (!requestFrame(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_SET_RANGE, data, offset, &packet)) {
-    return false;
-  }
-  if (packet.len < 3 || packet.data[0] != (uint8_t)eRangeConfigFile) {
-    return false;
-  }
-
-  respCount = readUint16(&packet.data[1]);
-  if (respCount != pointCount || packet.len < (uint16_t)(3 + respCount * 4)) {
+  flushInput();
+  if (!sendCommand(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_SET_RANGE, data, offset)) {
     return false;
   }
 
-  _rangeInfo.mode = eRangeConfigFile;
-  return true;
+  startTime = millis();
+  while ((uint32_t)(millis() - startTime) < DEFAULT_TIMEOUT) {
+    uint16_t elapsed = (uint16_t)(millis() - startTime);
+    if (elapsed >= DEFAULT_TIMEOUT) {
+      break;
+    }
+    uint16_t leftTime = DEFAULT_TIMEOUT - elapsed;
+    if (!readFrame(&packet, leftTime)) {
+      continue;
+    }
+    handlePacket(&packet);
+    if (packet.control == CTRL_DETECTION_RANGE && packet.cmd == CMD_DETECTION_RANGE_SET_RANGE) {
+      if (packet.len < 3 || packet.data[0] != (uint8_t)eRangeConfigFile) {
+        return false;
+      }
+      respCount = readUint16(&packet.data[1]);
+      if (respCount != pointCount || packet.len < (uint16_t)(3 + respCount * 4)) {
+        return false;
+      }
+      _rangeInfo.mode = eRangeConfigFile;
+      return true;
+    }
+  }
+  return false;
 }
 
 bool DFRobot_C4004::getTrajectoryRangeMode(sPoint_t *points, uint16_t *pointCount)
@@ -1107,8 +1136,6 @@ eReportedEvent_t DFRobot_C4004::handlePacket(const sPacket_t *packet)
     if (packet->len > 0) {
       _initFinished = (packet->data[0] == 0x01 || packet->cmd == CMD_WORK_STATUS_INIT_FINISHED_REPORT);
     }
-  } else if (packet->control == CTRL_PRESENCE && packet->cmd == CMD_PRESENCE_QUERY_ENABLE && packet->len > 0) {
-    _presenceEnable = packet->data[0];
   } else if (packet->control == CTRL_PRESENCE && (packet->cmd == CMD_PRESENCE_REPORT || packet->cmd == CMD_PRESENCE_QUERY_STATE) && packet->len > 0) {
     _presence = (ePresenceState_t)packet->data[0];
   } else if (packet->control == CTRL_PRESENCE && (packet->cmd == CMD_PRESENCE_MOTION_REPORT || packet->cmd == CMD_PRESENCE_QUERY_MOTION) && packet->len > 0) {
