@@ -45,7 +45,6 @@ DFRobot_C4004::DFRobot_C4004(HardwareSerial *hSerial, uint32_t baud, uint8_t rxp
 
 void DFRobot_C4004::initObject(void)
 {
-  _lastHeartbeatMs = 0;
   _heartbeat = false;
   _initFinished = false;
   _presenceEnable = 0xFF;
@@ -855,11 +854,6 @@ bool DFRobot_C4004::getUnmannedTime(uint32_t *delayTime)
   return queryUint32(CTRL_PEOPLE_COUNT, CMD_PEOPLE_COUNT_QUERY_NO_PERSON_DELAY, delayTime);
 }
 
-void DFRobot_C4004::setTimeout(uint16_t timeoutMs)
-{
-  (void)timeoutMs;
-}
-
 bool DFRobot_C4004::sendCommand(uint8_t control, uint8_t cmd, const uint8_t *data, uint16_t len)
 {
   uint8_t checksum = 0;
@@ -932,7 +926,6 @@ bool DFRobot_C4004::sendCommand(uint8_t control, uint8_t cmd, const uint8_t *dat
 bool DFRobot_C4004::requestFrame(uint8_t control, uint8_t cmd, const uint8_t *data, uint16_t len, sPacket_t *response, uint16_t timeoutMs)
 {
   uint32_t startTime = 0;
-  eReportedEvent_t event = eEventNone;
 
   if (response == NULL) {
     return false;
@@ -954,11 +947,10 @@ bool DFRobot_C4004::requestFrame(uint8_t control, uint8_t cmd, const uint8_t *da
     if (!readFrame(response, leftTime)) {
       continue;
     }
-    event = handlePacket(response);
+    handlePacket(response);
     if (response->control == control && response->cmd == cmd) {
       return true;
     }
-    (void)event;
   }
   return false;
 }
@@ -1105,14 +1097,11 @@ void DFRobot_C4004::flushInput(void)
 
 eReportedEvent_t DFRobot_C4004::handlePacket(const sPacket_t *packet)
 {
-  eReportedEvent_t event = eEventUnknown;
-
   if (packet == NULL) {
     return eEventError;
   }
 
   if ((packet->control == CTRL_SYSTEM && packet->cmd == CMD_SYSTEM_HEARTBEAT_REPORT) || (packet->control == CTRL_SYSTEM && packet->cmd == CMD_SYSTEM_HEARTBEAT_QUERY)) {
-    _lastHeartbeatMs = millis();
     _heartbeat = true;
   } else if ((packet->control == CTRL_WORK_STATUS && packet->cmd == CMD_WORK_STATUS_INIT_FINISHED_REPORT) || (packet->control == CTRL_WORK_STATUS && packet->cmd == CMD_WORK_STATUS_INIT_FINISHED_QUERY)) {
     if (packet->len > 0) {
@@ -1138,8 +1127,7 @@ eReportedEvent_t DFRobot_C4004::handlePacket(const sPacket_t *packet)
     parsePeopleCount(packet->data, packet->len);
   }
 
-  event = classifyPacket(packet);
-  return event;
+  return classifyPacket(packet);
 }
 
 eReportedEvent_t DFRobot_C4004::classifyPacket(const sPacket_t *packet)

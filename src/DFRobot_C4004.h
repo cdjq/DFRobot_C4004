@@ -825,7 +825,6 @@ public:
   bool getUnmannedTime(uint32_t *delayTime);
 
 protected:
-  void setTimeout(uint16_t timeoutMs);
   bool isInitFinished(void);
   bool sendCommand(uint8_t control, uint8_t cmd, const uint8_t *data, uint16_t len);
   bool requestFrame(uint8_t control, uint8_t cmd, const uint8_t *data, uint16_t len, sPacket_t *response, uint16_t timeoutMs = 200);
@@ -867,7 +866,6 @@ private:
   uint32_t _baud;
   uint8_t _rxpin;
   uint8_t _txpin;
-  uint32_t _lastHeartbeatMs;
   bool _heartbeat;
   bool _initFinished;
   uint8_t _presenceEnable;

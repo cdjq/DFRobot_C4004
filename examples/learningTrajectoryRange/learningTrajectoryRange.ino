@@ -216,8 +216,7 @@ bool waitForSinglePerson(void)
 
   while (confirmCount < SINGLE_PERSON_CONFIRM_TIMES) {
     uint32_t startTime = millis();
-    sTargetInfo_t targets[MAX_TARGETS];
-    uint8_t targetCount = c4004.getTargetList(targets, MAX_TARGETS, eGetDataActive);
+    uint8_t targetCount = c4004.getTargetList(NULL, 0, eGetDataActive);
 
     Serial.print(F("Active target count: "));
     Serial.print(targetCount);
@@ -275,12 +274,19 @@ void queryTrajectoryRange(void)
 void printTrajectoryPoints(const sPoint_t *points, uint16_t pointCount)
 {
   for (uint16_t i = 0; i < pointCount; i++) {
-    Serial.print(F("#"));
-    Serial.print(i);
-    Serial.print(F(" x/y="));
+    Serial.print(F("("));
     Serial.print(points[i].x);
-    Serial.print(F("/"));
-    Serial.println(points[i].y);
+    Serial.print(F(","));
+    Serial.print(points[i].y);
+    Serial.print(F(")"));
+
+    if (i + 1 == pointCount) {
+      Serial.println();
+    } else if ((i + 1) % 8 == 0) {
+      Serial.println();
+    } else {
+      Serial.print(F(" "));
+    }
   }
 }
 
