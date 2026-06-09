@@ -204,7 +204,10 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
       @brief Get one target info by index.
       @param index: target index
       @param mode: data mode
+      @n   GET_DATA_ACTIVE: active query
+      @n   GET_DATA_REPORT: read report cache
       @return TargetInfo or None
+      @note Falls back to list position access when no matching target index exists.
     '''
 
   def get_target_count(self):
@@ -239,12 +242,13 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
       @return True or False
     '''
 
-  def get_tags(self, mode=GET_DATA_ACTIVE):
+  def get_tags(self, mode=GET_DATA_ACTIVE, max_tags=None):
     '''!
       @brief Get all tag configs from the device.
-      @param mode: data mode
-      @n   GET_DATA_ACTIVE: active query
-      @n   GET_DATA_REPORT: currently behaves the same as active query
+      @param mode: data mode kept for compatibility
+      @n   GET_DATA_ACTIVE: active query from device
+      @n   GET_DATA_REPORT: currently behaves the same as GET_DATA_ACTIVE
+      @param max_tags: maximum number of tags to return. None returns all parsed tags.
       @return List[TagConfig]
     '''
 
@@ -253,18 +257,23 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
       @brief Set one tag (size mode).
       @param tag: TagConfig object
       @n   tag.io_index: IO linkage index. 0 means unused; 2-6 maps to IO2-IO6.
+      @n   tag.width: tag width or circle radius in cm
+      @n   tag.height: tag height in cm
       @return tag set status code
       @n   TAG_SET_COMM_ERROR
       @n   TAG_SET_SUCCESS
       @n   TAG_SET_TRACK_COUNT_ERROR
       @n   TAG_SET_ALREADY_USED
       @n   TAG_SET_INDEX_OUT_OF_RANGE
+      @note center_x/center_y are ignored by this API.
+      @note Track count must be 1 when using this API.
+      @note Set up to 32 tags at most.
     '''
 
   def clear_tag(self, tag_index):
     '''!
       @brief Clear one tag.
-      @param tag_index: tag index
+      @param tag_index: tag index (2-byte index in protocol payload)
       @return True or False
     '''
 
@@ -280,12 +289,15 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
       @param tags: iterable of TagConfig
       @n   tag.io_index in each tag: IO linkage index. 0 means unused; 2-6 maps to IO2-IO6.
       @return True or False
+      @note Coordinate mode does not require track count to be 1.
+      @note Set up to 32 tags at most.
     '''
 
   def get_tag_info(self):
     '''!
-      @brief Get last tag event decoded from report cache.
+      @brief Get last tag event decoded from report cache (CTRL 0x07, CMD 0x1B).
       @return TagInfo object, or None if no valid event.
+      @note This API reads report cache only. Call get_reported_info() first to receive new report data.
       @note Tag event reports include info.io_index.
     '''
 
@@ -294,6 +306,7 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
       @brief Set four-side boundary range (mode 0x04).
       @param range_info: FourSidedRange_t object
       @return True or False
+      @note Position values use sign-bit int16 encoding (bit15: 0=positive, 1=negative).
     '''
 
   def get_four_sided_range_mode(self, range_info):
@@ -316,11 +329,22 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
       @param points: iterable of Point
       @return True or False
       @n   payload: 0x06 + 2B count + n*(2B X + 2B Y)
+      @note Point values use sign-bit int16 encoding (bit15: 0=positive, 1=negative).
+      @note Point count is limited to MAX_POINTS (150).
     '''
 
   def get_trajectory_range_mode(self, points, point_count):
     '''!
       @brief Get trajectory mode points (mode 0x05).
+      @param points: output list for Point objects
+      @param point_count: output container (list/dict/object.value)
+      @return True or False
+      @note points list must be able to hold at least MAX_POINTS points.
+    '''
+
+  def get_trajectory_mode_points(self, points, point_count):
+    '''!
+      @brief Backward-compatible alias of get_trajectory_range_mode.
       @param points: output list for Point objects
       @param point_count: output container (list/dict/object.value)
       @return True or False
@@ -332,11 +356,12 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
       @param points: output list for Point objects
       @param point_count: output container (list/dict/object.value)
       @return True or False
+      @note points list must be able to hold at least MAX_POINTS points.
     '''
 
   def get_detection_range_mode(self):
     '''!
-      @brief Get current detection range mode.
+      @brief Query current detection range mode.
       @return mode value
     '''
 
@@ -344,7 +369,9 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
     '''!
       @brief Get people count.
       @param mode: data mode
-      @return people count
+      @n   GET_DATA_ACTIVE: query latest data and update cache
+      @n   GET_DATA_REPORT: return cached data directly
+      @return people count (maximum count reported by module)
     '''
 
   def set_real_time_people_time(self, interval):

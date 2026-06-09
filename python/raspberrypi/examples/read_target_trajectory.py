@@ -42,14 +42,16 @@ def print_trajectory_data(data_mode):
     mode_text = 'Passive Report'
 
   targets = c4004.get_target_list(data_mode)
+  count = c4004.get_target_count()
   print(title)
   print('Mode:', mode_text)
-  print('Target Count:', len(targets))
-  if len(targets) == 0:
+  print('Target Count:', count)
+  if count == 0:
     print('No target.')
   else:
     print('Row\tID\tKinesia\tFeature\tX\tY\tSpeed')
-    for i, target in enumerate(targets):
+    for i in range(min(count, len(targets))):
+      target = targets[i]
       print('%d\t%d\t%d\t%s\t%d\t%d\t%d' % (
         i,
         target.index,

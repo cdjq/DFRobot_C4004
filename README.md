@@ -302,12 +302,12 @@ pip3 install pyserial
    * getTags
    * @brief Obtain all tag configuration information.
    * @param tags: Pointer to receive the tag configuration.
-   * @param maxTags: Maximum number of tags to be read.
-   * @param mode: Data acquisition mode.
-   * @n          eGetDataActive: Query latest tag configuration before reading.
-   * @n          eGetDataReport: Read tag configuration from cached data.
+   * @param maxTags: Maximum number of tags to be written into tags.
+   * @param mode: Data acquisition mode kept for compatibility.
+   * @n          eGetDataActive: Query latest tag configuration from the device.
+   * @n          eGetDataReport: Currently behaves the same as eGetDataActive.
    * @n          ioIndex in each tag: 0 means unused; 2-6 maps to IO2-IO6.
-   * @return uint8_t: Number of tags read.
+   * @return uint8_t: Actual number of tags returned by the device.
   */
   uint8_t getTags(sTagConfig_t *tags, uint8_t maxTags, eGetDataMode_t mode = eGetDataActive);
 
@@ -380,7 +380,7 @@ pip3 install pyserial
    * @n          yNegativeCm: Negative y boundary, in cm.
    * @return true: Set succeeded, false: Set failed.
   */
-  bool setFourSidedRangeMode(sFourSidedRange &range);
+  bool setFourSidedRangeMode(sFourSidedRange_t &range);
 
   /**
    * @fn getFourSidedRangeMode
@@ -388,7 +388,7 @@ pip3 install pyserial
    * @param range: Pointer to receive boundary range settings.
    * @return true: Get succeeded, false: Get failed.
   */
-  bool getFourSidedRangeMode(sFourSidedRange *range);
+  bool getFourSidedRangeMode(sFourSidedRange_t *range);
 
   /**
    * @fn setTrajectoryRangeMode
@@ -450,10 +450,10 @@ pip3 install pyserial
   /**
    * @fn setRealTimePeopleTime
    * @brief Set people count report interval.
-   * @param interval: Report interval, in seconds.
+   * @param time: Report interval, in seconds.
    * @return true: Set succeeded, false: Set failed.
   */
-  bool setRealTimePeopleTime(uint32_t interval);
+  bool setRealTimePeopleTime(uint32_t time);
 
   /**
    * @fn getRealTimePeopleTime

@@ -27,22 +27,21 @@ def main():
   while not c4004.begin():
     print('DFRobot C4004 begin failed, retrying...')
     time.sleep(1)
-  print('DFRobot C4004 begin success.')
 
   print('Hardware version:', c4004.get_hardware_version())
   print('Firmware version:', c4004.get_firmware_version())
 
-  print('Factory reset...')
+  print('Module factory resetting...')
   if c4004.factory_reset():
     print('Factory reset success.')
   else:
     print('Factory reset failed.')
 
-  print('Reboot module...')
+  print('Module rebooting ...')
   if c4004.reset():
-    print('Reboot command sent.')
+    print('Reboot success.')
   else:
-    print('Reboot command failed.')
+    print('Reboot failed.')
 
 
 if __name__ == '__main__':

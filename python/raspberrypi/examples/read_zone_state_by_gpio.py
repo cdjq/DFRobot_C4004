@@ -95,6 +95,7 @@ def main():
   tag2.center_y = 350
   tag2.width = 80
   tag2.height = 0
+  # Note: For circle tags, width is the radius and height is not used.
   set_tags.append(tag2)
 
   tag3 = TagConfig()

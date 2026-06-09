@@ -158,6 +158,8 @@ def main():
   tag2.center_y = 350
   tag2.width = 80
   tag2.height = 0
+  # Note: For circle tags, width is the radius and height is not used.
+  # For rectangle tags, width and height are the rectangle dimensions.
   set_tags.append(tag2)
 
   tag3 = TagConfig()
@@ -193,7 +195,9 @@ def main():
   while True:
     event = c4004.get_reported_info(0.1)
     if event == c4004.EVENT_TAG:
-      print_tag_event(c4004.get_tag_info())
+      tag_info = c4004.get_tag_info()
+      if tag_info is not None:
+        print_tag_event(tag_info)
 
 
 if __name__ == '__main__':

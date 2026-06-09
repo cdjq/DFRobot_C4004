@@ -109,23 +109,33 @@ def setup_params():
   time.sleep(0.05)
 
 
+def print_trajectory_points(points):
+  for i, point in enumerate(points):
+    text = '(%d,%d)' % (point.x, point.y)
+    is_last = (i + 1) == len(points)
+    if is_last or (i + 1) % 8 == 0:
+      print(text)
+    else:
+      print(text, end=' ')
+
+
 def wait_for_single_person():
   confirm_count = 0
 
   while confirm_count < SINGLE_PERSON_CONFIRM_TIMES:
     start_time = time.time()
-    targets = c4004.get_target_list(c4004.GET_DATA_ACTIVE)
-    target_count = len(targets)
-
-    print('Active target count: %d  confirm: %d/%d' % (
-      target_count,
-      confirm_count + 1 if target_count == 1 else 0,
-      SINGLE_PERSON_CONFIRM_TIMES))
+    c4004.get_target_list(c4004.GET_DATA_ACTIVE)
+    target_count = c4004.get_target_count()
 
     if target_count == 1:
       confirm_count += 1
     else:
       confirm_count = 0
+
+    print('Active target count: %d  confirm: %d/%d' % (
+      target_count,
+      confirm_count,
+      SINGLE_PERSON_CONFIRM_TIMES))
 
     while time.time() - start_time < PEOPLE_QUERY_INTERVAL:
       cmd = read_command(0.01)
@@ -139,7 +149,7 @@ def wait_for_single_person():
 def learn_trajectory_range():
   print('')
   print(' =================Learn Trajectory=================')
-  print('Waiting until active target count is 1 for 5 times.')
+  print('Waiting until active people count is 1 for 5 times.')
   print('Send q to cancel.')
 
   if not wait_for_single_person():
@@ -205,8 +215,7 @@ def query_trajectory_range():
     return
 
   print('Trajectory point count:', point_count[0])
-  for i, point in enumerate(points):
-    print('#%d x/y=%d/%d' % (i, point.x, point.y))
+  print_trajectory_points(points)
 
 
 def main():

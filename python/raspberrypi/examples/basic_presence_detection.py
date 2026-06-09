@@ -79,7 +79,10 @@ def main():
     event = c4004.get_reported_info(0.05)
     if event == c4004.EVENT_PRESENCE:
       presence = c4004.get_presence_state()
-      print('Human presence state:', 'Presence' if presence == c4004.PRESENCE else 'None')
+      if presence == c4004.NO_PRESENCE:
+        print('Human presence state: None')
+      elif presence == c4004.PRESENCE:
+        print('Human presence state: Presence')
     elif event == c4004.EVENT_MOTION:
       motion = c4004.get_motion_state()
       if motion == c4004.MOTION_STATIC:
@@ -97,7 +100,10 @@ def main():
       print('Number of trajectories:', c4004.get_people_time(c4004.GET_DATA_REPORT))
 
       query_presence = c4004.get_presence_state()
-      print('Human presence state:', 'Presence' if query_presence == c4004.PRESENCE else 'None')
+      if query_presence == c4004.NO_PRESENCE:
+        print('Human presence state: None')
+      elif query_presence == c4004.PRESENCE:
+        print('Human presence state: Presence')
 
       query_motion = c4004.get_motion_state()
       if query_motion == c4004.MOTION_NONE:

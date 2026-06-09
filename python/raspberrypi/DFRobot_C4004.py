@@ -106,6 +106,7 @@ class DFRobot_C4004(object):
   MAX_TARGETS = 8
   MAX_POINTS = 150
   MAX_PAYLOAD = 3 + MAX_POINTS * 4
+  DEFAULT_TIMEOUT = 0.2
   _TAG_CONFIG_LIMIT = 32
 
   CTRL_SYSTEM = 0x01
@@ -255,7 +256,6 @@ class DFRobot_C4004(object):
     self._baudrate = baudrate
     self._timeout = timeout
     self.ser = port if hasattr(port, 'read') and hasattr(port, 'write') else None
-    self._last_heartbeat_time = 0
     self._heartbeat = False
     self._init_finished = False
     self._presence_enable = 0xFF
@@ -264,6 +264,7 @@ class DFRobot_C4004(object):
     self._trajectory_led = 0xFF
     self._motion_led = 0xFF
     self._targets = []
+    self._target_count = 0
     self._tag_info = TagInfo()
     self._tag_info_valid = False
     self._range_info = FourSidedRange_t()
@@ -314,14 +315,18 @@ class DFRobot_C4004(object):
       @brief Reboot the module.
       @return true if succeeded, otherwise false.
     '''
-    return self._request_frame(self.CTRL_SYSTEM, self.CMD_SYSTEM_RESET, [self.QUERY_DATA]) is not None
+    ret = self._request_frame(self.CTRL_SYSTEM, self.CMD_SYSTEM_RESET, [self.QUERY_DATA]) is not None
+    time.sleep(0.1)
+    return ret
 
   def factory_reset(self):
     '''!
       @brief Restore module to factory settings.
       @return true if succeeded, otherwise false.
     '''
-    return self._request_frame(self.CTRL_SYSTEM, self.CMD_SYSTEM_FACTORY_RESET, [self.QUERY_DATA]) is not None
+    ret = self._request_frame(self.CTRL_SYSTEM, self.CMD_SYSTEM_FACTORY_RESET, [self.QUERY_DATA]) is not None
+    time.sleep(0.1)
+    return ret
 
   def get_heartbeat(self, mode=GET_DATA_ACTIVE):
     '''!
@@ -626,10 +631,10 @@ class DFRobot_C4004(object):
       mode = self.GET_DATA_ACTIVE if mode else self.GET_DATA_REPORT
     if mode == self.GET_DATA_ACTIVE:
       self._request_frame(self.CTRL_TRAJECTORY, self.CMD_TRAJECTORY_QUERY_TARGET, [self.QUERY_DATA])
-    for target in self._targets:
-      if target.index == index:
-        return target
-    if index < len(self._targets):
+    for i in range(self._target_count):
+      if self._targets[i].index == index:
+        return self._targets[i]
+    if index < self._target_count:
       return self._targets[index]
     return None
 
@@ -638,7 +643,7 @@ class DFRobot_C4004(object):
       @brief Get current cached target count.
       @return Target count.
     '''
-    return len(self._targets)
+    return self._target_count
 
   def set_trajectory_led(self, enable):
     '''!
@@ -682,12 +687,13 @@ class DFRobot_C4004(object):
       self._motion_led = value
     return self._motion_led != 0
 
-  def get_tags(self, mode=GET_DATA_ACTIVE):
+  def get_tags(self, mode=GET_DATA_ACTIVE, max_tags=None):
     '''!
       @brief Get all tag configurations from the device.
       @param mode Data acquisition mode kept for compatibility.
       @n GET_DATA_ACTIVE: Active query.
       @n GET_DATA_REPORT: Currently behaves the same as GET_DATA_ACTIVE.
+      @param max_tags Maximum number of tags to return. None returns all parsed tags.
       @return List of TagConfig objects.
     '''
     if isinstance(mode, bool):
@@ -695,7 +701,8 @@ class DFRobot_C4004(object):
     packet = self._request_frame(self.CTRL_DETECTION_RANGE, self.CMD_DETECTION_RANGE_QUERY_TAGS, [self.QUERY_DATA])
     if packet is None:
       return []
-    return self._parse_tag_list(packet.data)
+    tags, _ = self._parse_tag_list(packet.data, max_tags)
+    return tags
 
   def set_tag(self, tag):
     '''!
@@ -843,8 +850,8 @@ class DFRobot_C4004(object):
       return False
 
     start = time.time()
-    while time.time() - start < 0.25:
-      packet = self._read_frame(max(0.01, 0.25 - (time.time() - start)))
+    while time.time() - start < self.DEFAULT_TIMEOUT:
+      packet = self._read_frame(max(0.01, self.DEFAULT_TIMEOUT - (time.time() - start)))
       if packet is None:
         continue
       self._handle_packet(packet)
@@ -896,9 +903,7 @@ class DFRobot_C4004(object):
       @brief Query current detection range mode.
       @return Current mode value.
     '''
-    range_info = FourSidedRange_t()
-    if self.get_four_sided_range_mode(range_info):
-      return range_info.mode
+    self._request_frame(self.CTRL_DETECTION_RANGE, self.CMD_DETECTION_RANGE_QUERY_RANGE, [self.QUERY_DATA])
     return self._range_info.mode
 
   def get_trajectory_range_mode(self, points, point_count):
@@ -1146,7 +1151,9 @@ class DFRobot_C4004(object):
     self.ser.write(frame)
     return True
 
-  def _request_frame(self, control, cmd, data, timeout=0.2):
+  def _request_frame(self, control, cmd, data, timeout=None):
+    if timeout is None:
+      timeout = self.DEFAULT_TIMEOUT
     self._flush_input()
     if not self._send_command(control, cmd, data):
       return None
@@ -1202,10 +1209,10 @@ class DFRobot_C4004(object):
 
   def _handle_packet(self, packet):
     if packet.control == self.CTRL_SYSTEM and packet.cmd in (self.CMD_SYSTEM_HEARTBEAT_REPORT, self.CMD_SYSTEM_HEARTBEAT_QUERY):
-      self._last_heartbeat_time = time.time()
       self._heartbeat = True
     elif packet.control == self.CTRL_WORK_STATUS and packet.cmd in (self.CMD_WORK_STATUS_INIT_FINISHED_REPORT, self.CMD_WORK_STATUS_INIT_FINISHED_QUERY):
-      self._init_finished = (packet.cmd == self.CMD_WORK_STATUS_INIT_FINISHED_REPORT) or (len(packet.data) > 0 and packet.data[0] == 0x01)
+      if len(packet.data) > 0:
+        self._init_finished = (packet.data[0] == 0x01) or (packet.cmd == self.CMD_WORK_STATUS_INIT_FINISHED_REPORT)
     elif packet.control == self.CTRL_PRESENCE and packet.cmd == self.CMD_PRESENCE_QUERY_ENABLE and len(packet.data) > 0:
       self._presence_enable = packet.data[0]
     elif packet.control == self.CTRL_PRESENCE and packet.cmd in (self.CMD_PRESENCE_REPORT, self.CMD_PRESENCE_QUERY_STATE) and len(packet.data) > 0:
@@ -1244,9 +1251,16 @@ class DFRobot_C4004(object):
     return self.EVENT_UNKNOWN
 
   def _parse_targets(self, data):
-    self._targets = []
+    if data is None:
+      self._target_count = 0
+      self._targets = []
+      return
     target_len = 11
-    count = min(len(data) // target_len, self.MAX_TARGETS)
+    count = len(data) // target_len
+    if count > self.MAX_TARGETS:
+      count = self.MAX_TARGETS
+    self._target_count = count
+    self._targets = []
     for i in range(count):
       offset = i * target_len
       target = TargetInfo()
@@ -1259,18 +1273,20 @@ class DFRobot_C4004(object):
       target.speed = self._sb16(data, offset + 9)
       self._targets.append(target)
 
-  def _parse_tag_list(self, data):
+  def _parse_tag_list(self, data, max_tags=None):
     tags = []
-    if len(data) < 2:
-      return tags
+    if data is None or len(data) < 2:
+      return tags, 0
     tag_len = 12
-    count = self._u16(data, 0)
-    if count > 0xFF:
-      count = 0xFF
+    total = self._u16(data, 0)
+    actual_count = 0xFF if total > 0xFF else total
     available_len = len(data) - 2
-    if available_len < count * tag_len:
-      count = available_len // tag_len
-    for i in range(count):
+    if available_len < actual_count * tag_len:
+      actual_count = available_len // tag_len
+    copy_count = actual_count
+    if max_tags is not None and copy_count > max_tags:
+      copy_count = max_tags
+    for i in range(copy_count):
       offset = 2 + i * tag_len
       tag = TagConfig()
       tag.tag_index = data[offset]
@@ -1282,14 +1298,13 @@ class DFRobot_C4004(object):
       tag.width = self._u16(data, offset + 8)
       tag.height = self._u16(data, offset + 10)
       tags.append(tag)
-    return tags
+    return tags, actual_count
 
   def _parse_tag_event(self, data):
-    info = TagInfo()
-    if len(data) < 8:
-      self._tag_info = info
+    if data is None or len(data) < 8:
       self._tag_info_valid = False
       return
+    info = TagInfo()
     info.tag_index = data[0]
     info.tag_type = data[1]
     info.io_index = data[2]
@@ -1306,11 +1321,13 @@ class DFRobot_C4004(object):
     self._tag_info_valid = True
 
   def _parse_boundary_range(self, data):
-    if len(data) < 1:
+    if data is None or len(data) < 1:
       return
     self._range_info.mode = data[0]
     if self._range_info.mode == self.RANGE_FOUR_SIDE:
-      offset = 2 if len(data) >= 10 and data[1] == 0 else 1
+      offset = 1
+      if len(data) >= 10 and data[1] == 0x00:
+        offset = 2
       if len(data) >= offset + 8:
         self._range_info.x_positive_cm = self._sb16(data, offset)
         self._range_info.x_negative_cm = self._sb16(data, offset + 2)
@@ -1318,7 +1335,7 @@ class DFRobot_C4004(object):
         self._range_info.y_negative_cm = self._sb16(data, offset + 6)
 
   def _parse_people_count(self, data):
-    if len(data) == 0:
+    if data is None or len(data) == 0:
       self._people_count = 0
     elif len(data) >= 2:
       self._people_count = data[1]

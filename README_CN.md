@@ -302,12 +302,12 @@ pip3 install pyserial
    * getTags
    * @brief 获取所有标签配置信息。
    * @param tags: 接收标签配置的指针。
-   * @param maxTags: 可读取的最大标签数量。
-   * @param mode: 数据获取模式。
-   * @n          eGetDataActive: 读取前主动查询最新标签配置。
-   * @n          eGetDataReport: 从缓存数据中读取标签配置。
+   * @param maxTags: 写入 tags 缓冲区的最大标签数量。
+   * @param mode: 数据获取模式，保留用于兼容。
+   * @n          eGetDataActive: 从设备主动查询最新标签配置。
+   * @n          eGetDataReport: 当前行为与 eGetDataActive 相同。
    * @n          每个标签中的 ioIndex: IO 联动索引，0 表示不使用，2-6 表示绑定 IO2-IO6。
-   * @return uint8_t: 读取到的标签数量。
+   * @return uint8_t: 设备实际返回的标签数量。
    */
   uint8_t getTags(sTagConfig_t *tags, uint8_t maxTags, eGetDataMode_t mode = eGetDataActive);
 
@@ -380,7 +380,7 @@ pip3 install pyserial
    * @n          yNegativeCm: Y 轴负方向边界，单位为 cm。
    * @return true: 设置成功，false: 设置失败。
    */
-  bool setFourSidedRangeMode(sFourSidedRange &range);
+  bool setFourSidedRangeMode(sFourSidedRange_t &range);
 
   /**
    * @fn getFourSidedRangeMode
@@ -388,7 +388,7 @@ pip3 install pyserial
    * @param range: 接收边界范围设置的指针。
    * @return true: 获取成功，false: 获取失败。
    */
-  bool getFourSidedRangeMode(sFourSidedRange *range);
+  bool getFourSidedRangeMode(sFourSidedRange_t *range);
 
   /**
    * @fn setTrajectoryRangeMode
@@ -450,18 +450,18 @@ pip3 install pyserial
   /**
    * @fn setRealTimePeopleTime
    * @brief 设置人数统计上报间隔。
-   * @param interval: 上报间隔，单位为秒。
+   * @param time: 上报间隔，单位为秒。
    * @return true: 设置成功，false: 设置失败。
    */
-  bool setRealTimePeopleTime(uint32_t interval);
+  bool setRealTimePeopleTime(uint32_t time);
 
   /**
    * @fn getRealTimePeopleTime
    * @brief 获取人数统计上报间隔。
-   * @param interval: 接收上报间隔的指针，单位为秒。
+   * @param time: 接收上报间隔的指针，单位为秒。
    * @return true: 获取成功，false: 获取失败。
    */
-  bool getRealTimePeopleTime(uint32_t *interval);
+  bool getRealTimePeopleTime(uint32_t *time);
 
   /**
    * @fn clearPeopleCount

@@ -204,7 +204,10 @@ RX         | TXD
       @brief 获取单个目标信息。
       @param index: 目标索引
       @param mode: 数据模式
+      @n   GET_DATA_ACTIVE: 主动查询
+      @n   GET_DATA_REPORT: 读取上报缓存
       @return TargetInfo or None
+      @note 若无匹配的目标索引，则回退到列表位置访问。
     '''
 
   def get_target_count(self):
@@ -239,12 +242,13 @@ RX         | TXD
       @return True or False
     '''
 
-  def get_tags(self, mode=GET_DATA_ACTIVE):
+  def get_tags(self, mode=GET_DATA_ACTIVE, max_tags=None):
     '''!
-      @brief 获取标签配置缓存列表。
-      @param mode: 数据模式
-      @n   GET_DATA_ACTIVE: 先主动查询再读缓存
-      @n   GET_DATA_REPORT: 仅读取缓存
+      @brief 从设备获取全部标签配置。
+      @param mode: 数据模式，保留用于兼容
+      @n   GET_DATA_ACTIVE: 从设备主动查询
+      @n   GET_DATA_REPORT: 当前行为与 GET_DATA_ACTIVE 相同
+      @param max_tags: 返回的最大标签数量。None 表示返回全部已解析标签。
       @return List[TagConfig]
     '''
 
@@ -253,18 +257,23 @@ RX         | TXD
       @brief 单标签设置（尺寸模式）。
       @param tag: TagConfig 对象
       @n   tag.io_index: IO 联动索引，0 表示不使用，2-6 表示绑定 IO2-IO6。
+      @n   tag.width: 标签宽度或圆形半径，单位为 cm
+      @n   tag.height: 标签高度，单位为 cm
       @return 标签设置状态码
       @n   TAG_SET_COMM_ERROR
       @n   TAG_SET_SUCCESS
       @n   TAG_SET_TRACK_COUNT_ERROR
       @n   TAG_SET_ALREADY_USED
       @n   TAG_SET_INDEX_OUT_OF_RANGE
+      @note 此 API 忽略 center_x/center_y 字段。
+      @note 使用此 API 设置标签时，需确保轨迹数量为 1。
+      @note 最多设置 32 个标签。
     '''
 
   def clear_tag(self, tag_index):
     '''!
       @brief 清除单个标签。
-      @param tag_index: 标签索引
+      @param tag_index: 标签索引（协议载荷中的 2 字节索引）
       @return True or False
     '''
 
@@ -280,26 +289,30 @@ RX         | TXD
       @param tags: TagConfig 可迭代对象
       @n   每个 tag.io_index: IO 联动索引，0 表示不使用，2-6 表示绑定 IO2-IO6。
       @return True or False
+      @note 坐标模式设置标签时，无需满足轨迹数量为 1 的要求。
+      @note 最多设置 32 个标签。
     '''
 
   def get_tag_info(self):
     '''!
-      @brief 获取最近一次标签上报事件（缓存）。
+      @brief 获取从主动上报包（CTRL 0x07, CMD 0x1B）解码的最新标签事件。
       @return TagInfo 对象；若无有效事件则返回 None。
+      @note 此 API 仅读取上报缓存。请先调用 get_reported_info() 接收新的上报数据。
       @note 标签事件上报包含 info.io_index。
     '''
 
   def set_four_sided_range_mode(self, range_info):
     '''!
       @brief 设置四边探测范围（模式 0x04）。
-      @param range_info: FourSidedRange 对象
+      @param range_info: FourSidedRange_t 对象
       @return True or False
+      @note 位置值使用符号位 int16 编码（bit15: 0=正数，1=负数）。
     '''
 
   def get_four_sided_range_mode(self, range_info):
     '''!
       @brief 读取四边探测范围。
-      @param range_info: 范围输出对象
+      @param range_info: FourSidedRange_t 输出对象
       @return True or False
     '''
 
@@ -316,11 +329,22 @@ RX         | TXD
       @param points: Point 可迭代对象
       @return True or False
       @n   数据格式: 0x06 + 2B 点数 + n*(2B X + 2B Y)
+      @note 点值使用符号位 int16 编码（bit15: 0=正数，1=负数）。
+      @note 点数上限为 MAX_POINTS（150）。
     '''
 
   def get_trajectory_range_mode(self, points, point_count):
     '''!
       @brief 读取轨迹模式点位（模式 0x05）。
+      @param points: 点位输出 list
+      @param point_count: 点数输出容器(list/dict/object.value)
+      @return True or False
+      @note points 列表必须能够容纳至少 MAX_POINTS 个点。
+    '''
+
+  def get_trajectory_mode_points(self, points, point_count):
+    '''!
+      @brief get_trajectory_range_mode 的向后兼容别名。
       @param points: 点位输出 list
       @param point_count: 点数输出容器(list/dict/object.value)
       @return True or False
@@ -332,11 +356,12 @@ RX         | TXD
       @param points: 点位输出 list
       @param point_count: 点数输出容器(list/dict/object.value)
       @return True or False
+      @note points 列表必须能够容纳至少 MAX_POINTS 个点。
     '''
 
   def get_detection_range_mode(self):
     '''!
-      @brief 获取当前探测范围模式。
+      @brief 查询当前探测范围模式。
       @return 模式值
     '''
 
@@ -344,7 +369,9 @@ RX         | TXD
     '''!
       @brief 获取人数统计值。
       @param mode: 数据模式
-      @return 人数值
+      @n   GET_DATA_ACTIVE: 主动查询最新数据并更新缓存
+      @n   GET_DATA_REPORT: 直接返回缓存数据
+      @return 人数值（模块上报的最大计数值）
     '''
 
   def set_real_time_people_time(self, interval):

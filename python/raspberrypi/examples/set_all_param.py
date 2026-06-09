@@ -30,7 +30,6 @@ def main():
   print('DFRobot C4004 begin success.')
 
   print('===================Product Info===================')
-  print('Current product model:', c4004.get_product_model())
   print('Current hardware version:', c4004.get_hardware_version())
   print('Current firmware version:', c4004.get_firmware_version())
 
@@ -108,9 +107,9 @@ def main():
 
   print('====================Range Param===================')
   if c4004.set_four_sided_range_mode(range_info):
-    print('Set boundary detection range success!')
+    print('Set four sided range success!')
   else:
-    print('Set boundary detection range failed!')
+    print('Set four sided range failed!')
   time.sleep(0.05)
 
   mode = c4004.get_detection_range_mode()
@@ -135,6 +134,23 @@ def main():
   else:
     print('Current mode is not four-side boundary, skip boundary range check.')
 
+  # Set the trajectory detection range mode
+  # if c4004.set_trajectory_range_mode(False):
+  #   print('Set trajectory detection range mode success!')
+  # else:
+  #   print('Set trajectory detection range mode failed!')
+  # time.sleep(0.05)
+  #
+  # points = []
+  # point_count = [0]
+  # if c4004.get_trajectory_range_mode(points, point_count):
+  #   print('Current trajectory range query success.')
+  #   print('Current trajectory points:', point_count[0])
+  #   for i, point in enumerate(points):
+  #     print('#%d x/y=%d/%d' % (i, point.x, point.y))
+  # else:
+  #   print('Current trajectory range query failed.')
+  #
   # Set multi-point config by config-file mode points (mode 0x06)
   # cfg_points = [
   #   Point(200, 0),
