@@ -103,6 +103,10 @@ def main():
 
   last_query = 0
   while True:
+    # When state or data changes and the corresponding report function is enabled,
+    # the module pushes the update immediately as an event via get_reported_info().
+    # Use the matching getter with GET_DATA_REPORT to read the cached value
+    # updated by that report, without issuing an extra UART query.
     event = c4004.get_reported_info(0.1)
     if event == c4004.EVENT_TRAJECTORY:
       print_trajectory_data(c4004.GET_DATA_REPORT)

@@ -125,6 +125,12 @@ void setup()
 void loop()
 {
   eReportedEvent_t event = c4004.getReportedInfo(100);
+  /*
+   * When state or data changes and the corresponding report function is enabled,
+   * the module pushes the update immediately as an event via getReportedInfo().
+   * Use the matching getter with eGetDataReport to read the cached value
+   * updated by that report, without issuing an extra UART query.
+   */
 
   // Passively obtain the trajectory
   if (event == eEventTrajectory) {

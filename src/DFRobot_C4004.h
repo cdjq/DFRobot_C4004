@@ -200,6 +200,26 @@ typedef enum {
 } eTagType_t;
 
 /**
+ * @enum eBoundaryDirection_t
+ * @brief Boundary tag direction reported in tag events.
+ */
+enum class eBoundaryDirection_t : uint8_t {
+  eEnter = 0x00,
+  eExit  = 0x01,
+  eNone  = 0x02
+};
+
+/**
+ * @enum eApproachAwayDirection_t
+ * @brief Approach/away tag direction reported in tag events.
+ */
+enum class eApproachAwayDirection_t : uint8_t {
+  eApproach = 0x00,
+  eAway     = 0x01,
+  eNone     = 0x02
+};
+
+/**
  * @enum eTagRangeType_t
  * @brief Tag range shape.
  */
@@ -313,8 +333,8 @@ typedef struct {
   uint8_t ioIndex;
   int16_t centerX;
   int16_t centerY;
-  uint8_t enterExit;
-  uint8_t motionDir;
+  eBoundaryDirection_t enterExit;
+  eApproachAwayDirection_t motionDir;
   uint8_t motionNum;
   uint8_t staticNum;
 } sTagInfo_t;
@@ -494,21 +514,29 @@ public:
   /**
    * @fn getPresenceState
    * @brief Get the current presence detection result.
+   * @param mode: Data acquisition mode.
+   * @n          eGetDataActive: Query latest data and update cache.
+   * @n          eGetDataReport: Return cached data from the last report.
    * @return ePresenceState_t: Presence detection result.
    * @n          eNoPresence: No presence detected.
    * @n          ePresence: Presence detected.
    * @n          ePresenceUnknown: Unknown presence state.
   */
-  ePresenceState_t getPresenceState(void);
+  ePresenceState_t getPresenceState(eGetDataMode_t mode = eGetDataActive);
 
   /**
-   * @fn setMotionEnable
-   * @brief Enable or disable the human motion detection function of the sensor.
-   * @param enable: Enable or disable the human motion detection function.
-   * @n          true: Enable, false: Disable.
-   * @return true: Set succeeded, false: Set failed.
+   * @fn getMotionState
+   * @brief Get the current human motion state.
+   * @param mode: Data acquisition mode.
+   * @n          eGetDataActive: Query latest data and update cache.
+   * @n          eGetDataReport: Return cached data from the last report.
+   * @return eMotionState_t: Motion state.
+   * @n          eMotionNone: No motion state.
+   * @n          eMotionStatic: Stationary.
+   * @n          eMotionActive: Active motion.
+   * @n          eMotionUnknown: Unknown motion state.
   */
-  eMotionState_t getMotionState(void);
+  eMotionState_t getMotionState(eGetDataMode_t mode = eGetDataActive);
 
   /**
    * @fn setTrajectoryTrackEnable

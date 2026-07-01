@@ -59,16 +59,15 @@ living_people_count = 0
 kitchen_door_enter_count = 0
 kitchen_door_exit_count = 0
 kitchen_inferred_people = 0
-kitchen_occupied = False
 last_door_event = 'None'
 
 
 def door_event_to_text(enter_exit):
-  if enter_exit == 0:
+  if enter_exit == c4004.ENTER:
     return 'Enter living room'
-  if enter_exit == 1:
+  if enter_exit == c4004.EXIT:
     return 'Exit living room'
-  return 'Unknown'
+  return 'None'
 
 
 def process_living_room_tag(info):
@@ -85,27 +84,23 @@ def process_kitchen_door_tag(info):
   global kitchen_door_enter_count
   global kitchen_door_exit_count
   global kitchen_inferred_people
-  global kitchen_occupied
   global last_door_event
 
-  if info.enter_exit == 0:
+  if info.enter_exit == c4004.ENTER:
     kitchen_door_enter_count += 1
     if kitchen_inferred_people > 0:
       kitchen_inferred_people -= 1
     last_door_event = 'Enter living room'
-  elif info.enter_exit == 1:
+  elif info.enter_exit == c4004.EXIT:
     kitchen_door_exit_count += 1
     kitchen_inferred_people += 1
     last_door_event = 'Exit living room'
   else:
-    last_door_event = 'Unknown'
-
-  kitchen_occupied = kitchen_inferred_people > 0
+    last_door_event = 'None'
 
   print('------------------------------------------------------------')
   print('Kitchen door event      : %s' % door_event_to_text(info.enter_exit))
   print('Kitchen inferred people : %d' % kitchen_inferred_people)
-  print('Kitchen occupied        : %s' % ('YES' if kitchen_occupied else 'NO'))
 
 
 def process_tag_event():
@@ -229,7 +224,6 @@ def print_status():
   print('Last kitchen door event : %s' % last_door_event)
   print('Door enter/exit count   : %d/%d' % (kitchen_door_enter_count, kitchen_door_exit_count))
   print('Kitchen inferred people : %d' % kitchen_inferred_people)
-  print('Kitchen occupied        : %s' % ('YES' if kitchen_occupied else 'NO'))
 
 
 def main():

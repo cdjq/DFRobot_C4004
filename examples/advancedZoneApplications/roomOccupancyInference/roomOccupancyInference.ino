@@ -54,18 +54,17 @@ uint8_t livingPeopleCount = 0;
 uint16_t kitchenDoorEnterCount = 0;
 uint16_t kitchenDoorExitCount = 0;
 int16_t kitchenInferredPeople = 0;
-bool kitchenOccupied = false;
 const char *lastDoorEvent = "None";
 
-const char *doorEventToText(uint8_t enterExit)
+const char *doorEventToText(eBoundaryDirection_t enterExit)
 {
-  if (enterExit == 0) {
+  if (enterExit == eBoundaryDirection_t::eEnter) {
     return "Enter living room";
   }
-  if (enterExit == 1) {
+  if (enterExit == eBoundaryDirection_t::eExit) {
     return "Exit living room";
   }
-  return "Unknown";
+  return "None";
 }
 
 void processLivingRoomTag(const sTagInfo_t &tagInfo)
@@ -77,29 +76,25 @@ void processLivingRoomTag(const sTagInfo_t &tagInfo)
 
 void processKitchenDoorTag(const sTagInfo_t &tagInfo)
 {
-  if (tagInfo.enterExit == 0) {
+  if (tagInfo.enterExit == eBoundaryDirection_t::eEnter) {
     kitchenDoorEnterCount++;
     if (kitchenInferredPeople > 0) {
       kitchenInferredPeople--;
     }
     lastDoorEvent = "Enter living room";
-  } else if (tagInfo.enterExit == 1) {
+  } else if (tagInfo.enterExit == eBoundaryDirection_t::eExit) {
     kitchenDoorExitCount++;
     kitchenInferredPeople++;
     lastDoorEvent = "Exit living room";
   } else {
-    lastDoorEvent = "Unknown";
+    lastDoorEvent = "None";
   }
-
-  kitchenOccupied = (kitchenInferredPeople > 0);
 
   Serial.println(F("------------------------------------------------------------"));
   Serial.print(F("Kitchen door event      : "));
   Serial.println(doorEventToText(tagInfo.enterExit));
   Serial.print(F("Kitchen inferred people : "));
   Serial.println(kitchenInferredPeople);
-  Serial.print(F("Kitchen occupied        : "));
-  Serial.println(kitchenOccupied ? F("YES") : F("NO"));
 }
 
 void processTagEvent()
@@ -254,7 +249,5 @@ void loop()
     Serial.println(kitchenDoorExitCount);
     Serial.print(F("Kitchen inferred people : "));
     Serial.println(kitchenInferredPeople);
-    Serial.print(F("Kitchen occupied        : "));
-    Serial.println(kitchenOccupied ? F("YES") : F("NO"));
   }
 }

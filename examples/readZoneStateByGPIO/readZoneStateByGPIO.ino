@@ -140,6 +140,12 @@ void setup()
 
 void loop()
 {
+  /*
+   * When state or data changes and the corresponding report function is enabled,
+   * the module pushes the update immediately as an event via getReportedInfo().
+   * Use the matching getter with eGetDataReport to read the cached value
+   * updated by that report, without issuing an extra UART query.
+   */
   c4004.getReportedInfo(50);
 
   static uint32_t lastPrint = 0;

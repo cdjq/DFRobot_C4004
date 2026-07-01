@@ -37,6 +37,22 @@ def tag_type_to_string(tag_type):
   return 'Unknown'
 
 
+def boundary_direction_to_text(value):
+  if value == c4004.ENTER:
+    return 'Enter'
+  if value == c4004.EXIT:
+    return 'Exit'
+  return 'None'
+
+
+def approach_away_direction_to_text(value):
+  if value == c4004.APPROACH:
+    return 'Approach'
+  if value == c4004.AWAY:
+    return 'Away'
+  return 'None'
+
+
 def print_tag_event(info):
   if info is None:
     return
@@ -50,9 +66,9 @@ def print_tag_event(info):
   print('Center XY : %d / %d' % (info.center_x, info.center_y))
 
   if info.tag_type == c4004.TAG_BOUNDARY:
-    print('Event     : Boundary (%s)' % ('Enter' if info.enter_exit == 0 else 'Exit'))
+    print('Event     : Boundary (%s)' % boundary_direction_to_text(info.enter_exit))
   elif info.tag_type == c4004.TAG_APPROACH_AWAY:
-    print('Event     : MotionDirection (%s)' % ('Approach' if info.motion_dir == 0 else 'Away'))
+    print('Event     : MotionDirection (%s)' % approach_away_direction_to_text(info.motion_dir))
   elif info.tag_type == c4004.TAG_PEOPLE_COUNTING:
     print('Event     : PeopleCounting (M:%d S:%d)' % (info.motion_num, info.static_num))
   else:
@@ -70,31 +86,21 @@ def print_tag_list(title, tags):
     print('')
     return
 
-  print('Idx\tType\t\tRange\t\tIO\tCenterX\tCenterY\tWidth\tHeight')
-  print('----------------------------------------------------------------------')
+  print('Idx  Type             Range      IO  CenterX  CenterY  Width  Height')
+  print('---- ---------------- ---------- --  -------  -------  -----  ------')
   for tag in tags:
     type_text = tag_type_to_string(tag.tag_type)
     range_text = 'Circle' if tag.scope_type == c4004.TAG_RANGE_CIRCLE else 'Rectangle'
-
-    line = '%d\t%s' % (tag.tag_index, type_text)
-    if len(type_text) <= 8:
-      line += '\t\t'
-    else:
-      line += '\t'
-
-    line += range_text
-    if len(range_text) <= 8:
-      line += '\t\t'
-    else:
-      line += '\t'
-
-    line += '%d\t%d\t%d\t%d\t%d' % (
+    print('%3d  %-16s %-10s %2d  %7d  %7d  %5d  %6d' % (
+      tag.tag_index,
+      type_text,
+      range_text,
       tag.io_index,
       tag.center_x,
       tag.center_y,
       tag.width,
-      tag.height)
-    print(line)
+      tag.height,
+    ))
   print('')
 
 
@@ -193,6 +199,10 @@ def main():
   print_tag_list('Active tag list after setup:', tags)
 
   while True:
+    # When state or data changes and the corresponding report function is enabled,
+    # the module pushes the update immediately as an event via get_reported_info().
+    # Use the matching getter with GET_DATA_REPORT to read the cached value
+    # updated by that report, without issuing an extra UART query.
     event = c4004.get_reported_info(0.1)
     if event == c4004.EVENT_TAG:
       tag_info = c4004.get_tag_info()

@@ -106,6 +106,12 @@ void setup()
 
 void loop()
 {
+  /*
+   * When state or data changes and the corresponding report function is enabled,
+   * the module pushes the update immediately as an event via getReportedInfo().
+   * Use the matching getter with eGetDataReport to read the cached value
+   * updated by that report, without issuing an extra UART query.
+   */
   char cmd = readCommand();
 
   if (cmd == 0) {
@@ -273,19 +279,23 @@ void queryTrajectoryRange(void)
 
 void printTrajectoryPoints(const sPoint_t *points, uint16_t pointCount)
 {
-  for (uint16_t i = 0; i < pointCount; i++) {
-    Serial.print(F("("));
-    Serial.print(points[i].x);
-    Serial.print(F(","));
-    Serial.print(points[i].y);
-    Serial.print(F(")"));
+  const uint8_t pointsPerLine = 4;
 
-    if (i + 1 == pointCount) {
-      Serial.println();
-    } else if ((i + 1) % 8 == 0) {
+  if (points == NULL || pointCount == 0) {
+    Serial.println(F("(no points)"));
+    return;
+  }
+
+  Serial.println(F("Point coordinates (x, y):"));
+  for (uint16_t i = 0; i < pointCount; i++) {
+    char buf[20];
+    snprintf(buf, sizeof(buf), "(%5d,%5d)", points[i].x, points[i].y);
+    Serial.print(buf);
+
+    if ((i + 1) % pointsPerLine == 0 || i + 1 == pointCount) {
       Serial.println();
     } else {
-      Serial.print(F(" "));
+      Serial.print(F("  "));
     }
   }
 }

@@ -111,6 +111,12 @@ eTagApproachAway	LITERAL1
 eTagPeopleCounting	LITERAL1
 eTagNoise	LITERAL1
 
+eEnter	LITERAL1
+eExit	LITERAL1
+
+eApproach	LITERAL1
+eAway	LITERAL1
+
 eTagRangeCircle	LITERAL1
 eTagRangeRectangle	LITERAL1
 

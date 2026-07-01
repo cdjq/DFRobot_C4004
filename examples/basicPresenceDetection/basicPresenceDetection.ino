@@ -86,18 +86,24 @@ void setup()
 
 void loop()
 {
-  eReportedEvent_t event = c4004.getReportedInfo(50);
+  eReportedEvent_t event = c4004.getReportedInfo(30);
+  /*
+   * When state or data changes and the corresponding report function is enabled,
+   * the module pushes the update immediately as an event via getReportedInfo().
+   * Use the matching getter with eGetDataReport to read the cached value
+   * updated by that report, without issuing an extra UART query.
+   */
 
   if (event == eEventPresence) {
-    ePresenceState_t presence = c4004.getPresenceState();
-    Serial.print(F("Human presence state: "));
+    ePresenceState_t presence = c4004.getPresenceState(eGetDataReport);
+    Serial.print(F("Presence state: "));
     if (presence == eNoPresence) {
       Serial.println(F("None"));
     } else if (presence == ePresence) {
       Serial.println(F("Presence"));
     }
   } else if (event == eEventMotion) {
-    uint8_t motion = c4004.getMotionState();
+    eMotionState_t motion = c4004.getMotionState(eGetDataReport);
     Serial.print(F("Motion state: "));
     if (motion == eMotionStatic) {
       Serial.println(F("Static"));
@@ -108,26 +114,26 @@ void loop()
     }
   } else if (event == eEventPeopleCount) {
     uint8_t count = c4004.getPeopleTime(eGetDataReport);
-    Serial.print(F("Number of trajectories: "));
+    Serial.print(F("People count: "));
     Serial.println(count);
   }
 
   static uint32_t lastQuery = 0;
-  if (millis() - lastQuery > 2000) {
+  if (millis() - lastQuery > 3000) {
     lastQuery = millis();
-    Serial.print(F("Number of trajectories: "));
+    Serial.print(F("People count: "));
     //Serial.println(c4004.getPeopleTime(eGetDataActive)); // Query active data
     Serial.println(c4004.getPeopleTime(eGetDataReport)); // Query report data
 
-    ePresenceState_t queryPresence = c4004.getPresenceState();
-    Serial.print(F("Human presence state: "));
+    ePresenceState_t queryPresence = c4004.getPresenceState(eGetDataActive);
+    Serial.print(F("Presence state: "));
     if (queryPresence == eNoPresence) {
       Serial.println(F("None"));
     } else if (queryPresence == ePresence) {
       Serial.println(F("Presence"));
     }
 
-    eMotionState_t queryMotion = c4004.getMotionState();
+    eMotionState_t queryMotion = c4004.getMotionState(eGetDataActive);
     Serial.print(F("Motion state: "));
     if (queryMotion == eMotionNone) {
       Serial.println(F("None"));

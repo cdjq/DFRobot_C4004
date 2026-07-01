@@ -79,6 +79,8 @@ void initTagCacheFromConfig(const sTagConfig_t *tags, uint8_t count)
     memset(&tagCache[i], 0, sizeof(sTagInfo_t));
     tagCache[i].tagIndex = i;
     tagCache[i].tagType = eTagNone;
+    tagCache[i].enterExit = eBoundaryDirection_t::eNone;
+    tagCache[i].motionDir = eApproachAwayDirection_t::eNone;
   }
 
   for (uint8_t i = 0; i < count; i++) {
@@ -91,9 +93,6 @@ void initTagCacheFromConfig(const sTagConfig_t *tags, uint8_t count)
     tagCache[index].ioIndex = tags[i].ioIndex;
     tagCache[index].centerX = tags[i].centerX;
     tagCache[index].centerY = tags[i].centerY;
-    if (index == TAG_HOME_DOOR || index == TAG_KITCHEN_DOOR) {
-      tagCache[index].motionDir = 1;
-    }
   }
 }
 
@@ -195,7 +194,7 @@ void setup()
   tags[1].height = 300;
 
   tags[2].tagIndex = TAG_HOME_DOOR;
-  tags[2].tagType = eTagApproachAway;
+  tags[2].tagType = eTagBoundary;
   tags[2].scopeType = eTagRangeRectangle;
   tags[2].ioIndex = 0;
   tags[2].centerX = 100;
@@ -204,7 +203,7 @@ void setup()
   tags[2].height = 40;
 
   tags[3].tagIndex = TAG_KITCHEN_DOOR;
-  tags[3].tagType = eTagApproachAway;
+  tags[3].tagType = eTagBoundary;
   tags[3].scopeType = eTagRangeRectangle;
   tags[3].ioIndex = 0;
   tags[3].centerX = -100;
@@ -261,6 +260,7 @@ void setup()
 void loop()
 {
   eReportedEvent_t event = c4004.getReportedInfo(100);
+
   uint32_t nowMs = millis();
 
   if (event == eEventTag) {
@@ -373,22 +373,34 @@ void loop()
       Serial.print(F("\t"));
 
       if (tagCache[i].tagType == eTagApproachAway) {
-        Serial.print(tagCache[i].motionDir);
+        if (tagCache[i].motionDir == eApproachAwayDirection_t::eApproach) {
+          Serial.print(F("Approach"));
+        } else if (tagCache[i].motionDir == eApproachAwayDirection_t::eAway) {
+          Serial.print(F("Away"));
+        } else {
+          Serial.print(F("None"));
+        }
       } else {
         Serial.print(F("-"));
       }
       Serial.print(F("\t"));
 
       if (tagCache[i].tagType == eTagBoundary) {
-        Serial.println(tagCache[i].enterExit);
+        if (tagCache[i].enterExit == eBoundaryDirection_t::eEnter) {
+          Serial.println(F("Enter"));
+        } else if (tagCache[i].enterExit == eBoundaryDirection_t::eExit) {
+          Serial.println(F("Exit"));
+        } else {
+          Serial.println(F("None"));
+        }
       } else {
         Serial.println(F("-"));
       }
     }
 
-    Serial.print(F("TV IO:\t"));
+    Serial.print(F("TV IO level:\t"));
     Serial.println(tvOutputHigh ? F("HIGH") : F("LOW"));
-    Serial.print(F("Light PWM:\t"));
+    Serial.print(F("Light PWM value:\t"));
     Serial.println(lightOutputValue);
   }
 }

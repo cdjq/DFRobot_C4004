@@ -150,15 +150,21 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
       @return True or False
     '''
 
-  def get_presence_state(self):
+  def get_presence_state(self, mode=GET_DATA_ACTIVE):
     '''!
       @brief Get presence state.
+      @param mode: Data acquisition mode.
+      @n   GET_DATA_ACTIVE: Query latest data and update cache.
+      @n   GET_DATA_REPORT: Return cached data from the last report.
       @return NO_PRESENCE / PRESENCE / PRESENCE_UNKNOWN
     '''
 
-  def get_motion_state(self):
+  def get_motion_state(self, mode=GET_DATA_ACTIVE):
     '''!
       @brief Get motion state.
+      @param mode: Data acquisition mode.
+      @n   GET_DATA_ACTIVE: Query latest data and update cache.
+      @n   GET_DATA_REPORT: Return cached data from the last report.
       @return MOTION_NONE / MOTION_STATIC / MOTION_ACTIVE / MOTION_UNKNOWN
     '''
 

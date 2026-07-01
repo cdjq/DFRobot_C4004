@@ -188,21 +188,29 @@ pip3 install pyserial
   /**
    * @fn getPresenceState
    * @brief Get the current presence detection result.
+   * @param mode: Data acquisition mode.
+   * @n          eGetDataActive: Query latest data and update cache.
+   * @n          eGetDataReport: Return cached data from the last report.
    * @return ePresenceState_t: Presence detection result.
    * @n          eNoPresence: No presence detected.
    * @n          ePresence: Presence detected.
    * @n          ePresenceUnknown: Unknown presence state.
-  */
-  ePresenceState_t getPresenceState(void);
+   */
+  ePresenceState_t getPresenceState(eGetDataMode_t mode = eGetDataActive);
 
   /**
-   * @fn setMotionEnable
-   * @brief Enable or disable the human motion detection function of the sensor.
-   * @param enable: Enable or disable the human motion detection function.
-   * @n          true: Enable, false: Disable.
-   * @return true: Set succeeded, false: Set failed.
-  */
-  eMotionState_t getMotionState(void);
+   * @fn getMotionState
+   * @brief Get the current human motion state.
+   * @param mode: Data acquisition mode.
+   * @n          eGetDataActive: Query latest data and update cache.
+   * @n          eGetDataReport: Return cached data from the last report.
+   * @return eMotionState_t: Motion state.
+   * @n          eMotionNone: No motion state.
+   * @n          eMotionStatic: Stationary.
+   * @n          eMotionActive: Active motion.
+   * @n          eMotionUnknown: Unknown motion state.
+   */
+  eMotionState_t getMotionState(eGetDataMode_t mode = eGetDataActive);
 
   /**
    * @fn setTrajectoryTrackEnable

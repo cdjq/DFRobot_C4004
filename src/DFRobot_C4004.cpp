@@ -306,20 +306,24 @@ bool DFRobot_C4004::getPresenceEnable(bool *enable)
   return true;
 }
 
-ePresenceState_t DFRobot_C4004::getPresenceState(void)
+ePresenceState_t DFRobot_C4004::getPresenceState(eGetDataMode_t mode)
 {
   uint8_t value = ePresenceUnknown;
-  if (queryByte(CTRL_PRESENCE, CMD_PRESENCE_QUERY_STATE, &value)) {
-    _presence = (ePresenceState_t)value;
+  if (mode == eGetDataActive) {
+    if (queryByte(CTRL_PRESENCE, CMD_PRESENCE_QUERY_STATE, &value)) {
+      _presence = (ePresenceState_t)value;
+    }
   }
   return _presence;
 }
 
-eMotionState_t DFRobot_C4004::getMotionState(void)
+eMotionState_t DFRobot_C4004::getMotionState(eGetDataMode_t mode)
 {
   uint8_t value = eMotionUnknown;
-  if (queryByte(CTRL_PRESENCE, CMD_PRESENCE_QUERY_MOTION, &value)) {
-    _motionState = (eMotionState_t)value;
+  if (mode == eGetDataActive) {
+    if (queryByte(CTRL_PRESENCE, CMD_PRESENCE_QUERY_MOTION, &value)) {
+      _motionState = (eMotionState_t)value;
+    }
   }
   return _motionState;
 }
@@ -1328,9 +1332,9 @@ void DFRobot_C4004::parseTagEvent(const uint8_t *data, uint16_t len)
   _tagInfo.centerX = readSignBitInt16(&data[3]);
   _tagInfo.centerY = readSignBitInt16(&data[5]);
   if (_tagInfo.tagType == eTagBoundary) {
-    _tagInfo.enterExit = data[7];
+    _tagInfo.enterExit = static_cast<eBoundaryDirection_t>(data[7]);
   } else if (_tagInfo.tagType == eTagApproachAway) {
-    _tagInfo.motionDir = data[7];
+    _tagInfo.motionDir = static_cast<eApproachAwayDirection_t>(data[7]);
   } else if (_tagInfo.tagType == eTagPeopleCounting) {
     _tagInfo.motionNum = (data[7] >> 4) & 0x0F;
     _tagInfo.staticNum = data[7] & 0x0F;

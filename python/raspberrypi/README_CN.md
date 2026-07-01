@@ -150,15 +150,21 @@ RX         | TXD
       @return True or False
     '''
 
-  def get_presence_state(self):
+  def get_presence_state(self, mode=GET_DATA_ACTIVE):
     '''!
       @brief 读取存在状态。
+      @param mode: 数据获取方式。
+      @n   GET_DATA_ACTIVE: 主动查询最新数据并更新缓存。
+      @n   GET_DATA_REPORT: 直接返回最近一次上报缓存的数据。
       @return NO_PRESENCE / PRESENCE / PRESENCE_UNKNOWN
     '''
 
-  def get_motion_state(self):
+  def get_motion_state(self, mode=GET_DATA_ACTIVE):
     '''!
       @brief 读取运动状态。
+      @param mode: 数据获取方式。
+      @n   GET_DATA_ACTIVE: 主动查询最新数据并更新缓存。
+      @n   GET_DATA_REPORT: 直接返回最近一次上报缓存的数据。
       @return MOTION_NONE / MOTION_STATIC / MOTION_ACTIVE / MOTION_UNKNOWN
     '''
 

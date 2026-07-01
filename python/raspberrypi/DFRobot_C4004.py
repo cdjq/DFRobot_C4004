@@ -58,8 +58,8 @@ class TagInfo(object):
     self.io_index = 0
     self.center_x = 0
     self.center_y = 0
-    self.enter_exit = 0
-    self.motion_dir = 0
+    self.enter_exit = DFRobot_C4004.DIR_NONE
+    self.motion_dir = DFRobot_C4004.DIR_NONE
     self.motion_num = 0
     self.static_num = 0
 
@@ -215,6 +215,12 @@ class DFRobot_C4004(object):
   TAG_APPROACH_AWAY = 0x02
   TAG_PEOPLE_COUNTING = 0x03
   TAG_NOISE = 0x04
+
+  ENTER = 0x00
+  EXIT = 0x01
+  DIR_NONE = 0x02
+  APPROACH = 0x00
+  AWAY = 0x01
 
   TAG_RANGE_CIRCLE = 0x00
   TAG_RANGE_RECTANGLE = 0x01
@@ -518,31 +524,46 @@ class DFRobot_C4004(object):
       return True
     return False
 
-  def get_presence(self):
-    '''!
-      @brief Query presence state directly.
-      @return NO_PRESENCE / PRESENCE / PRESENCE_UNKNOWN.
-    '''
-    value = self._query_byte(self.CTRL_PRESENCE, self.CMD_PRESENCE_QUERY_STATE)
-    if value is not None:
-      self._presence = value
-    return self._presence
-
-  def get_presence_state(self):
+  def get_presence(self, mode=GET_DATA_ACTIVE):
     '''!
       @brief Get presence state.
+      @param mode Data acquisition mode.
+      @n GET_DATA_ACTIVE: Query latest presence state before reading cache.
+      @n GET_DATA_REPORT: Read from report cache only.
       @return NO_PRESENCE / PRESENCE / PRESENCE_UNKNOWN.
     '''
-    return self.get_presence()
+    if isinstance(mode, bool):
+      mode = self.GET_DATA_ACTIVE if mode else self.GET_DATA_REPORT
+    if mode == self.GET_DATA_ACTIVE:
+      value = self._query_byte(self.CTRL_PRESENCE, self.CMD_PRESENCE_QUERY_STATE)
+      if value is not None:
+        self._presence = value
+    return self._presence
 
-  def get_motion_state(self):
+  def get_presence_state(self, mode=GET_DATA_ACTIVE):
     '''!
-      @brief Query motion state.
+      @brief Get presence state.
+      @param mode Data acquisition mode.
+      @n GET_DATA_ACTIVE: Query latest presence state before reading cache.
+      @n GET_DATA_REPORT: Read from report cache only.
+      @return NO_PRESENCE / PRESENCE / PRESENCE_UNKNOWN.
+    '''
+    return self.get_presence(mode)
+
+  def get_motion_state(self, mode=GET_DATA_ACTIVE):
+    '''!
+      @brief Get motion state.
+      @param mode Data acquisition mode.
+      @n GET_DATA_ACTIVE: Query latest motion state before reading cache.
+      @n GET_DATA_REPORT: Read from report cache only.
       @return MOTION_NONE / MOTION_STATIC / MOTION_ACTIVE / MOTION_UNKNOWN.
     '''
-    value = self._query_byte(self.CTRL_PRESENCE, self.CMD_PRESENCE_QUERY_MOTION)
-    if value is not None:
-      self._motion_state = value
+    if isinstance(mode, bool):
+      mode = self.GET_DATA_ACTIVE if mode else self.GET_DATA_REPORT
+    if mode == self.GET_DATA_ACTIVE:
+      value = self._query_byte(self.CTRL_PRESENCE, self.CMD_PRESENCE_QUERY_MOTION)
+      if value is not None:
+        self._motion_state = value
     return self._motion_state
 
   def set_trajectory_track_enable(self, enable):

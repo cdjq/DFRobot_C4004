@@ -85,6 +85,22 @@ def tag_type_to_text(tag_type):
   return 'Unknown'
 
 
+def boundary_direction_to_text(value):
+  if value == c4004.ENTER:
+    return 'Enter'
+  if value == c4004.EXIT:
+    return 'Exit'
+  return 'None'
+
+
+def approach_away_direction_to_text(value):
+  if value == c4004.APPROACH:
+    return 'Approach'
+  if value == c4004.AWAY:
+    return 'Away'
+  return 'None'
+
+
 def make_empty_cache(index):
   return {
     'tag_index': index,
@@ -92,8 +108,8 @@ def make_empty_cache(index):
     'io_index': 0,
     'center_x': 0,
     'center_y': 0,
-    'enter_exit': 0,
-    'motion_dir': 0,
+    'enter_exit': c4004.DIR_NONE,
+    'motion_dir': c4004.DIR_NONE,
     'motion_num': 0,
     'static_num': 0,
   }
@@ -111,8 +127,6 @@ def init_tag_cache_from_config(tags):
     tag_cache[index]['io_index'] = tag.io_index
     tag_cache[index]['center_x'] = tag.center_x
     tag_cache[index]['center_y'] = tag.center_y
-    if index in (TAG_HOME_DOOR, TAG_KITCHEN_DOOR):
-      tag_cache[index]['motion_dir'] = 1
 
 
 def init_tag_cache_from_device():
@@ -230,7 +244,7 @@ def setup_sensor_and_tags():
 
   tag = TagConfig()
   tag.tag_index = TAG_HOME_DOOR
-  tag.tag_type = c4004.TAG_APPROACH_AWAY
+  tag.tag_type = c4004.TAG_BOUNDARY
   tag.scope_type = c4004.TAG_RANGE_RECTANGLE
   tag.io_index = 0
   tag.center_x = 100
@@ -241,7 +255,7 @@ def setup_sensor_and_tags():
 
   tag = TagConfig()
   tag.tag_index = TAG_KITCHEN_DOOR
-  tag.tag_type = c4004.TAG_APPROACH_AWAY
+  tag.tag_type = c4004.TAG_BOUNDARY
   tag.scope_type = c4004.TAG_RANGE_RECTANGLE
   tag.io_index = 0
   tag.center_x = -100
@@ -311,8 +325,8 @@ def print_tag_cache_table():
 
     motion_num = info['motion_num'] if info['tag_type'] == c4004.TAG_PEOPLE_COUNTING else 0
     static_num = info['static_num'] if info['tag_type'] == c4004.TAG_PEOPLE_COUNTING else 0
-    motion_dir = str(info['motion_dir']) if info['tag_type'] == c4004.TAG_APPROACH_AWAY else '-'
-    enter_exit = str(info['enter_exit']) if info['tag_type'] == c4004.TAG_BOUNDARY else '-'
+    motion_dir = approach_away_direction_to_text(info['motion_dir']) if info['tag_type'] == c4004.TAG_APPROACH_AWAY else '-'
+    enter_exit = boundary_direction_to_text(info['enter_exit']) if info['tag_type'] == c4004.TAG_BOUNDARY else '-'
 
     line = '%d\t%s' % (i, name)
     if len(name) < 8:
@@ -331,8 +345,8 @@ def print_tag_cache_table():
     )
     print(line)
 
-  print('TV IO:\t%s' % ('HIGH' if tv_output_high else 'LOW'))
-  print('Light PWM:\t%d' % light_output_value)
+  print('TV IO level:\t%s' % ('HIGH' if tv_output_high else 'LOW'))
+  print('Light PWM value:\t%d' % light_output_value)
 
 
 def main():
@@ -351,6 +365,7 @@ def main():
   try:
     while True:
       now_s = time.time()
+
       event = c4004.get_reported_info(0.1)
 
       if event == c4004.EVENT_TAG:

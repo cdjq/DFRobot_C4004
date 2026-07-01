@@ -188,21 +188,29 @@ pip3 install pyserial
   /**
    * @fn getPresenceState
    * @brief 获取当前的存在检测结果。
+   * @param mode: 数据获取方式。
+   * @n          eGetDataActive: 主动查询最新数据并更新缓存。
+   * @n          eGetDataReport: 直接返回最近一次上报缓存的数据。
    * @return ePresenceState_t: 存在检测结果。
    * @n          eNoPresence: 未检测到存在。
    * @n          ePresence: 检测到存在。
    * @n          ePresenceUnknown: 存在状态未知。
    */
-  ePresenceState_t getPresenceState(void);
+  ePresenceState_t getPresenceState(eGetDataMode_t mode = eGetDataActive);
 
   /**
-   * @fn setMotionEnable
-   * @brief 启用或禁用传感器的人体运动检测功能。
-   * @param enable: 启用或禁用人体运动检测功能。
-   * @n          true: 启用，false: 禁用。
-   * @return true: 设置成功，false: 设置失败。
+   * @fn getMotionState
+   * @brief 获取当前的人体运动状态。
+   * @param mode: 数据获取方式。
+   * @n          eGetDataActive: 主动查询最新数据并更新缓存。
+   * @n          eGetDataReport: 直接返回最近一次上报缓存的数据。
+   * @return eMotionState_t: 运动状态。
+   * @n          eMotionNone: 无运动状态。
+   * @n          eMotionStatic: 静止。
+   * @n          eMotionActive: 活跃运动。
+   * @n          eMotionUnknown: 运动状态未知。
    */
-  eMotionState_t getMotionState(void);
+  eMotionState_t getMotionState(eGetDataMode_t mode = eGetDataActive);
 
   /**
    * @fn setTrajectoryTrackEnable

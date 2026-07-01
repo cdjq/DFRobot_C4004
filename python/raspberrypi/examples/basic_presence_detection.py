@@ -23,7 +23,6 @@ from DFRobot_C4004 import DFRobot_C4004, FourSidedRange_t
 PORT = '/dev/ttyAMA0'
 c4004 = DFRobot_C4004(PORT, 115200)
 
-
 def main():
   while not c4004.begin():
     print('DFRobot C4004 begin failed, retrying...')
@@ -76,15 +75,19 @@ def main():
 
   last_query = 0
   while True:
+    # When state or data changes and the corresponding report function is enabled,
+    # the module pushes the update immediately as an event via get_reported_info().
+    # Use the matching getter with GET_DATA_REPORT to read the cached value
+    # updated by that report, without issuing an extra UART query.
     event = c4004.get_reported_info(0.05)
     if event == c4004.EVENT_PRESENCE:
-      presence = c4004.get_presence_state()
+      presence = c4004.get_presence_state(c4004.GET_DATA_REPORT)
       if presence == c4004.NO_PRESENCE:
         print('Human presence state: None')
       elif presence == c4004.PRESENCE:
         print('Human presence state: Presence')
     elif event == c4004.EVENT_MOTION:
-      motion = c4004.get_motion_state()
+      motion = c4004.get_motion_state(c4004.GET_DATA_REPORT)
       if motion == c4004.MOTION_STATIC:
         print('Motion state: Static')
       elif motion == c4004.MOTION_ACTIVE:
@@ -99,13 +102,13 @@ def main():
       last_query = time.time()
       print('Number of trajectories:', c4004.get_people_time(c4004.GET_DATA_REPORT))
 
-      query_presence = c4004.get_presence_state()
+      query_presence = c4004.get_presence_state(c4004.GET_DATA_ACTIVE)
       if query_presence == c4004.NO_PRESENCE:
         print('Human presence state: None')
       elif query_presence == c4004.PRESENCE:
         print('Human presence state: Presence')
 
-      query_motion = c4004.get_motion_state()
+      query_motion = c4004.get_motion_state(c4004.GET_DATA_ACTIVE)
       if query_motion == c4004.MOTION_NONE:
         print('Motion state: None')
       elif query_motion == c4004.MOTION_STATIC:

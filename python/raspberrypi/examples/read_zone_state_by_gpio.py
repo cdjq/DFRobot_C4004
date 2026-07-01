@@ -138,6 +138,10 @@ def main():
   try:
     last_print = 0
     while True:
+      # When state or data changes and the corresponding report function is enabled,
+      # the module pushes the update immediately as an event via get_reported_info().
+      # Use the matching getter with GET_DATA_REPORT to read the cached value
+      # updated by that report, without issuing an extra UART query.
       c4004.get_reported_info(0.05)
       if time.time() - last_print > 1:
         last_print = time.time()

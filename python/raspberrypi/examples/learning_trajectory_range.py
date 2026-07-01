@@ -110,13 +110,16 @@ def setup_params():
 
 
 def print_trajectory_points(points):
-  for i, point in enumerate(points):
-    text = '(%d,%d)' % (point.x, point.y)
-    is_last = (i + 1) == len(points)
-    if is_last or (i + 1) % 8 == 0:
-      print(text)
-    else:
-      print(text, end=' ')
+  points_per_line = 4
+
+  if not points:
+    print('(no points)')
+    return
+
+  print('Point coordinates (x, y):')
+  for start in range(0, len(points), points_per_line):
+    chunk = points[start:start + points_per_line]
+    print('  '.join('(%5d,%5d)' % (point.x, point.y) for point in chunk))
 
 
 def wait_for_single_person():
@@ -234,6 +237,10 @@ def main():
   print_menu()
 
   while True:
+    # When state or data changes and the corresponding report function is enabled,
+    # the module pushes the update immediately as an event via get_reported_info().
+    # Use the matching getter with GET_DATA_REPORT to read the cached value
+    # updated by that report, without issuing an extra UART query.
     cmd = read_command(0.01)
 
     if not cmd:
