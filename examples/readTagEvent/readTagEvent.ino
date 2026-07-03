@@ -20,67 +20,88 @@ DFRobot_C4004 c4004(&Serial1, 115200, /*D2*/ D2, /*D3*/ D3);
 DFRobot_C4004 c4004(&Serial1, 115200);
 #endif
 
+void printCol(const __FlashStringHelper *text, uint8_t width)
+{
+  uint8_t len = strlen_P(reinterpret_cast<PGM_P>(text));
+  Serial.print(text);
+  for (uint8_t i = len; i < width; i++) {
+    Serial.print(' ');
+  }
+}
+
+void printCol(long value, uint8_t width)
+{
+  char buf[12];
+  ltoa(value, buf, 10);
+  Serial.print(buf);
+  for (uint8_t i = (uint8_t)strlen(buf); i < width; i++) {
+    Serial.print(' ');
+  }
+}
+
+const __FlashStringHelper *tagTypeText(eTagType_t type)
+{
+  switch (type) {
+    case eTagNone:           return F("None");
+    case eTagBoundary:       return F("Boundary");
+    case eTagApproachAway:   return F("ApproachAway");
+    case eTagPeopleCounting: return F("PeopleCounting");
+    case eTagNoise:          return F("Noise");
+    default:                 return F("Unknown");
+  }
+}
+
 void printTagEvent(const sTagInfo_t &info)
 {
-  char line[96];
-  const char *typeText = "Unknown";
-
   Serial.println(F("======================================================================"));
   Serial.println(F("============================TagEventReport============================"));
   Serial.println(F("======================================================================"));
-  snprintf(line, sizeof(line), "Tag Index : %u", info.tagIndex);
-  Serial.println(line);
-
-  if (info.tagType == eTagNone) {
-    typeText = "None";
-  } else if (info.tagType == eTagBoundary) {
-    typeText = "Boundary";
-  } else if (info.tagType == eTagApproachAway) {
-    typeText = "ApproachAway";
-  } else if (info.tagType == eTagPeopleCounting) {
-    typeText = "PeopleCounting";
-  } else if (info.tagType == eTagNoise) {
-    typeText = "Noise";
-  }
-  snprintf(line, sizeof(line), "Tag Type  : %s", typeText);
-  Serial.println(line);
-  snprintf(line, sizeof(line), "IO Index  : %u", info.ioIndex);
-  Serial.println(line);
-  snprintf(line, sizeof(line), "Center XY : %d / %d", info.centerX, info.centerY);
-  Serial.println(line);
+  Serial.print(F("Tag Index : "));
+  Serial.println(info.tagIndex);
+  Serial.print(F("Tag Type  : "));
+  Serial.println(tagTypeText(info.tagType));
+  Serial.print(F("IO Index  : "));
+  Serial.println(info.ioIndex);
+  Serial.print(F("Center XY : "));
+  Serial.print(info.centerX);
+  Serial.print(F(" / "));
+  Serial.println(info.centerY);
 
   if (info.tagType == eTagBoundary) {
-    const char *boundaryText = "None";
+    Serial.print(F("Event     : Boundary ("));
     if (info.enterExit == eBoundaryDirection_t::eEnter) {
-      boundaryText = "Enter";
+      Serial.print(F("Enter"));
     } else if (info.enterExit == eBoundaryDirection_t::eExit) {
-      boundaryText = "Exit";
+      Serial.print(F("Exit"));
+    } else {
+      Serial.print(F("None"));
     }
-    snprintf(line, sizeof(line), "Event     : Boundary (%s)", boundaryText);
-    Serial.println(line);
+    Serial.println(F(")"));
   } else if (info.tagType == eTagApproachAway) {
-    const char *motionText = "None";
+    Serial.print(F("Event     : MotionDirection ("));
     if (info.motionDir == eApproachAwayDirection_t::eApproach) {
-      motionText = "Approach";
+      Serial.print(F("Approach"));
     } else if (info.motionDir == eApproachAwayDirection_t::eAway) {
-      motionText = "Away";
+      Serial.print(F("Away"));
+    } else {
+      Serial.print(F("None"));
     }
-    snprintf(line, sizeof(line), "Event     : MotionDirection (%s)", motionText);
-    Serial.println(line);
+    Serial.println(F(")"));
   } else if (info.tagType == eTagPeopleCounting) {
-    snprintf(line, sizeof(line), "Event     : PeopleCounting (M:%u S:%u)", info.motionNum, info.staticNum);
-    Serial.println(line);
+    Serial.print(F("Event     : PeopleCounting (M:"));
+    Serial.print(info.motionNum);
+    Serial.print(F(" S:"));
+    Serial.print(info.staticNum);
+    Serial.println(F(")"));
   } else {
-    snprintf(line, sizeof(line), "Event     : %s", typeText);
-    Serial.println(line);
+    Serial.print(F("Event     : "));
+    Serial.println(tagTypeText(info.tagType));
   }
   Serial.println();
 }
 
 void printTagList(const __FlashStringHelper *title, sTagConfig_t *tags, uint8_t count)
 {
-  char line[128];
-
   Serial.println(F("======================================================================"));
   Serial.println(title);
   Serial.println(F("----------------------------------------------------------------------"));
@@ -92,28 +113,23 @@ void printTagList(const __FlashStringHelper *title, sTagConfig_t *tags, uint8_t 
     return;
   }
 
-  Serial.println(F("Idx  Type             Range      IO  CenterX  CenterY  Width  Height"));
-  Serial.println(F("---- ---------------- ---------- --  -------  -------  -----  ------"));
+  printCol(F("Idx"), 5);
+  printCol(F("Type"), 16);
+  printCol(F("Range"), 11);
+  printCol(F("IO"), 4);
+  printCol(F("CenterX"), 9);
+  printCol(F("CenterY"), 9);
+  printCol(F("Width"), 7);
+  Serial.println(F("Height"));
   for (uint8_t i = 0; i < count; i++) {
-    const char *typeText = "Unknown";
-    const char *rangeText = tags[i].scopeType == eTagRangeCircle ? "Circle" : "Rectangle";
-
-    if (tags[i].tagType == eTagNone) {
-      typeText = "None";
-    } else if (tags[i].tagType == eTagBoundary) {
-      typeText = "Boundary";
-    } else if (tags[i].tagType == eTagApproachAway) {
-      typeText = "ApproachAway";
-    } else if (tags[i].tagType == eTagPeopleCounting) {
-      typeText = "PeopleCounting";
-    } else if (tags[i].tagType == eTagNoise) {
-      typeText = "Noise";
-    }
-
-    snprintf(line, sizeof(line), "%3u  %-16s %-10s %2u  %7d  %7d  %5u  %6u",
-             tags[i].tagIndex, typeText, rangeText, tags[i].ioIndex,
-             tags[i].centerX, tags[i].centerY, tags[i].width, tags[i].height);
-    Serial.println(line);
+    printCol((long)tags[i].tagIndex, 5);
+    printCol(tagTypeText(tags[i].tagType), 16);
+    printCol(tags[i].scopeType == eTagRangeCircle ? F("Circle") : F("Rectangle"), 11);
+    printCol((long)tags[i].ioIndex, 4);
+    printCol((long)tags[i].centerX, 9);
+    printCol((long)tags[i].centerY, 9);
+    printCol((long)tags[i].width, 7);
+    Serial.println(tags[i].height);
   }
   Serial.println();
 }
@@ -126,6 +142,7 @@ void setup()
     Serial.println(F("DFRobot C4004 begin failed, retrying..."));
     delay(1000);
   }
+  Serial.println("DFRobot C4004 begin success.");
 
   if (c4004.setCheckToActiveFrames(7)) {
     Serial.println(F("Set check-to-active frames success."));

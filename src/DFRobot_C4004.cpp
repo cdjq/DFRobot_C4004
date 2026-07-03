@@ -202,9 +202,6 @@ bool DFRobot_C4004::setInstallInfo(sInstallInfo_t &info)
   if (info.mode != eInstallModeSide && info.mode != eInstallModeTop) {
     return false;
   }
-  if (info.heightCm > 0xFFFF) {
-    return false;
-  }
 
   if (xAngleProto > 18000) {
     xAngleProto = 18000;

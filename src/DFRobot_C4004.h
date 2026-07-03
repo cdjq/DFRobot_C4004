@@ -35,9 +35,9 @@
 #define DBG(...)
 #endif
 
-// RAM note: these buffers cost ~1KB / ~2KB of SRAM. Requires an MCU with
+// RAM note: these buffers cost ~2KB of SRAM. Requires an MCU with
 // at least 2KB SRAM. If RAM is tight or you see crashes/garbled RX, lower MAX_POINTS.
-#if defined(ARDUINO_AVR_UNO)
+#if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_LEONARDO)
 #define MAX_POINTS            64
 #else
 #define MAX_POINTS            150
