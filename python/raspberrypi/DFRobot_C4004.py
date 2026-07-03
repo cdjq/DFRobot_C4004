@@ -13,6 +13,7 @@
 
 import time
 import serial
+from collections import deque
 
 
 class InstallInfo(object):
@@ -102,8 +103,23 @@ class DFRobot_C4004(object):
   MAX_TARGETS = 8
   MAX_POINTS = 150
   MAX_PAYLOAD = 3 + MAX_POINTS * 4
+  MAX_FRAME_SIZE = 9 + MAX_PAYLOAD
+  RX_RING_SIZE = MAX_FRAME_SIZE + 128
   DEFAULT_TIMEOUT = 0.2
+  RESET_TIMEOUT = 0.3
+  FACTORY_RESET_TIMEOUT = 0.35
   _TAG_CONFIG_LIMIT = 32
+
+  _RX_ASM_SYNC_H1 = 0
+  _RX_ASM_SYNC_H2 = 1
+  _RX_ASM_CTRL = 2
+  _RX_ASM_CMD = 3
+  _RX_ASM_LEN_HI = 4
+  _RX_ASM_LEN_LO = 5
+  _RX_ASM_PAYLOAD = 6
+  _RX_ASM_CHECKSUM = 7
+  _RX_ASM_TAIL1 = 8
+  _RX_ASM_TAIL2 = 9
 
   CTRL_SYSTEM = 0x01
   CTRL_PRODUCT_INFO = 0x02
@@ -271,6 +287,13 @@ class DFRobot_C4004(object):
     self._tag_info_valid = False
     self._range_info = FourSidedRange_t()
     self._people_count = 0
+    self._init_rx_state()
+
+  def _init_rx_state(self):
+    self._rx_ring = deque(maxlen=self.RX_RING_SIZE)
+    self._pending_packet = None
+    self._pending_valid = False
+    self._reset_rx_parser()
 
   def begin(self):
     '''!
@@ -317,7 +340,7 @@ class DFRobot_C4004(object):
       @brief Reboot the module.
       @return true if succeeded, otherwise false.
     '''
-    ret = self._request_frame(self.CTRL_SYSTEM, self.CMD_SYSTEM_RESET, [self.QUERY_DATA]) is not None
+    ret = self._request_frame(self.CTRL_SYSTEM, self.CMD_SYSTEM_RESET, [self.QUERY_DATA], self.RESET_TIMEOUT) is not None
     time.sleep(0.1)
     return ret
 
@@ -326,7 +349,7 @@ class DFRobot_C4004(object):
       @brief Restore module to factory settings.
       @return true if succeeded, otherwise false.
     '''
-    ret = self._request_frame(self.CTRL_SYSTEM, self.CMD_SYSTEM_FACTORY_RESET, [self.QUERY_DATA]) is not None
+    ret = self._request_frame(self.CTRL_SYSTEM, self.CMD_SYSTEM_FACTORY_RESET, [self.QUERY_DATA], self.FACTORY_RESET_TIMEOUT) is not None
     time.sleep(0.1)
     return ret
 
@@ -820,28 +843,10 @@ class DFRobot_C4004(object):
     '''!
       @brief Start trajectory-range learning or use the learned trajectory range (mode 0x05).
       @param learning True starts trajectory-range learning; False uses trajectory range mode without learning.
-      @return true if succeeded, otherwise false.
     '''
     data = [self.RANGE_TRAJECTORY, 1 if learning else 0]
-    self._flush_input()
-    if not self._send_command(self.CTRL_DETECTION_RANGE, self.CMD_DETECTION_RANGE_SET_RANGE, data):
-      return False
-
-    start = time.time()
-    while time.time() - start < self.DEFAULT_TIMEOUT:
-      packet = self._read_frame(max(0.01, self.DEFAULT_TIMEOUT - (time.time() - start)))
-      if packet is None:
-        continue
-      self._handle_packet(packet)
-      if packet.control != self.CTRL_DETECTION_RANGE:
-        continue
-      if packet.cmd == self.CMD_DETECTION_RANGE_SET_RANGE:
-        self._range_info.mode = self.RANGE_TRAJECTORY
-        return True
-      if packet.cmd == self.CMD_DETECTION_RANGE_QUERY_RANGE and len(packet.data) > 0 and packet.data[0] == self.RANGE_TRAJECTORY:
-        self._range_info.mode = self.RANGE_TRAJECTORY
-        return True
-    return False
+    self._request_frame(self.CTRL_DETECTION_RANGE, self.CMD_DETECTION_RANGE_SET_RANGE, data)
+    self._range_info.mode = self.RANGE_TRAJECTORY
 
   def set_config_file_mode_points(self, points):
     '''!
@@ -1109,7 +1114,105 @@ class DFRobot_C4004(object):
       return True
     return False
 
+  def _reset_rx_parser(self):
+    self._asm_state = self._RX_ASM_SYNC_H1
+    self._asm_control = 0
+    self._asm_cmd = 0
+    self._asm_len = 0
+    self._asm_data = bytearray()
+    self._asm_checksum = 0
+    self._asm_idx = 0
+    self._asm_recv_checksum = 0
+
+  def _discard_rx_ring(self):
+    self._rx_ring.clear()
+
+  def _feed_asm_byte(self, value):
+    if self._asm_state == self._RX_ASM_SYNC_H1:
+      if value == self.FRAME_HEAD1:
+        self._asm_checksum = value
+        self._asm_state = self._RX_ASM_SYNC_H2
+    elif self._asm_state == self._RX_ASM_SYNC_H2:
+      if value == self.FRAME_HEAD2:
+        self._asm_checksum = (self._asm_checksum + value) & 0xFF
+        self._asm_state = self._RX_ASM_CTRL
+      else:
+        self._asm_state = self._RX_ASM_SYNC_H1
+        if value == self.FRAME_HEAD1:
+          self._asm_checksum = value
+          self._asm_state = self._RX_ASM_SYNC_H2
+    elif self._asm_state == self._RX_ASM_CTRL:
+      self._asm_control = value
+      self._asm_checksum = (self._asm_checksum + value) & 0xFF
+      self._asm_state = self._RX_ASM_CMD
+    elif self._asm_state == self._RX_ASM_CMD:
+      self._asm_cmd = value
+      self._asm_checksum = (self._asm_checksum + value) & 0xFF
+      self._asm_state = self._RX_ASM_LEN_HI
+    elif self._asm_state == self._RX_ASM_LEN_HI:
+      self._asm_len = (value << 8)
+      self._asm_checksum = (self._asm_checksum + value) & 0xFF
+      self._asm_state = self._RX_ASM_LEN_LO
+    elif self._asm_state == self._RX_ASM_LEN_LO:
+      self._asm_len |= value
+      self._asm_checksum = (self._asm_checksum + value) & 0xFF
+      if self._asm_len > self.MAX_PAYLOAD:
+        self._reset_rx_parser()
+        self._discard_rx_ring()
+        return
+      self._asm_data = bytearray()
+      self._asm_idx = 0
+      if self._asm_len == 0:
+        self._asm_state = self._RX_ASM_CHECKSUM
+      else:
+        self._asm_state = self._RX_ASM_PAYLOAD
+    elif self._asm_state == self._RX_ASM_PAYLOAD:
+      self._asm_data.append(value)
+      self._asm_checksum = (self._asm_checksum + value) & 0xFF
+      self._asm_idx += 1
+      if self._asm_idx >= self._asm_len:
+        self._asm_state = self._RX_ASM_CHECKSUM
+    elif self._asm_state == self._RX_ASM_CHECKSUM:
+      self._asm_recv_checksum = value
+      self._asm_state = self._RX_ASM_TAIL1
+    elif self._asm_state == self._RX_ASM_TAIL1:
+      if value != self.FRAME_TAIL1:
+        self._reset_rx_parser()
+        return
+      self._asm_state = self._RX_ASM_TAIL2
+    elif self._asm_state == self._RX_ASM_TAIL2:
+      if value != self.FRAME_TAIL2:
+        self._reset_rx_parser()
+        return
+      if self._asm_checksum != self._asm_recv_checksum:
+        self._reset_rx_parser()
+        return
+      self._pending_packet = Packet(self._asm_control, self._asm_cmd, self._asm_data)
+      self._pending_valid = True
+      self._reset_rx_parser()
+
+  def _pump_rx(self):
+    if self.ser is None:
+      return
+    if hasattr(self.ser, 'in_waiting') and self.ser.in_waiting:
+      self._rx_ring.extend(self.ser.read(self.ser.in_waiting))
+    while (not self._pending_valid) and self._rx_ring:
+      value = self._rx_ring.popleft()
+      self._feed_asm_byte(value)
+
+  def _take_pending_frame(self):
+    if not self._pending_valid:
+      return None
+    packet = self._pending_packet
+    self._pending_valid = False
+    self._pending_packet = None
+    return packet
+
   def _flush_input(self):
+    self._discard_rx_ring()
+    self._reset_rx_parser()
+    self._pending_valid = False
+    self._pending_packet = None
     if self.ser is None:
       return
     if hasattr(self.ser, 'reset_input_buffer'):
@@ -1135,7 +1238,6 @@ class DFRobot_C4004(object):
   def _request_frame(self, control, cmd, data, timeout=None):
     if timeout is None:
       timeout = self.DEFAULT_TIMEOUT
-    self._flush_input()
     if not self._send_command(control, cmd, data):
       return None
     start = time.time()
@@ -1151,42 +1253,12 @@ class DFRobot_C4004(object):
   def _read_frame(self, timeout=0.05):
     start = time.time()
     while time.time() - start < timeout:
-      first = self._read_exact(1, max(0.001, timeout - (time.time() - start)))
-      if len(first) == 0:
-        continue
-      if first[0] != self.FRAME_HEAD1:
-        continue
-      second = self._read_exact(1, max(0.001, timeout - (time.time() - start)))
-      if len(second) == 0 or second[0] != self.FRAME_HEAD2:
-        continue
-      header = self._read_exact(4, max(0.001, timeout - (time.time() - start)))
-      if len(header) != 4:
-        return None
-      control = header[0]
-      cmd = header[1]
-      length = (header[2] << 8) | header[3]
-      if length > self.MAX_PAYLOAD:
-        if hasattr(self.ser, 'reset_input_buffer'):
-          self.ser.reset_input_buffer()
-        continue
-      payload = self._read_exact(length, max(0.001, timeout - (time.time() - start)))
-      tail = self._read_exact(3, max(0.001, timeout - (time.time() - start)))
-      if len(payload) != length or len(tail) != 3:
-        return None
-      checksum = (self.FRAME_HEAD1 + self.FRAME_HEAD2 + sum(header) + sum(payload)) & 0xFF
-      if tail[0] != checksum or tail[1] != self.FRAME_TAIL1 or tail[2] != self.FRAME_TAIL2:
-        continue
-      return Packet(control, cmd, payload)
+      self._pump_rx()
+      packet = self._take_pending_frame()
+      if packet is not None:
+        return packet
+      time.sleep(0.001)
     return None
-
-  def _read_exact(self, length, timeout):
-    data = bytearray()
-    start = time.time()
-    while len(data) < length and time.time() - start < timeout:
-      chunk = self.ser.read(length - len(data))
-      if chunk:
-        data += chunk
-    return data
 
   def _handle_packet(self, packet):
     if packet.control == self.CTRL_SYSTEM and packet.cmd in (self.CMD_SYSTEM_HEARTBEAT_REPORT, self.CMD_SYSTEM_HEARTBEAT_QUERY):

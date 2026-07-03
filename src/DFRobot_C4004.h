@@ -35,19 +35,26 @@
 #define DBG(...)
 #endif
 
-#define MAX_TARGETS           8
+// RAM note: these buffers cost ~1KB / ~2KB of SRAM. Requires an MCU with
+// at least 2KB SRAM. If RAM is tight or you see crashes/garbled RX, lower MAX_POINTS.
 #if defined(ARDUINO_AVR_UNO)
 #define MAX_POINTS            64
 #else
 #define MAX_POINTS            150
 #endif
 #define MAX_PAYLOAD           (3 + MAX_POINTS * 4)
+#define C4004_MAX_FRAME_SIZE  (9 + MAX_PAYLOAD)
+#define C4004_RX_RING_SIZE    (C4004_MAX_FRAME_SIZE + 128)
+
+#define MAX_TARGETS           8
 #define QUERY_DATA            0x0F
 #define FRAME_HEAD1           0x53
 #define FRAME_HEAD2           0x59
 #define FRAME_TAIL1           0x54
 #define FRAME_TAIL2           0x43
 #define DEFAULT_TIMEOUT       200
+#define RESET_TIMEOUT         300
+#define FACTORY_RESET_TIMEOUT 350
 #define HEARTBEAT_TIMEOUT     90000UL
 
 #define CTRL_SYSTEM           0x01
@@ -74,50 +81,50 @@
 #define CMD_WORK_STATUS_INIT_FINISHED_REPORT  0x01
 #define CMD_WORK_STATUS_INIT_FINISHED_QUERY   0x81
 
-#define CMD_INSTALL_SET_ANGLE            0x01
-#define CMD_INSTALL_SET_HEIGHT           0x02
-#define CMD_INSTALL_SET_MODE             0x06
-#define CMD_INSTALL_QUERY_ANGLE          0x81
-#define CMD_INSTALL_QUERY_HEIGHT         0x82
-#define CMD_INSTALL_QUERY_MODE           0x86
+#define CMD_INSTALL_SET_ANGLE                 0x01
+#define CMD_INSTALL_SET_HEIGHT                0x02
+#define CMD_INSTALL_SET_MODE                  0x06
+#define CMD_INSTALL_QUERY_ANGLE               0x81
+#define CMD_INSTALL_QUERY_HEIGHT              0x82
+#define CMD_INSTALL_QUERY_MODE                0x86
 
-#define CMD_PRESENCE_SET_ENABLE          0x00
-#define CMD_PRESENCE_REPORT              0x01
-#define CMD_PRESENCE_MOTION_REPORT       0x02
-#define CMD_PRESENCE_QUERY_ENABLE        0x80
-#define CMD_PRESENCE_QUERY_STATE         0x81
-#define CMD_PRESENCE_QUERY_MOTION        0x82
+#define CMD_PRESENCE_SET_ENABLE               0x00
+#define CMD_PRESENCE_REPORT                   0x01
+#define CMD_PRESENCE_MOTION_REPORT            0x02
+#define CMD_PRESENCE_QUERY_ENABLE             0x80
+#define CMD_PRESENCE_QUERY_STATE              0x81
+#define CMD_PRESENCE_QUERY_MOTION             0x82
 
-#define CMD_TRAJECTORY_SET_ENABLE             0x00
-#define CMD_TRAJECTORY_TARGET_REPORT          0x02
-#define CMD_TRAJECTORY_QUERY_ENABLE           0x80
-#define CMD_TRAJECTORY_QUERY_TARGET           0x82
-#define CMD_TRAJECTORY_SET_TRAJECTORY_LED     0x0B
-#define CMD_TRAJECTORY_SET_MOTION_LED         0x0C
-#define CMD_TRAJECTORY_SET_CHECK_TO_ACTIVE_FRAMES    0x0D
-#define CMD_TRAJECTORY_QUERY_TRAJECTORY_LED   0x8B
-#define CMD_TRAJECTORY_QUERY_MOTION_LED       0x8C
-#define CMD_TRAJECTORY_QUERY_CHECK_TO_ACTIVE_FRAMES  0x8D
+#define CMD_TRAJECTORY_SET_ENABLE                     0x00
+#define CMD_TRAJECTORY_TARGET_REPORT                  0x02
+#define CMD_TRAJECTORY_QUERY_ENABLE                   0x80
+#define CMD_TRAJECTORY_QUERY_TARGET                   0x82
+#define CMD_TRAJECTORY_SET_TRAJECTORY_LED             0x0B
+#define CMD_TRAJECTORY_SET_MOTION_LED                 0x0C
+#define CMD_TRAJECTORY_SET_CHECK_TO_ACTIVE_FRAMES     0x0D
+#define CMD_TRAJECTORY_QUERY_TRAJECTORY_LED           0x8B
+#define CMD_TRAJECTORY_QUERY_MOTION_LED               0x8C
+#define CMD_TRAJECTORY_QUERY_CHECK_TO_ACTIVE_FRAMES   0x8D
 
-#define CMD_DETECTION_RANGE_QUERY_TAGS            0x91
-#define CMD_DETECTION_RANGE_SET_TAG               0x11
-#define CMD_DETECTION_RANGE_CLEAR_TAG             0x13
-#define CMD_DETECTION_RANGE_SET_TAGS_FROM_CONFIG  0x19
-#define CMD_DETECTION_RANGE_SET_RANGE             0x1A
-#define CMD_DETECTION_RANGE_QUERY_RANGE           0x9A
-#define CMD_DETECTION_RANGE_TAG_REPORT            0x1B
+#define CMD_DETECTION_RANGE_QUERY_TAGS                0x91
+#define CMD_DETECTION_RANGE_SET_TAG                   0x11
+#define CMD_DETECTION_RANGE_CLEAR_TAG                 0x13
+#define CMD_DETECTION_RANGE_SET_TAGS_FROM_CONFIG      0x19
+#define CMD_DETECTION_RANGE_SET_RANGE                 0x1A
+#define CMD_DETECTION_RANGE_QUERY_RANGE               0x9A
+#define CMD_DETECTION_RANGE_TAG_REPORT                0x1B
 
-#define CMD_PEOPLE_COUNT_REPORT                     0x0A
-#define CMD_PEOPLE_COUNT_QUERY_COUNT                0x8A
-#define CMD_PEOPLE_COUNT_SET_REPORT_INTERVAL        0x0B
-#define CMD_PEOPLE_COUNT_QUERY_REPORT_INTERVAL      0x8B
-#define CMD_PEOPLE_COUNT_CLEAR_COUNT                0x11
-#define CMD_PEOPLE_COUNT_SET_TRAJECTORY_DISTANCE    0x0E
-#define CMD_PEOPLE_COUNT_QUERY_TRAJECTORY_DISTANCE  0x8E
-#define CMD_PEOPLE_COUNT_SET_TRAJECTORY_HOLD_TIME   0x15
-#define CMD_PEOPLE_COUNT_QUERY_TRAJECTORY_HOLD_TIME 0x95
-#define CMD_PEOPLE_COUNT_SET_NO_PERSON_DELAY        0x17
-#define CMD_PEOPLE_COUNT_QUERY_NO_PERSON_DELAY      0x97
+#define CMD_PEOPLE_COUNT_REPORT                       0x0A
+#define CMD_PEOPLE_COUNT_QUERY_COUNT                  0x8A
+#define CMD_PEOPLE_COUNT_SET_REPORT_INTERVAL          0x0B
+#define CMD_PEOPLE_COUNT_QUERY_REPORT_INTERVAL        0x8B
+#define CMD_PEOPLE_COUNT_CLEAR_COUNT                  0x11
+#define CMD_PEOPLE_COUNT_SET_TRAJECTORY_DISTANCE      0x0E
+#define CMD_PEOPLE_COUNT_QUERY_TRAJECTORY_DISTANCE    0x8E
+#define CMD_PEOPLE_COUNT_SET_TRAJECTORY_HOLD_TIME     0x15
+#define CMD_PEOPLE_COUNT_QUERY_TRAJECTORY_HOLD_TIME   0x95
+#define CMD_PEOPLE_COUNT_SET_NO_PERSON_DELAY          0x17
+#define CMD_PEOPLE_COUNT_QUERY_NO_PERSON_DELAY        0x97
 
 /**
  * @enum eReportedEvent_t
@@ -699,9 +706,8 @@ public:
    * @brief Start trajectory-range learning or use the learned trajectory range.
    * @param learning: Trajectory-range learning switch.
    * @n          true: Start learning trajectory range, false: Use trajectory range mode without learning.
-   * @return true: Set succeeded, false: Set failed.
   */
-  bool setTrajectoryRangeMode(bool learning);
+  void setTrajectoryRangeMode(bool learning);
 
   /**
    * @fn getTrajectoryRangeMode
@@ -856,7 +862,29 @@ protected:
   void writeUint32(uint8_t *data, uint32_t value) const;
   void initObject(void);
 
+  void pumpRx(void);
+  void resetRxParser(void);
+  void discardRxRing(void);
+  bool takePendingFrame(sPacket_t *packet);
+  void rxPushByte(uint8_t value);
+  bool rxPopByte(uint8_t *value);
+  void feedAsmByte(uint8_t value);
+  void logRxPacket(const sPacket_t *packet, uint8_t recvChecksum);
+
 private:
+  enum eRxAsmState_t {
+    eRxAsmSyncH1 = 0,
+    eRxAsmSyncH2,
+    eRxAsmCtrl,
+    eRxAsmCmd,
+    eRxAsmLenHi,
+    eRxAsmLenLo,
+    eRxAsmPayload,
+    eRxAsmChecksum,
+    eRxAsmTail1,
+    eRxAsmTail2
+  };
+
   Stream *_s;
 #if defined(ESP8266) || defined(ARDUINO_AVR_UNO)
   SoftwareSerial *_serial;
@@ -879,6 +907,15 @@ private:
   bool _tagInfoValid;
   sFourSidedRange_t _rangeInfo;
   uint8_t _peopleCount;
+  uint8_t _rxRing[C4004_RX_RING_SIZE];
+  uint16_t _rxHead;
+  uint16_t _rxTail;
+  eRxAsmState_t _asmState;
+  uint8_t _asmChecksum;
+  uint16_t _asmIdx;
+  uint8_t _asmRecvChecksum;
+  sPacket_t _pendingPacket;
+  bool _pendingValid;
 };
 
 #endif

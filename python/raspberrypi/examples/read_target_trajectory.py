@@ -49,7 +49,7 @@ def print_trajectory_data(data_mode):
   if count == 0:
     print('No target.')
   else:
-    print('Row\tID\tKinesia\tFeature\tX\tY\tSpeed')
+    print('Row\tIndex\tKinesia\tFeature\tX\tY\tSpeed')
     for i in range(min(count, len(targets))):
       target = targets[i]
       print('%d\t%d\t%d\t%s\t%d\t%d\t%d' % (

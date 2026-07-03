@@ -135,10 +135,8 @@ def main():
     print('Current mode is not four-side boundary, skip boundary range check.')
 
   # Set the trajectory detection range mode
-  # if c4004.set_trajectory_range_mode(False):
-  #   print('Set trajectory detection range mode success!')
-  # else:
-  #   print('Set trajectory detection range mode failed!')
+  # Setting it to false means using this mode and not performing trajectory learning
+  # c4004.set_trajectory_range_mode(False)
   # time.sleep(0.05)
   #
   # points = []

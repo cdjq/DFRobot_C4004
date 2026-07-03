@@ -183,12 +183,8 @@ void learnTrajectoryRange(void)
     Serial.println(F("Send s to start, or q to cancel."));
   }
 
-  Serial.print(F("Start trajectory learning: "));
-  if (!c4004.setTrajectoryRangeMode(true)) {
-    Serial.println(F("FAILED"));
-    printMenu();
-    return;
-  }
+  Serial.println(F("Start trajectory learning..."));
+  c4004.setTrajectoryRangeMode(true);
   Serial.println(F("OK"));
 
   Serial.println(F("Learning is running. Walk the required boundary path."));
@@ -204,12 +200,8 @@ void learnTrajectoryRange(void)
     c4004.getReportedInfo(50);
   }
 
-  Serial.print(F("Set trajectory range mode (learning off): "));
-  if (c4004.setTrajectoryRangeMode(false)) {
-    Serial.println(F("OK"));
-  } else {
-    Serial.println(F("FAILED"));
-  }
+  Serial.println(F("Set trajectory range mode (learning off)."));
+  c4004.setTrajectoryRangeMode(false);
 
   delay(200);
   queryTrajectoryRange();
@@ -255,8 +247,8 @@ void setUseTrajectoryRangeMode(void)
 {
   Serial.println();
   Serial.println(F(" ===============Use Trajectory Range==============="));
-  Serial.print(F("Set trajectory range mode (learning off): "));
-  Serial.println(c4004.setTrajectoryRangeMode(false) ? F("OK") : F("FAILED"));
+  Serial.println(F("Set trajectory range mode (learning off)."));
+  c4004.setTrajectoryRangeMode(false);
 }
 
 void queryTrajectoryRange(void)

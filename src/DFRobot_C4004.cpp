@@ -58,6 +58,11 @@ void DFRobot_C4004::initObject(void)
   memset(&_rangeInfo, 0, sizeof(_rangeInfo));
   _peopleCount = 0;
   _rangeInfo.mode = eRangeUnknown;
+  _rxHead = 0;
+  _rxTail = 0;
+  _pendingValid = false;
+  memset(&_pendingPacket, 0, sizeof(_pendingPacket));
+  resetRxParser();
 }
 
 bool DFRobot_C4004::begin(void)
@@ -107,7 +112,7 @@ bool DFRobot_C4004::reset(void)
 {
   uint8_t data = QUERY_DATA;
   sPacket_t &packet = _rxPacket;
-  bool ret = requestFrame(CTRL_SYSTEM, CMD_SYSTEM_RESET, &data, 1, &packet);
+  bool ret = requestFrame(CTRL_SYSTEM, CMD_SYSTEM_RESET, &data, 1, &packet, RESET_TIMEOUT);
   delay(100);
   return ret;
 }
@@ -116,7 +121,7 @@ bool DFRobot_C4004::factoryReset(void)
 {
   uint8_t data = QUERY_DATA;
   sPacket_t &packet = _rxPacket;
-  bool ret = requestFrame(CTRL_SYSTEM, CMD_SYSTEM_FACTORY_RESET, &data, 1, &packet);
+  bool ret = requestFrame(CTRL_SYSTEM, CMD_SYSTEM_FACTORY_RESET, &data, 1, &packet, FACTORY_RESET_TIMEOUT);
   delay(100);
   return ret;
 }
@@ -575,7 +580,6 @@ bool DFRobot_C4004::setTagsFromConfig(const sTagConfig_t *tags, uint8_t tagCount
     offset += 2;
   }
 
-  flushInput();
   if (!sendCommand(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_SET_TAGS_FROM_CONFIG, data, offset)) {
     return false;
   }
@@ -638,43 +642,16 @@ bool DFRobot_C4004::getFourSidedRangeMode(sFourSidedRange_t *range)
   return true;
 }
 
-bool DFRobot_C4004::setTrajectoryRangeMode(bool learning)
+void DFRobot_C4004::setTrajectoryRangeMode(bool learning)
 {
   uint8_t data[2];
   sPacket_t &packet = _rxPacket;
-  uint32_t startTime = 0;
 
   data[0] = eRangeTrajectory;
   data[1] = learning ? 1 : 0;
 
-  flushInput();
-  if (!sendCommand(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_SET_RANGE, data, sizeof(data))) {
-    return false;
-  }
-
-  startTime = millis();
-  while ((uint32_t)(millis() - startTime) < DEFAULT_TIMEOUT) {
-    uint16_t elapsed = (uint16_t)(millis() - startTime);
-    uint16_t leftTime = DEFAULT_TIMEOUT - elapsed;
-
-    if (!readFrame(&packet, leftTime)) {
-      continue;
-    }
-    handlePacket(&packet);
-
-    if (packet.control != CTRL_DETECTION_RANGE) {
-      continue;
-    }
-    if (packet.cmd == CMD_DETECTION_RANGE_SET_RANGE) {
-      _rangeInfo.mode = eRangeTrajectory;
-      return true;
-    }
-    if (packet.cmd == CMD_DETECTION_RANGE_QUERY_RANGE && packet.len > 0 && (eDetectionRangeMode_t)packet.data[0] == eRangeTrajectory) {
-      _rangeInfo.mode = eRangeTrajectory;
-      return true;
-    }
-  }
-  return false;
+  requestFrame(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_SET_RANGE, data, sizeof(data), &packet);
+  _rangeInfo.mode = eRangeTrajectory;
 }
 
 bool DFRobot_C4004::setConfigFileModePoints(const sPoint_t *points, uint16_t pointCount)
@@ -703,7 +680,6 @@ bool DFRobot_C4004::setConfigFileModePoints(const sPoint_t *points, uint16_t poi
     offset += 2;
   }
 
-  flushInput();
   if (!sendCommand(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_SET_RANGE, data, offset)) {
     return false;
   }
@@ -948,6 +924,210 @@ bool DFRobot_C4004::sendCommand(uint8_t control, uint8_t cmd, const uint8_t *dat
   return true;
 }
 
+void DFRobot_C4004::resetRxParser(void)
+{
+  _asmState = eRxAsmSyncH1;
+  _asmIdx = 0;
+  _asmChecksum = 0;
+  _asmRecvChecksum = 0;
+}
+
+void DFRobot_C4004::discardRxRing(void)
+{
+  _rxHead = 0;
+  _rxTail = 0;
+}
+
+void DFRobot_C4004::rxPushByte(uint8_t value)
+{
+  uint16_t nextHead = (uint16_t)((_rxHead + 1) % C4004_RX_RING_SIZE);
+
+  if (nextHead == _rxTail) {
+    _rxTail = (uint16_t)((_rxTail + 1) % C4004_RX_RING_SIZE);
+  }
+  _rxRing[_rxHead] = value;
+  _rxHead = nextHead;
+}
+
+bool DFRobot_C4004::rxPopByte(uint8_t *value)
+{
+  if (value == NULL || _rxTail == _rxHead) {
+    return false;
+  }
+  *value = _rxRing[_rxTail];
+  _rxTail = (uint16_t)((_rxTail + 1) % C4004_RX_RING_SIZE);
+  return true;
+}
+
+#ifdef ENABLE_DBG
+void DFRobot_C4004::logRxPacket(const sPacket_t *packet, uint8_t recvChecksum)
+{
+  if (packet == NULL) {
+    return;
+  }
+
+  String meta = "RX ctrl=0x";
+  appendHexByte(meta, packet->control);
+  meta += " cmd=0x";
+  appendHexByte(meta, packet->cmd);
+  meta += " len=";
+  meta += String(packet->len);
+  meta += " checksum=0x";
+  appendHexByte(meta, recvChecksum);
+  DBG(meta);
+
+  if (packet->len > 0) {
+    const uint16_t dumpLen = (packet->len > 24) ? 24 : packet->len;
+    String dataLog = "RX data: ";
+    for (uint16_t i = 0; i < dumpLen; i++) {
+      appendHexByte(dataLog, packet->data[i]);
+      if (i + 1 < dumpLen) {
+        dataLog += " ";
+      }
+    }
+    DBG(dataLog);
+    if (packet->len > dumpLen) {
+      DBG(String("RX data truncated, total len=") + String(packet->len));
+    }
+  }
+}
+#else
+void DFRobot_C4004::logRxPacket(const sPacket_t *packet, uint8_t recvChecksum)
+{
+  (void)packet;
+  (void)recvChecksum;
+}
+#endif
+
+void DFRobot_C4004::feedAsmByte(uint8_t value)
+{
+  switch (_asmState) {
+  case eRxAsmSyncH1:
+    if (value == FRAME_HEAD1) {
+      _asmChecksum = value;
+      _asmState = eRxAsmSyncH2;
+    }
+    break;
+
+  case eRxAsmSyncH2:
+    if (value == FRAME_HEAD2) {
+      _asmChecksum += value;
+      _asmState = eRxAsmCtrl;
+    } else {
+      _asmState = eRxAsmSyncH1;
+      if (value == FRAME_HEAD1) {
+        _asmChecksum = value;
+        _asmState = eRxAsmSyncH2;
+      }
+    }
+    break;
+
+  case eRxAsmCtrl:
+    _pendingPacket.control = value;
+    _asmChecksum += value;
+    _asmState = eRxAsmCmd;
+    break;
+
+  case eRxAsmCmd:
+    _pendingPacket.cmd = value;
+    _asmChecksum += value;
+    _asmState = eRxAsmLenHi;
+    break;
+
+  case eRxAsmLenHi:
+    _pendingPacket.len = (uint16_t)((uint16_t)value << 8);
+    _asmChecksum += value;
+    _asmState = eRxAsmLenLo;
+    break;
+
+  case eRxAsmLenLo:
+    _pendingPacket.len |= value;
+    _asmChecksum += value;
+    if (_pendingPacket.len > MAX_PAYLOAD) {
+#ifdef ENABLE_DBG
+      DBG(String("payload too long, len=") + String(_pendingPacket.len) + String(" max=") + String(MAX_PAYLOAD));
+#endif
+      resetRxParser();
+      discardRxRing();
+      break;
+    }
+    _asmIdx = 0;
+    if (_pendingPacket.len == 0) {
+      _asmState = eRxAsmChecksum;
+    } else {
+      _asmState = eRxAsmPayload;
+    }
+    break;
+
+  case eRxAsmPayload:
+    _pendingPacket.data[_asmIdx++] = value;
+    _asmChecksum += value;
+    if (_asmIdx >= _pendingPacket.len) {
+      _asmState = eRxAsmChecksum;
+    }
+    break;
+
+  case eRxAsmChecksum:
+    _asmRecvChecksum = value;
+    _asmState = eRxAsmTail1;
+    break;
+
+  case eRxAsmTail1:
+    if (value != FRAME_TAIL1) {
+      resetRxParser();
+      break;
+    }
+    _asmState = eRxAsmTail2;
+    break;
+
+  case eRxAsmTail2:
+    if (value != FRAME_TAIL2) {
+      resetRxParser();
+      break;
+    }
+    if (_asmChecksum != _asmRecvChecksum) {
+      DBG("checksum error");
+      resetRxParser();
+      break;
+    }
+    _pendingValid = true;
+    logRxPacket(&_pendingPacket, _asmRecvChecksum);
+    resetRxParser();
+    break;
+
+  default:
+    resetRxParser();
+    break;
+  }
+}
+
+void DFRobot_C4004::pumpRx(void)
+{
+  uint8_t value = 0;
+
+  if (_s == NULL) {
+    return;
+  }
+
+  while (_s->available() > 0) {
+    rxPushByte((uint8_t)_s->read());
+  }
+
+  while (!_pendingValid && rxPopByte(&value)) {
+    feedAsmByte(value);
+  }
+}
+
+bool DFRobot_C4004::takePendingFrame(sPacket_t *packet)
+{
+  if (packet == NULL || !_pendingValid) {
+    return false;
+  }
+  memcpy(packet, &_pendingPacket, sizeof(sPacket_t));
+  _pendingValid = false;
+  return true;
+}
+
 bool DFRobot_C4004::requestFrame(uint8_t control, uint8_t cmd, const uint8_t *data, uint16_t len, sPacket_t *response, uint16_t timeoutMs)
 {
   uint32_t startTime = 0;
@@ -957,7 +1137,6 @@ bool DFRobot_C4004::requestFrame(uint8_t control, uint8_t cmd, const uint8_t *da
   }
   memset(response, 0, sizeof(sPacket_t));
 
-  flushInput();
   if (!sendCommand(control, cmd, data, len)) {
     return false;
   }
@@ -983,11 +1162,6 @@ bool DFRobot_C4004::requestFrame(uint8_t control, uint8_t cmd, const uint8_t *da
 bool DFRobot_C4004::readFrame(sPacket_t *packet, uint16_t timeoutMs)
 {
   uint32_t startTime = millis();
-  uint8_t value = 0;
-  uint8_t checksum = 0;
-  uint8_t recvChecksum = 0;
-  uint8_t tail1 = 0;
-  uint8_t tail2 = 0;
 
   if (packet == NULL || _s == NULL) {
     return false;
@@ -995,99 +1169,11 @@ bool DFRobot_C4004::readFrame(sPacket_t *packet, uint16_t timeoutMs)
   memset(packet, 0, sizeof(sPacket_t));
 
   while ((uint32_t)(millis() - startTime) < timeoutMs) {
-    if (!readByte(&value, 1)) {
-      continue;
+    pumpRx();
+    if (takePendingFrame(packet)) {
+      return true;
     }
-    if (value != FRAME_HEAD1) {
-      continue;
-    }
-    checksum = value;
-
-    if (!readByte(&value, timeoutMs)) {
-      return false;
-    }
-    if (value != FRAME_HEAD2) {
-      continue;
-    }
-    checksum += value;
-
-    if (!readByte(&packet->control, timeoutMs)) {
-      return false;
-    }
-    checksum += packet->control;
-    if (!readByte(&packet->cmd, timeoutMs)) {
-      return false;
-    }
-    checksum += packet->cmd;
-    if (!readByte(&value, timeoutMs)) {
-      return false;
-    }
-    checksum += value;
-    packet->len = ((uint16_t)value << 8);
-    if (!readByte(&value, timeoutMs)) {
-      return false;
-    }
-    checksum += value;
-    packet->len |= value;
-
-    if (packet->len > MAX_PAYLOAD) {
-#ifdef ENABLE_DBG
-      DBG(String("payload too long, len=") + String(packet->len) + String(" max=") + String(MAX_PAYLOAD));
-#endif
-      flushInput();
-      return false;
-    }
-
-    for (uint16_t i = 0; i < packet->len; i++) {
-      if (!readByte(&packet->data[i], timeoutMs)) {
-        return false;
-      }
-      checksum += packet->data[i];
-    }
-
-    if (!readByte(&recvChecksum, timeoutMs)) {
-      return false;
-    }
-    if (!readByte(&tail1, timeoutMs) || !readByte(&tail2, timeoutMs)) {
-      return false;
-    }
-    if (tail1 != FRAME_TAIL1 || tail2 != FRAME_TAIL2) {
-      return false;
-    }
-    if (checksum != recvChecksum) {
-      DBG("checksum error");
-      return false;
-    }
-
-#ifdef ENABLE_DBG
-    {
-      String meta = "RX ctrl=0x";
-      appendHexByte(meta, packet->control);
-      meta += " cmd=0x";
-      appendHexByte(meta, packet->cmd);
-      meta += " len=";
-      meta += String(packet->len);
-      meta += " checksum=0x";
-      appendHexByte(meta, recvChecksum);
-      DBG(meta);
-
-      if (packet->len > 0) {
-        const uint16_t dumpLen = (packet->len > 24) ? 24 : packet->len;
-        String dataLog = "RX data: ";
-        for (uint16_t i = 0; i < dumpLen; i++) {
-          appendHexByte(dataLog, packet->data[i]);
-          if (i + 1 < dumpLen) {
-            dataLog += " ";
-          }
-        }
-        DBG(dataLog);
-        if (packet->len > dumpLen) {
-          DBG(String("RX data truncated, total len=") + String(packet->len));
-        }
-      }
-    }
-#endif
-    return true;
+    delay(1);
   }
   return false;
 }
@@ -1112,6 +1198,9 @@ bool DFRobot_C4004::readByte(uint8_t *value, uint16_t timeoutMs)
 
 void DFRobot_C4004::flushInput(void)
 {
+  discardRxRing();
+  resetRxParser();
+  _pendingValid = false;
   if (_s == NULL) {
     return;
   }

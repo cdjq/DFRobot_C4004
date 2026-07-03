@@ -55,7 +55,7 @@ void printTrajectoryData(eGetDataMode_t dataMode)
   if (count == 0) {
     Serial.println(F("No target."));
   } else {
-    Serial.println(F("Row\tID\tKinesia\tFeature\tX\tY\tSpeed"));
+    Serial.println(F("Row\tIndex\tKinesia\tFeature\tX\tY\tSpeed"));
     for (uint8_t i = 0; i < count; i++) {
       Serial.print(i);
       Serial.print(F("\t"));

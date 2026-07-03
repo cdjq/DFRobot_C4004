@@ -172,11 +172,8 @@ def learn_trajectory_range():
       break
     print('Send s to start, or q to cancel.')
 
-  print('Start trajectory learning:', end=' ')
-  if not c4004.set_trajectory_range_mode(True):
-    print('FAILED')
-    print_menu()
-    return
+  print('Start trajectory learning...')
+  c4004.set_trajectory_range_mode(True)
   print('OK')
 
   print('Learning is running. Walk the required boundary path.')
@@ -188,11 +185,8 @@ def learn_trajectory_range():
       break
     c4004.get_reported_info(0.05)
 
-  print('Set trajectory range mode (learning off):', end=' ')
-  if c4004.set_trajectory_range_mode(False):
-    print('OK')
-  else:
-    print('FAILED')
+  print('Set trajectory range mode (learning off).')
+  c4004.set_trajectory_range_mode(False)
 
   time.sleep(0.2)
   query_trajectory_range()
@@ -202,8 +196,8 @@ def learn_trajectory_range():
 def set_use_trajectory_range_mode():
   print('')
   print(' ===============Use Trajectory Range===============')
-  print('Set trajectory range mode (learning off):', end=' ')
-  print('OK' if c4004.set_trajectory_range_mode(False) else 'FAILED')
+  print('Set trajectory range mode (learning off).')
+  c4004.set_trajectory_range_mode(False)
 
 
 def query_trajectory_range():

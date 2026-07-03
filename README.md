@@ -370,9 +370,8 @@ pip3 install pyserial
    * @brief Start trajectory-range learning or use the learned trajectory range.
    * @param learning: Trajectory-range learning switch.
    * @n          true: Start learning trajectory range, false: Use trajectory range mode without learning.
-   * @return true: Set succeeded, false: Set failed.
   */
-  bool setTrajectoryRangeMode(bool learning);
+  void setTrajectoryRangeMode(bool learning);
 
   /**
    * @fn getTrajectoryRangeMode

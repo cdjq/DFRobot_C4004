@@ -29,6 +29,8 @@ void setup()
     delay(1000);
   }
 
+  
+
   Serial.print(F("Hardware version: "));
   Serial.println(c4004.getHardwareVersion());
   Serial.print(F("Firmware version: "));

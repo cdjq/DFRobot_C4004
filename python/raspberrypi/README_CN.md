@@ -291,7 +291,6 @@ RX         | TXD
     '''!
       @brief 开始轨迹范围学习，或使用已学习的轨迹范围模式（模式 0x05）。
       @param learning: True 表示开始学习；False 表示使用轨迹范围模式但不学习。
-      @return True or False
     '''
 
   def set_config_file_mode_points(self, points):
