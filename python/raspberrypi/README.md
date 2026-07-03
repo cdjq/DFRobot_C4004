@@ -76,18 +76,6 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
       @return event type
     '''
 
-  def get_product_model(self):
-    '''!
-      @brief Get product model.
-      @return String
-    '''
-
-  def get_product_id(self):
-    '''!
-      @brief Get product ID.
-      @return Integer product ID
-    '''
-
   def get_hardware_version(self):
     '''!
       @brief Get hardware version.
@@ -129,12 +117,6 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
       @brief Get installation height.
       @return installation height in cm. Returns 0 on failure.
     '''
-
-  def set_install_height(self, height_cm):
-    '''! @brief Alias of set_install_high with corrected spelling. '''
-
-  def get_install_height(self):
-    '''! @brief Alias of get_install_high with corrected spelling. '''
 
   def set_presence_enable(self, enable):
     '''!
@@ -203,23 +185,6 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
       @n   GET_DATA_ACTIVE: active query
       @n   GET_DATA_REPORT: read report cache
       @return List[TargetInfo]
-    '''
-
-  def get_target_info(self, index=0, mode=GET_DATA_ACTIVE):
-    '''!
-      @brief Get one target info by index.
-      @param index: target index
-      @param mode: data mode
-      @n   GET_DATA_ACTIVE: active query
-      @n   GET_DATA_REPORT: read report cache
-      @return TargetInfo or None
-      @note Falls back to list position access when no matching target index exists.
-    '''
-
-  def get_target_count(self):
-    '''!
-      @brief Get cached target count.
-      @return Integer
     '''
 
   def set_trajectory_led(self, enable):
@@ -346,14 +311,6 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
       @param point_count: output container (list/dict/object.value)
       @return True or False
       @note points list must be able to hold at least MAX_POINTS points.
-    '''
-
-  def get_trajectory_mode_points(self, points, point_count):
-    '''!
-      @brief Backward-compatible alias of get_trajectory_range_mode.
-      @param points: output list for Point objects
-      @param point_count: output container (list/dict/object.value)
-      @return True or False
     '''
 
   def get_config_file_mode_points(self, points, point_count):

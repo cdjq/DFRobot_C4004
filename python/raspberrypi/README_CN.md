@@ -76,18 +76,6 @@ RX         | TXD
       @return 事件类型
     '''
 
-  def get_product_model(self):
-    '''!
-      @brief 获取产品型号。
-      @return 字符串
-    '''
-
-  def get_product_id(self):
-    '''!
-      @brief 获取产品 ID。
-      @return 整数 ID
-    '''
-
   def get_hardware_version(self):
     '''!
       @brief 获取硬件版本。
@@ -129,12 +117,6 @@ RX         | TXD
       @brief 读取安装高度。
       @return 安装高度(cm)，失败时返回 0。
     '''
-
-  def set_install_height(self, height_cm):
-    '''! @brief set_install_high 的拼写修正别名。 '''
-
-  def get_install_height(self):
-    '''! @brief get_install_high 的拼写修正别名。 '''
 
   def set_presence_enable(self, enable):
     '''!
@@ -203,23 +185,6 @@ RX         | TXD
       @n   GET_DATA_ACTIVE: 主动查询
       @n   GET_DATA_REPORT: 读取上报缓存
       @return List[TargetInfo]
-    '''
-
-  def get_target_info(self, index=0, mode=GET_DATA_ACTIVE):
-    '''!
-      @brief 获取单个目标信息。
-      @param index: 目标索引
-      @param mode: 数据模式
-      @n   GET_DATA_ACTIVE: 主动查询
-      @n   GET_DATA_REPORT: 读取上报缓存
-      @return TargetInfo or None
-      @note 若无匹配的目标索引，则回退到列表位置访问。
-    '''
-
-  def get_target_count(self):
-    '''!
-      @brief 获取缓存目标数量。
-      @return 整数
     '''
 
   def set_trajectory_led(self, enable):
@@ -346,14 +311,6 @@ RX         | TXD
       @param point_count: 点数输出容器(list/dict/object.value)
       @return True or False
       @note points 列表必须能够容纳至少 MAX_POINTS 个点。
-    '''
-
-  def get_trajectory_mode_points(self, points, point_count):
-    '''!
-      @brief get_trajectory_range_mode 的向后兼容别名。
-      @param points: 点位输出 list
-      @param point_count: 点数输出容器(list/dict/object.value)
-      @return True or False
     '''
 
   def get_config_file_mode_points(self, points, point_count):

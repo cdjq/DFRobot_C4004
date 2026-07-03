@@ -127,8 +127,7 @@ def wait_for_single_person():
 
   while confirm_count < SINGLE_PERSON_CONFIRM_TIMES:
     start_time = time.time()
-    c4004.get_target_list(c4004.GET_DATA_ACTIVE)
-    target_count = c4004.get_target_count()
+    target_count = len(c4004.get_target_list(c4004.GET_DATA_ACTIVE))
 
     if target_count == 1:
       confirm_count += 1

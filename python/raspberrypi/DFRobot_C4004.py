@@ -74,10 +74,6 @@ class FourSidedRange_t(object):
     self.y_negative_cm = 0
 
 
-# Backward-compatible alias.
-FourSidedRange = FourSidedRange_t
-
-
 class Point(object):
   '''! @brief One point for trajectory/config range modes. '''
   def __init__(self, x=0, y=0):
@@ -365,27 +361,6 @@ class DFRobot_C4004(object):
       return self.EVENT_NONE
     return self._handle_packet(packet)
 
-  def get_product_model(self):
-    '''!
-      @brief Query product model string.
-      @return Product model string.
-    '''
-    return self._query_string(self.CTRL_PRODUCT_INFO, self.CMD_PRODUCT_MODEL_QUERY)
-
-  def get_product_id(self):
-    '''!
-      @brief Query product ID.
-      @return Product ID as integer.
-    '''
-    packet = self._request_frame(self.CTRL_PRODUCT_INFO, self.CMD_PRODUCT_ID_QUERY, [self.QUERY_DATA])
-    if packet is None or len(packet.data) == 0:
-      return 0
-    if len(packet.data) >= 2:
-      return self._u16(packet.data, 0)
-    if len(packet.data) == 1:
-      return packet.data[0]
-    return 0
-
   def get_hardware_version(self):
     '''!
       @brief Query hardware version string.
@@ -405,11 +380,16 @@ class DFRobot_C4004(object):
       @brief Set installation information.
       @param info InstallInfo object.
       @n info.mode: INSTALL_MODE_SIDE or INSTALL_MODE_TOP.
-      @n info.height_cm: Installation height in cm.
-      @n info.x_angle/y_angle/z_angle: Installation angles in degree.
+      @n info.height_cm: Installation height in cm, valid range 0-65535.
+      @n info.x_angle/y_angle/z_angle: Installation angles in degree, valid range -180 to 180.
       @return true if succeeded, otherwise false.
-      @note Angle values are converted to protocol scale (*100) internally.
+      @note Invalid mode or height returns false. Out-of-range angles are clamped.
     '''
+    if info.mode not in (self.INSTALL_MODE_SIDE, self.INSTALL_MODE_TOP):
+      return False
+    height_cm = int(info.height_cm)
+    if height_cm < 0 or height_cm > 0xFFFF:
+      return False
     x_angle = int(info.x_angle) * 100
     y_angle = int(info.y_angle) * 100
     z_angle = int(info.z_angle) * 100
@@ -418,7 +398,7 @@ class DFRobot_C4004(object):
     z_angle = max(-18000, min(18000, z_angle))
 
     angle = self._i16_bytes(x_angle) + self._i16_bytes(y_angle) + self._i16_bytes(z_angle)
-    height = self._u16_bytes(info.height_cm)
+    height = self._u16_bytes(height_cm)
     return (self._request_frame(self.CTRL_INSTALL_INFO, self.CMD_INSTALL_SET_MODE, [info.mode]) is not None and
             self._request_frame(self.CTRL_INSTALL_INFO, self.CMD_INSTALL_SET_ANGLE, angle) is not None and
             self._request_frame(self.CTRL_INSTALL_INFO, self.CMD_INSTALL_SET_HEIGHT, height) is not None)
@@ -477,14 +457,6 @@ class DFRobot_C4004(object):
       return 0
     return self._u16(packet.data, 0)
 
-  def set_install_height(self, height_cm):
-    '''! @brief Alias of set_install_high with corrected spelling. '''
-    return self.set_install_high(height_cm)
-
-  def get_install_height(self):
-    '''! @brief Alias of get_install_high with corrected spelling. '''
-    return self.get_install_high()
-
   def set_presence_enable(self, enable):
     '''!
       @brief Enable or disable presence detection.
@@ -524,7 +496,7 @@ class DFRobot_C4004(object):
       return True
     return False
 
-  def get_presence(self, mode=GET_DATA_ACTIVE):
+  def get_presence_state(self, mode=GET_DATA_ACTIVE):
     '''!
       @brief Get presence state.
       @param mode Data acquisition mode.
@@ -539,16 +511,6 @@ class DFRobot_C4004(object):
       if value is not None:
         self._presence = value
     return self._presence
-
-  def get_presence_state(self, mode=GET_DATA_ACTIVE):
-    '''!
-      @brief Get presence state.
-      @param mode Data acquisition mode.
-      @n GET_DATA_ACTIVE: Query latest presence state before reading cache.
-      @n GET_DATA_REPORT: Read from report cache only.
-      @return NO_PRESENCE / PRESENCE / PRESENCE_UNKNOWN.
-    '''
-    return self.get_presence(mode)
 
   def get_motion_state(self, mode=GET_DATA_ACTIVE):
     '''!
@@ -640,32 +602,6 @@ class DFRobot_C4004(object):
       self._request_frame(self.CTRL_TRAJECTORY, self.CMD_TRAJECTORY_QUERY_TARGET, [self.QUERY_DATA])
     return list(self._targets)
 
-  def get_target_info(self, index=0, mode=GET_DATA_ACTIVE):
-    '''!
-      @brief Get one target information by target index.
-      @param index Target index.
-      @param mode Data acquisition mode.
-      @return TargetInfo object if found, otherwise None.
-      @note If no matching target index exists, this API falls back to list position access.
-    '''
-    if isinstance(mode, bool):
-      mode = self.GET_DATA_ACTIVE if mode else self.GET_DATA_REPORT
-    if mode == self.GET_DATA_ACTIVE:
-      self._request_frame(self.CTRL_TRAJECTORY, self.CMD_TRAJECTORY_QUERY_TARGET, [self.QUERY_DATA])
-    for i in range(self._target_count):
-      if self._targets[i].index == index:
-        return self._targets[i]
-    if index < self._target_count:
-      return self._targets[index]
-    return None
-
-  def get_target_count(self):
-    '''!
-      @brief Get current cached target count.
-      @return Target count.
-    '''
-    return self._target_count
-
   def set_trajectory_led(self, enable):
     '''!
       @brief Enable or disable trajectory LED.
@@ -725,6 +661,21 @@ class DFRobot_C4004(object):
     tags, _ = self._parse_tag_list(packet.data, max_tags)
     return tags
 
+  def _is_valid_tag_config(self, tag):
+    '''!
+      @brief Validate tag type, range shape and IO linkage index.
+      @param tag TagConfig object.
+      @return True if the tag config is valid, otherwise False.
+      @note io_index is valid only when it is 0 (unused) or within 2-6 (IO2-IO6).
+    '''
+    if not (self.TAG_NONE <= tag.tag_type <= self.TAG_NOISE):
+      return False
+    if not (self.TAG_RANGE_CIRCLE <= tag.scope_type <= self.TAG_RANGE_RECTANGLE):
+      return False
+    if tag.io_index == 1 or tag.io_index < 0 or tag.io_index > 6:
+      return False
+    return True
+
   def set_tag(self, tag):
     '''!
       @brief Set one tag using size mode.
@@ -732,7 +683,10 @@ class DFRobot_C4004(object):
       @return Tag set status code:
       @n TAG_SET_COMM_ERROR / TAG_SET_SUCCESS / TAG_SET_TRACK_COUNT_ERROR / TAG_SET_ALREADY_USED / TAG_SET_INDEX_OUT_OF_RANGE.
       @note center_x/center_y fields are ignored by this API.
+      @note Invalid tag_type, scope_type or io_index returns TAG_SET_COMM_ERROR before sending command.
     '''
+    if not self._is_valid_tag_config(tag):
+      return self.TAG_SET_COMM_ERROR
     data = [tag.tag_index, tag.tag_type, tag.scope_type, tag.io_index]
     data += self._u16_bytes(tag.width)
     data += self._u16_bytes(tag.height)
@@ -793,6 +747,9 @@ class DFRobot_C4004(object):
     expected_len = 2 + len(tags) * 12
     if expected_len > self.MAX_PAYLOAD:
       return False
+    for tag in tags:
+      if not self._is_valid_tag_config(tag):
+        return False
     data = self._u16_bytes(len(tags))
     for tag in tags:
       data += [tag.tag_index, tag.tag_type, tag.scope_type, tag.io_index]
@@ -973,16 +930,6 @@ class DFRobot_C4004(object):
       return True
     return False
 
-  # Backward-compatible alias.
-  def get_trajectory_mode_points(self, points, point_count):
-    '''!
-      @brief Backward-compatible alias of get_trajectory_range_mode.
-      @param points List used to receive Point objects.
-      @param point_count Output container for point count.
-      @return true if succeeded, otherwise false.
-    '''
-    return self.get_trajectory_range_mode(points, point_count)
-
   def get_config_file_mode_points(self, points, point_count):
     '''!
       @brief Query and get config-file mode points (mode 0x06).
@@ -1133,6 +1080,19 @@ class DFRobot_C4004(object):
     if packet is None:
       return ''
     return ''.join(chr(b) for b in packet.data if b != 0)
+
+  def _get_product_model(self):
+    return self._query_string(self.CTRL_PRODUCT_INFO, self.CMD_PRODUCT_MODEL_QUERY)
+
+  def _get_product_id(self):
+    packet = self._request_frame(self.CTRL_PRODUCT_INFO, self.CMD_PRODUCT_ID_QUERY, [self.QUERY_DATA])
+    if packet is None or len(packet.data) == 0:
+      return 0
+    if len(packet.data) >= 2:
+      return self._u16(packet.data, 0)
+    if len(packet.data) == 1:
+      return packet.data[0]
+    return 0
 
   def _set_output_value(self, output, value):
     if isinstance(output, list):

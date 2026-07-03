@@ -428,20 +428,6 @@ public:
   eReportedEvent_t getReportedInfo(uint16_t timeoutMs = 50);
 
   /**
-   * @fn getProductModel
-   * @brief Get the product model of the DFRobot C4004 sensor.
-   * @return String: Product model.
-  */
-  String getProductModel(void);
-
-  /**
-   * @fn getProductID
-   * @brief Get the product ID of the DFRobot C4004 sensor.
-   * @return uint16_t: Product ID.
-  */
-  uint16_t getProductID(void);
-
-  /**
    * @fn getHardwareVersion
    * @brief Get the hardware version of the DFRobot C4004 sensor.
    * @return String: Hardware version.
@@ -459,10 +445,11 @@ public:
    * @fn setInstallInfo
    * @brief Set the installation information of the DFRobot C4004 sensor.
    * @param info: Installation information.
-   * @n          mode: DFRobot C4004 mounting mode.
-   * @n          heightCm: DFRobot C4004 installation height, in cm.
-   * @n          zAngle: DFRobot C4004 installation z-axis angle, in degrees.
+   * @n          mode: DFRobot C4004 mounting mode, eInstallModeSide or eInstallModeTop.
+   * @n          heightCm: DFRobot C4004 installation height, in cm, valid range: 0-65535.
+   * @n          xAngle/yAngle/zAngle: Installation angles, in degrees, valid range: -180 to 180.
    * @return true: Set succeeded, false: Set failed.
+   * @note Invalid mode or height returns false. Out-of-range angles are clamped.
   */
   bool setInstallInfo(sInstallInfo_t &info);
 
@@ -573,18 +560,6 @@ public:
   bool getCheckToActiveFrames(uint8_t *frames);
 
   /**
-   * @fn getTargetInfo
-   * @brief Get the target information of the DFRobot C4004 sensor.
-   * @param index: Target index.
-   * @param targetInfo: Pointer to receive the target information.
-   * @param mode: Data acquisition mode.
-   * @n          eGetDataActive: Query latest target information before reading.
-   * @n          eGetDataReport: Read target information from cached report data.
-   * @return true: Get succeeded, false: Get failed.
-  */
-  bool getTargetInfo(uint8_t index, sTargetInfo_t *targetInfo, eGetDataMode_t mode = eGetDataActive);
-
-  /**
    * @fn getTargetList
    * @brief Get the list of target information of the DFRobot C4004 sensor.
    * @param targetBuf: Pointer to receive the target information list.
@@ -595,13 +570,6 @@ public:
    * @return uint8_t: Number of targets read.
   */
   uint8_t getTargetList(sTargetInfo_t *targetBuf, uint8_t maxCount, eGetDataMode_t mode = eGetDataActive);
-
-  /**
-   * @fn getTargetCount
-   * @brief Get the number of targets detected by the DFRobot C4004 sensor.
-   * @return uint8_t: Number of targets.
-  */
-  uint8_t getTargetCount(void);
 
   /**
    * @fn setTrajectoryLed
@@ -662,6 +630,7 @@ public:
    * @n          eTagSetAlreadyUsed: Tag has been occupied.
    * @n          eTagSetIndexOutOfRange: Tag index out of range.
    * @note centerX/centerY in sTagConfig_t are ignored by this API.
+   * @note Invalid tagType, scopeType or ioIndex returns eTagSetCommError before sending command.
    * @note When setting labels using this API, it is necessary to ensure that the number of tracks is 1.
    * @note Set up to 32 tags at most.
   */
@@ -691,6 +660,7 @@ public:
    * @return true: Set succeeded, false: Set failed.
    * @note The labels can be set in the form of coordinates, and there is no need to meet the requirement that the number of tracks is 1
    * @note Set up to 32 tags at most.
+   * @note Invalid tagType, scopeType or ioIndex in any tag returns false before sending command.
   */
   bool setTagsFromConfig(const sTagConfig_t *tags, uint8_t tagCount);
 
@@ -854,6 +824,8 @@ public:
 
 protected:
   bool isInitFinished(void);
+  String getProductModel(void);
+  uint16_t getProductID(void);
   bool sendCommand(uint8_t control, uint8_t cmd, const uint8_t *data, uint16_t len);
   bool requestFrame(uint8_t control, uint8_t cmd, const uint8_t *data, uint16_t len, sPacket_t *response, uint16_t timeoutMs = 200);
   bool readFrame(sPacket_t *packet, uint16_t timeoutMs);

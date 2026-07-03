@@ -194,6 +194,13 @@ bool DFRobot_C4004::setInstallInfo(sInstallInfo_t &info)
   int32_t yAngleProto = (int32_t)info.yAngle * 100;
   int32_t zAngleProto = (int32_t)info.zAngle * 100;
 
+  if (info.mode != eInstallModeSide && info.mode != eInstallModeTop) {
+    return false;
+  }
+  if (info.heightCm > 0xFFFF) {
+    return false;
+  }
+
   if (xAngleProto > 18000) {
     xAngleProto = 18000;
   } else if (xAngleProto < -18000) {
@@ -360,32 +367,6 @@ bool DFRobot_C4004::getCheckToActiveFrames(uint8_t *frames)
   return queryByte(CTRL_TRAJECTORY, CMD_TRAJECTORY_QUERY_CHECK_TO_ACTIVE_FRAMES, frames);
 }
 
-bool DFRobot_C4004::getTargetInfo(uint8_t index, sTargetInfo_t *targetInfo, eGetDataMode_t mode)
-{
-  uint8_t data = QUERY_DATA;
-  sPacket_t &packet = _rxPacket;
-
-  if (targetInfo == NULL) {
-    return false;
-  }
-  if (mode == eGetDataActive) {
-    requestFrame(CTRL_TRAJECTORY, CMD_TRAJECTORY_QUERY_TARGET, &data, 1, &packet);
-  }
-
-  for (uint8_t i = 0; i < _targetCount; i++) {
-    if (_targets[i].index == index) {
-      *targetInfo = _targets[i];
-      return true;
-    }
-  }
-
-  if (index < _targetCount) {
-    *targetInfo = _targets[index];
-    return true;
-  }
-  return false;
-}
-
 uint8_t DFRobot_C4004::getTargetList(sTargetInfo_t *targetBuf, uint8_t maxCount, eGetDataMode_t mode)
 {
   uint8_t data = QUERY_DATA;
@@ -408,11 +389,6 @@ uint8_t DFRobot_C4004::getTargetList(sTargetInfo_t *targetBuf, uint8_t maxCount,
     targetBuf[i] = _targets[i];
   }
   return copyCount;
-}
-
-uint8_t DFRobot_C4004::getTargetCount(void)
-{
-  return _targetCount;
 }
 
 bool DFRobot_C4004::setTrajectoryLed(bool enable)
@@ -480,6 +456,13 @@ eTagSetStatus_t DFRobot_C4004::setTag(const sTagConfig_t &tag)
   uint8_t data[8];
   sPacket_t &packet = _rxPacket;
   eTagSetStatus_t status = eTagSetCommError;
+
+  if (tag.tagType > eTagNoise || tag.scopeType > eTagRangeRectangle) {
+    return eTagSetCommError;
+  }
+  if (tag.ioIndex == 1 || tag.ioIndex > 6) {
+    return eTagSetCommError;
+  }
 
   data[0] = tag.tagIndex;
   data[1] = (uint8_t)tag.tagType;
@@ -564,6 +547,15 @@ bool DFRobot_C4004::setTagsFromConfig(const sTagConfig_t *tags, uint8_t tagCount
   expectedLen = 2 + (uint16_t)tagCount * tagLen;
   if (expectedLen > MAX_PAYLOAD) {
     return false;
+  }
+
+  for (uint8_t i = 0; i < tagCount; i++) {
+    if (tags[i].tagType > eTagNoise || tags[i].scopeType > eTagRangeRectangle) {
+      return false;
+    }
+    if (tags[i].ioIndex == 1 || tags[i].ioIndex > 6) {
+      return false;
+    }
   }
 
   writeUint16(&data[offset], tagCount);

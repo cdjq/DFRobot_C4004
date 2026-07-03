@@ -18,8 +18,6 @@ reset	KEYWORD2
 factoryReset	KEYWORD2
 getHeartbeat	KEYWORD2
 getReportedInfo	KEYWORD2
-getProductModel	KEYWORD2
-getProductID	KEYWORD2
 getHardwareVersion	KEYWORD2
 getFirmwareVersion	KEYWORD2
 setInstallInfo	KEYWORD2
@@ -34,9 +32,7 @@ setTrajectoryTrackEnable	KEYWORD2
 getTrajectoryTrackEnable	KEYWORD2
 setCheckToActiveFrames	KEYWORD2
 getCheckToActiveFrames	KEYWORD2
-getTargetInfo	KEYWORD2
 getTargetList	KEYWORD2
-getTargetCount	KEYWORD2
 setTrajectoryLed	KEYWORD2
 setMotionLed	KEYWORD2
 getTrajectoryLed	KEYWORD2

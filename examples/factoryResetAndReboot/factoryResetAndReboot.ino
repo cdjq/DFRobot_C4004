@@ -41,6 +41,8 @@ void setup()
     Serial.println(F("Factory reset failed."));
   }
 
+  delay(1000);
+
   Serial.println(F("Module rebooting ..."));
   if (c4004.reset()) {
     Serial.println(F("Reboot success."));

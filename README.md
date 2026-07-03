@@ -102,20 +102,6 @@ pip3 install pyserial
   eReportedEvent_t getReportedInfo(uint16_t timeoutMs = 50);
 
   /**
-   * @fn getProductModel
-   * @brief Get the product model of the DFRobot C4004 sensor.
-   * @return String: Product model.
-  */
-  String getProductModel(void);
-
-  /**
-   * @fn getProductID
-   * @brief Get the product ID of the DFRobot C4004 sensor.
-   * @return uint16_t: Product ID.
-  */
-  uint16_t getProductID(void);
-
-  /**
    * @fn getHardwareVersion
    * @brief Get the hardware version of the DFRobot C4004 sensor.
    * @return String: Hardware version.
@@ -247,18 +233,6 @@ pip3 install pyserial
   bool getCheckToActiveFrames(uint8_t *frames);
 
   /**
-   * @fn getTargetInfo
-   * @brief Get the target information of the DFRobot C4004 sensor.
-   * @param index: Target index.
-   * @param targetInfo: Pointer to receive the target information.
-   * @param mode: Data acquisition mode.
-   * @n          eGetDataActive: Query latest target information before reading.
-   * @n          eGetDataReport: Read target information from cached report data.
-   * @return true: Get succeeded, false: Get failed.
-  */
-  bool getTargetInfo(uint8_t index, sTargetInfo_t *targetInfo, eGetDataMode_t mode = eGetDataActive);
-
-  /**
    * @fn getTargetList
    * @brief Get the list of target information of the DFRobot C4004 sensor.
    * @param targetBuf: Pointer to receive the target information list.
@@ -269,13 +243,6 @@ pip3 install pyserial
    * @return uint8_t: Number of targets read.
   */
   uint8_t getTargetList(sTargetInfo_t *targetBuf, uint8_t maxCount, eGetDataMode_t mode = eGetDataActive);
-
-  /**
-   * @fn getTargetCount
-   * @brief Get the number of targets detected by the DFRobot C4004 sensor.
-   * @return uint8_t: Number of targets.
-  */
-  uint8_t getTargetCount(void);
 
   /**
    * @fn setTrajectoryLed

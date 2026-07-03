@@ -42,7 +42,7 @@ def print_trajectory_data(data_mode):
     mode_text = 'Passive Report'
 
   targets = c4004.get_target_list(data_mode)
-  count = c4004.get_target_count()
+  count = len(targets)
   print(title)
   print('Mode:', mode_text)
   print('Target Count:', count)

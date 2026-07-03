@@ -83,9 +83,9 @@ def main():
     if event == c4004.EVENT_PRESENCE:
       presence = c4004.get_presence_state(c4004.GET_DATA_REPORT)
       if presence == c4004.NO_PRESENCE:
-        print('Human presence state: None')
+        print('Presence state: None')
       elif presence == c4004.PRESENCE:
-        print('Human presence state: Presence')
+        print('Presence state: Presence')
     elif event == c4004.EVENT_MOTION:
       motion = c4004.get_motion_state(c4004.GET_DATA_REPORT)
       if motion == c4004.MOTION_STATIC:
@@ -96,17 +96,17 @@ def main():
         print('Motion state: None')
     elif event == c4004.EVENT_PEOPLE_COUNT:
       count = c4004.get_people_time(c4004.GET_DATA_REPORT)
-      print('Number of trajectories:', count)
+      print('People count:', count)
 
     if time.time() - last_query > 2:
       last_query = time.time()
-      print('Number of trajectories:', c4004.get_people_time(c4004.GET_DATA_REPORT))
+      print('People count:', c4004.get_people_time(c4004.GET_DATA_REPORT))
 
       query_presence = c4004.get_presence_state(c4004.GET_DATA_ACTIVE)
       if query_presence == c4004.NO_PRESENCE:
-        print('Human presence state: None')
+        print('Presence state: None')
       elif query_presence == c4004.PRESENCE:
-        print('Human presence state: Presence')
+        print('Presence state: Presence')
 
       query_motion = c4004.get_motion_state(c4004.GET_DATA_ACTIVE)
       if query_motion == c4004.MOTION_NONE:

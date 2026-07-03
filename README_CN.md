@@ -102,20 +102,6 @@ pip3 install pyserial
   eReportedEvent_t getReportedInfo(uint16_t timeoutMs = 50);
 
   /**
-   * @fn getProductModel
-   * @brief 获取 DFRobot C4004 传感器的产品型号。
-   * @return String: 产品型号。
-   */
-  String getProductModel(void);
-
-  /**
-   * @fn getProductID
-   * @brief 获取 DFRobot C4004 传感器的产品 ID。
-   * @return uint16_t: 产品 ID。
-   */
-  uint16_t getProductID(void);
-
-  /**
    * @fn getHardwareVersion
    * @brief 获取 DFRobot C4004 传感器的硬件版本。
    * @return String: 硬件版本。
@@ -247,18 +233,6 @@ pip3 install pyserial
   bool getCheckToActiveFrames(uint8_t *frames);
 
   /**
-   * @fn getTargetInfo
-   * @brief 获取 DFRobot C4004 传感器的目标信息。
-   * @param index: 目标索引。
-   * @param targetInfo: 接收目标信息的指针。
-   * @param mode: 数据获取模式。
-   * @n          eGetDataActive: 读取前主动查询最新目标信息。
-   * @n          eGetDataReport: 从缓存的上报数据中读取目标信息。
-   * @return true: 获取成功，false: 获取失败。
-   */
-  bool getTargetInfo(uint8_t index, sTargetInfo_t *targetInfo, eGetDataMode_t mode = eGetDataActive);
-
-  /**
    * @fn getTargetList
    * @brief 获取 DFRobot C4004 传感器的目标信息列表。
    * @param targetBuf: 接收目标信息列表的指针。
@@ -269,13 +243,6 @@ pip3 install pyserial
    * @return uint8_t: 读取到的目标数量。
    */
   uint8_t getTargetList(sTargetInfo_t *targetBuf, uint8_t maxCount, eGetDataMode_t mode = eGetDataActive);
-
-  /**
-   * @fn getTargetCount
-   * @brief 获取 DFRobot C4004 传感器检测到的目标数量。
-   * @return uint8_t: 目标数量。
-   */
-  uint8_t getTargetCount(void);
 
   /**
    * @fn setTrajectoryLed
