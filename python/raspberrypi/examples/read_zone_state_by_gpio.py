@@ -21,22 +21,22 @@ while cur_path != os.path.dirname(cur_path):
     sys.path.insert(0, cur_path)
     break
   cur_path = os.path.dirname(cur_path)
-from DFRobot_C4004 import DFRobot_C4004, TagConfig, FourSidedRange_t
+from DFRobot_C4004 import DFRobot_C4004, DFRobot_TagConfig, FourSidedRange
 
 try:
-  import RPi.GPIO as GPIO
-except Exception:
-  GPIO = None
+  import RPi.GPIO as rpi_gpio
+except ImportError:
+  rpi_gpio = None
 
 c4004 = DFRobot_C4004('/dev/ttyAMA0', 115200)
-ZONE_PINS = [6, 13, 19, 26, 20, 21]
+zone_pins = [6, 13, 19, 26, 20, 21]
 
 
 def main():
-  if GPIO is not None:
-    GPIO.setmode(GPIO.BCM)
-    for pin in ZONE_PINS:
-      GPIO.setup(pin, GPIO.IN)
+  if rpi_gpio is not None:
+    rpi_gpio.setmode(rpi_gpio.BCM)
+    for pin in zone_pins:
+      rpi_gpio.setup(pin, rpi_gpio.IN)
 
   while not c4004.begin():
     print('DFRobot C4004 begin failed, retrying...')
@@ -48,7 +48,7 @@ def main():
     print('Set check-to-active frames failed.')
   time.sleep(0.05)
 
-  range_info = FourSidedRange_t()
+  range_info = FourSidedRange()
   range_info.mode = c4004.RANGE_FOUR_SIDE
   range_info.x_positive_cm = 200
   range_info.x_negative_cm = -200
@@ -66,7 +66,7 @@ def main():
 
   set_tags = []
 
-  tag0 = TagConfig()
+  tag0 = DFRobot_TagConfig()
   tag0.tag_index = 0
   tag0.tag_type = c4004.TAG_PEOPLE_COUNTING
   tag0.scope_type = c4004.TAG_RANGE_RECTANGLE
@@ -77,7 +77,7 @@ def main():
   tag0.height = 120
   set_tags.append(tag0)
 
-  tag1 = TagConfig()
+  tag1 = DFRobot_TagConfig()
   tag1.tag_index = 1
   tag1.tag_type = c4004.TAG_PEOPLE_COUNTING
   tag1.scope_type = c4004.TAG_RANGE_RECTANGLE
@@ -88,7 +88,7 @@ def main():
   tag1.height = 120
   set_tags.append(tag1)
 
-  tag2 = TagConfig()
+  tag2 = DFRobot_TagConfig()
   tag2.tag_index = 2
   tag2.tag_type = c4004.TAG_PEOPLE_COUNTING
   tag2.scope_type = c4004.TAG_RANGE_CIRCLE
@@ -100,7 +100,7 @@ def main():
   # Note: For circle tags, width is the radius and height is not used.
   set_tags.append(tag2)
 
-  tag3 = TagConfig()
+  tag3 = DFRobot_TagConfig()
   tag3.tag_index = 3
   tag3.tag_type = c4004.TAG_PEOPLE_COUNTING
   tag3.scope_type = c4004.TAG_RANGE_RECTANGLE
@@ -111,7 +111,7 @@ def main():
   tag3.height = 160
   set_tags.append(tag3)
 
-  tag4 = TagConfig()
+  tag4 = DFRobot_TagConfig()
   tag4.tag_index = 4
   tag4.tag_type = c4004.TAG_PEOPLE_COUNTING
   tag4.scope_type = c4004.TAG_RANGE_RECTANGLE
@@ -150,11 +150,11 @@ def main():
         print('=============================================')
         print('GPIO presence (HIGH=Presence, LOW=None):')
         print('GPIO 1 = Whole area, GPIO 2-6 = Divided zones')
-        if GPIO is None:
+        if rpi_gpio is None:
           print('RPi.GPIO is not available.')
         else:
-          for i, pin in enumerate(ZONE_PINS):
-            has_presence = GPIO.input(pin) == GPIO.HIGH
+          for i, pin in enumerate(zone_pins):
+            has_presence = rpi_gpio.input(pin) == rpi_gpio.HIGH
             if i == 0:
               label = 'GPIO 1 (Whole area)'
             else:
@@ -162,8 +162,8 @@ def main():
             print('%s: %s' % (label, 'Presence' if has_presence else 'None'))
         print('=============================================')
   finally:
-    if GPIO is not None:
-      GPIO.cleanup()
+    if rpi_gpio is not None:
+      rpi_gpio.cleanup()
 
 
 if __name__ == '__main__':

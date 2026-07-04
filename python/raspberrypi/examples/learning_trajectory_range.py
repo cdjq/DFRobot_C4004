@@ -21,12 +21,12 @@ while cur_path != os.path.dirname(cur_path):
     sys.path.insert(0, cur_path)
     break
   cur_path = os.path.dirname(cur_path)
-from DFRobot_C4004 import DFRobot_C4004, FourSidedRange_t
+from DFRobot_C4004 import DFRobot_C4004, FourSidedRange
 
 c4004 = DFRobot_C4004('/dev/ttyAMA0', 115200)
 
-SINGLE_PERSON_CONFIRM_TIMES = 5
-PEOPLE_QUERY_INTERVAL = 1.0
+single_person_confirm_times = 5
+people_query_interval = 1.0
 
 
 def print_menu():
@@ -66,7 +66,7 @@ def wait_command():
 def setup_params():
   print(' ====================Init Params===================')
 
-  range_info = FourSidedRange_t()
+  range_info = FourSidedRange()
   range_info.mode = c4004.RANGE_FOUR_SIDE
   range_info.x_positive_cm = 500
   range_info.x_negative_cm = -500
@@ -120,13 +120,13 @@ def print_trajectory_points(points):
   print('Point coordinates (x, y):')
   for start in range(0, len(points), points_per_line):
     chunk = points[start : start + points_per_line]
-    print('  '.join('(%5d,%5d)' % (point.x, point.y) for point in chunk))
+    print('  '.join('(%5d,%5d)' % (point.pos_x, point.pos_y) for point in chunk))
 
 
 def wait_for_single_person():
   confirm_count = 0
 
-  while confirm_count < SINGLE_PERSON_CONFIRM_TIMES:
+  while confirm_count < single_person_confirm_times:
     start_time = time.time()
     target_count = len(c4004.get_target_list(c4004.GET_DATA_ACTIVE))
 
@@ -135,9 +135,9 @@ def wait_for_single_person():
     else:
       confirm_count = 0
 
-    print('Active target count: %d  confirm: %d/%d' % (target_count, confirm_count, SINGLE_PERSON_CONFIRM_TIMES))
+    print('Active target count: %d  confirm: %d/%d' % (target_count, confirm_count, single_person_confirm_times))
 
-    while time.time() - start_time < PEOPLE_QUERY_INTERVAL:
+    while time.time() - start_time < people_query_interval:
       cmd = read_command(0.01)
       if cmd in ('q', 'Q'):
         return False

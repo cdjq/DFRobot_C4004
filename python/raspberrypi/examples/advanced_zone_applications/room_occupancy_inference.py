@@ -24,33 +24,33 @@ while cur_path != os.path.dirname(cur_path):
     break
   cur_path = os.path.dirname(cur_path)
 
-from DFRobot_C4004 import DFRobot_C4004, TagConfig, FourSidedRange_t
+from DFRobot_C4004 import DFRobot_C4004, DFRobot_TagConfig, FourSidedRange
 
-PORT = '/dev/ttyAMA0'
-c4004 = DFRobot_C4004(PORT, 115200)
+port = '/dev/ttyAMA0'
+c4004 = DFRobot_C4004(port, 115200)
 
-TAG_LIVING_ROOM = 0
-TAG_KITCHEN = 1       # Configured only; kitchen people count uses door enter/exit events.
-TAG_KITCHEN_DOOR = 2
+tag_living_room = 0
+tag_kitchen = 1       # Configured only; kitchen people count uses door enter/exit events.
+tag_kitchen_door = 2
 
-CHECK_TO_ACTIVE_FRAMES = 2
-NO_PERSON_DELAY_S = 5
-TRACK_EXISTS_TIME_S = 1
+check_to_active_frames_cfg = 2
+no_person_delay_s = 5
+track_exists_time_s = 1
 
-LIVING_ROOM_CENTER_X_CM = 0
-LIVING_ROOM_CENTER_Y_CM = 200
-LIVING_ROOM_SIZE_X_CM = 400
-LIVING_ROOM_SIZE_Y_CM = 400
+living_room_center_x_cm = 0
+living_room_center_y_cm = 200
+living_room_size_x_cm = 400
+living_room_size_y_cm = 400
 
-KITCHEN_CENTER_X_CM = 0
-KITCHEN_CENTER_Y_CM = 600
-KITCHEN_SIZE_X_CM = 200
-KITCHEN_SIZE_Y_CM = 400
+kitchen_center_x_cm = 0
+kitchen_center_y_cm = 600
+kitchen_size_x_cm = 200
+kitchen_size_y_cm = 400
 
-DOOR_CENTER_X_CM = 0
-DOOR_CENTER_Y_CM = 400
-DOOR_SIZE_X_CM = 100
-DOOR_SIZE_Y_CM = 100
+door_center_x_cm = 0
+door_center_y_cm = 400
+door_size_x_cm = 100
+door_size_y_cm = 100
 
 living_motion_count = 0
 living_static_count = 0
@@ -108,9 +108,9 @@ def process_tag_event():
   if info is None:
     return
 
-  if info.tag_index == TAG_LIVING_ROOM and info.tag_type == c4004.TAG_PEOPLE_COUNTING:
+  if info.tag_index == tag_living_room and info.tag_type == c4004.TAG_PEOPLE_COUNTING:
     process_living_room_tag(info)
-  elif info.tag_index == TAG_KITCHEN_DOOR and info.tag_type == c4004.TAG_BOUNDARY:
+  elif info.tag_index == tag_kitchen_door and info.tag_type == c4004.TAG_BOUNDARY:
     process_kitchen_door_tag(info)
 
 
@@ -125,7 +125,7 @@ def setup_sensor_and_tags():
   else:
     print('Set presence enable failed.')
 
-  if c4004.set_check_to_active_frames(CHECK_TO_ACTIVE_FRAMES):
+  if c4004.set_check_to_active_frames(check_to_active_frames_cfg):
     print('Set check-to-active frames success.')
   else:
     print('Set check-to-active frames failed.')
@@ -137,7 +137,7 @@ def setup_sensor_and_tags():
   else:
     print('Read current check-to-active frames failed.')
 
-  range_info = FourSidedRange_t()
+  range_info = FourSidedRange()
   range_info.mode = c4004.RANGE_FOUR_SIDE
   range_info.x_positive_cm = 200
   range_info.x_negative_cm = -200
@@ -155,37 +155,37 @@ def setup_sensor_and_tags():
 
   tags = []
 
-  living_room = TagConfig()
-  living_room.tag_index = TAG_LIVING_ROOM
+  living_room = DFRobot_TagConfig()
+  living_room.tag_index = tag_living_room
   living_room.tag_type = c4004.TAG_PEOPLE_COUNTING
   living_room.scope_type = c4004.TAG_RANGE_RECTANGLE
   living_room.io_index = 0
-  living_room.center_x = LIVING_ROOM_CENTER_X_CM
-  living_room.center_y = LIVING_ROOM_CENTER_Y_CM
-  living_room.width = LIVING_ROOM_SIZE_X_CM
-  living_room.height = LIVING_ROOM_SIZE_Y_CM
+  living_room.center_x = living_room_center_x_cm
+  living_room.center_y = living_room_center_y_cm
+  living_room.width = living_room_size_x_cm
+  living_room.height = living_room_size_y_cm
   tags.append(living_room)
 
-  kitchen = TagConfig()
-  kitchen.tag_index = TAG_KITCHEN
+  kitchen = DFRobot_TagConfig()
+  kitchen.tag_index = tag_kitchen
   kitchen.tag_type = c4004.TAG_PEOPLE_COUNTING
   kitchen.scope_type = c4004.TAG_RANGE_RECTANGLE
   kitchen.io_index = 0
-  kitchen.center_x = KITCHEN_CENTER_X_CM
-  kitchen.center_y = KITCHEN_CENTER_Y_CM
-  kitchen.width = KITCHEN_SIZE_X_CM
-  kitchen.height = KITCHEN_SIZE_Y_CM
+  kitchen.center_x = kitchen_center_x_cm
+  kitchen.center_y = kitchen_center_y_cm
+  kitchen.width = kitchen_size_x_cm
+  kitchen.height = kitchen_size_y_cm
   tags.append(kitchen)
 
-  kitchen_door = TagConfig()
-  kitchen_door.tag_index = TAG_KITCHEN_DOOR
+  kitchen_door = DFRobot_TagConfig()
+  kitchen_door.tag_index = tag_kitchen_door
   kitchen_door.tag_type = c4004.TAG_BOUNDARY
   kitchen_door.scope_type = c4004.TAG_RANGE_RECTANGLE
   kitchen_door.io_index = 0
-  kitchen_door.center_x = DOOR_CENTER_X_CM
-  kitchen_door.center_y = DOOR_CENTER_Y_CM
-  kitchen_door.width = DOOR_SIZE_X_CM
-  kitchen_door.height = DOOR_SIZE_Y_CM
+  kitchen_door.center_x = door_center_x_cm
+  kitchen_door.center_y = door_center_y_cm
+  kitchen_door.width = door_size_x_cm
+  kitchen_door.height = door_size_y_cm
   tags.append(kitchen_door)
 
   if c4004.set_tags_from_config(tags):
@@ -198,12 +198,12 @@ def setup_sensor_and_tags():
   else:
     print('Set trajectory track enable failed.')
 
-  if c4004.set_track_exists_time(TRACK_EXISTS_TIME_S):
+  if c4004.set_track_exists_time(track_exists_time_s):
     print('Set TrackExistsTime success.')
   else:
     print('Set TrackExistsTime failed.')
 
-  if c4004.set_unmanned_time(NO_PERSON_DELAY_S):
+  if c4004.set_unmanned_time(no_person_delay_s):
     print('Set UnmannedTime success.')
   else:
     print('Set UnmannedTime failed.')

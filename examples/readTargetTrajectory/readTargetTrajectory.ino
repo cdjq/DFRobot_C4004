@@ -27,7 +27,7 @@ const __FlashStringHelper *targetFeatureToString(eTargetFeature_t feature)
   } else if (feature == eMotion) {
     return F("Motion");
   } else if (feature == eUncertain) {
-    return F("Uncertain");
+    return F("Unsure");
   } else {
     return F("Unknown");
   }

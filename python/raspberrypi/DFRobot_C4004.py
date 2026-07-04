@@ -16,7 +16,7 @@ import serial
 from collections import deque
 
 
-class InstallInfo(object):
+class DFRobot_InstallInfo(object):
   '''! @brief Complete installation information.'''
 
   def __init__(self, mode=0, height_cm=0, x_angle=0, y_angle=0, z_angle=0):
@@ -27,20 +27,20 @@ class InstallInfo(object):
     self.z_angle = z_angle
 
 
-class TargetInfo(object):
+class DFRobot_TargetInfo(object):
   '''! @brief One tracked target information block.'''
 
   def __init__(self):
     self.index = 0
     self.kinesia = 0
     self.target_feature = 0
-    self.x = 0
-    self.y = 0
+    self.pos_x = 0
+    self.pos_y = 0
     self.height = 0
     self.speed = 0
 
 
-class TagConfig(object):
+class DFRobot_TagConfig(object):
   '''! @brief Tag configuration.'''
 
   def __init__(self):
@@ -54,7 +54,7 @@ class TagConfig(object):
     self.height = 0
 
 
-class TagInfo(object):
+class DFRobot_TagInfo(object):
   '''! @brief Last tag event decoded from a report.'''
 
   def __init__(self):
@@ -69,7 +69,7 @@ class TagInfo(object):
     self.static_num = 0
 
 
-class FourSidedRange_t(object):
+class FourSidedRange(object):
   '''! @brief Four-side detection boundary settings.'''
 
   def __init__(self):
@@ -80,15 +80,15 @@ class FourSidedRange_t(object):
     self.y_negative_cm = 0
 
 
-class Point(object):
+class DFRobot_Point(object):
   '''! @brief One point for trajectory/config range modes.'''
 
-  def __init__(self, x=0, y=0):
-    self.x = x
-    self.y = y
+  def __init__(self, pos_x=0, pos_y=0):
+    self.pos_x = pos_x
+    self.pos_y = pos_y
 
 
-class Packet(object):
+class DFRobot_Packet(object):
   '''! @brief Decoded UART packet.'''
 
   def __init__(self, control=0, cmd=0, data=None):
@@ -292,9 +292,9 @@ class DFRobot_C4004(object):
     self._motion_led = 0xFF
     self._targets = []
     self._target_count = 0
-    self._tag_info = TagInfo()
+    self._tag_info = DFRobot_TagInfo()
     self._tag_info_valid = False
-    self._range_info = FourSidedRange_t()
+    self._range_info = FourSidedRange()
     self._people_count = 0
     self._init_rx_state()
 
@@ -410,7 +410,7 @@ class DFRobot_C4004(object):
   def set_install_info(self, info):
     '''!
     @brief Set installation information.
-    @param info InstallInfo object.
+    @param info DFRobot_InstallInfo object.
     @n info.mode: INSTALL_MODE_SIDE or INSTALL_MODE_TOP.
     @n info.height_cm: Installation height in cm, valid range 0-65535.
     @n info.x_angle/y_angle/z_angle: Installation angles in degree, valid range -180 to 180.
@@ -440,7 +440,7 @@ class DFRobot_C4004(object):
   def get_install_info(self, info):
     '''!
     @brief Query installation information.
-    @param info InstallInfo object to receive result.
+    @param info DFRobot_InstallInfo object to receive result.
     @return true if succeeded, otherwise false.
     @note Returned angle values are degree.
     '''
@@ -628,7 +628,7 @@ class DFRobot_C4004(object):
     @param mode Data acquisition mode.
     @n GET_DATA_ACTIVE: Query latest target list before reading cache.
     @n GET_DATA_REPORT: Read from report cache only.
-    @return List of TargetInfo objects.
+    @return List of DFRobot_TargetInfo objects.
     '''
     if isinstance(mode, bool):
       mode = self.GET_DATA_ACTIVE if mode else self.GET_DATA_REPORT
@@ -685,7 +685,7 @@ class DFRobot_C4004(object):
     @n GET_DATA_ACTIVE: Active query.
     @n GET_DATA_REPORT: Currently behaves the same as GET_DATA_ACTIVE.
     @param max_tags Maximum number of tags to return. None returns all parsed tags.
-    @return List of TagConfig objects.
+    @return List of DFRobot_TagConfig objects.
     '''
     if isinstance(mode, bool):
       mode = self.GET_DATA_ACTIVE if mode else self.GET_DATA_REPORT
@@ -698,7 +698,7 @@ class DFRobot_C4004(object):
   def _is_valid_tag_config(self, tag):
     '''!
     @brief Validate tag type, range shape and IO linkage index.
-    @param tag TagConfig object.
+    @param tag DFRobot_TagConfig object.
     @return True if the tag config is valid, otherwise False.
     @note io_index is valid only when it is 0 (unused) or within 2-6 (IO2-IO6).
     '''
@@ -713,7 +713,7 @@ class DFRobot_C4004(object):
   def set_tag(self, tag):
     '''!
     @brief Set one tag using size mode.
-    @param tag TagConfig object.
+    @param tag DFRobot_TagConfig object.
     @return Tag set status code:
     @n TAG_SET_COMM_ERROR / TAG_SET_SUCCESS / TAG_SET_TRACK_COUNT_ERROR / TAG_SET_ALREADY_USED / TAG_SET_INDEX_OUT_OF_RANGE.
     @note center_x/center_y fields are ignored by this API.
@@ -775,7 +775,7 @@ class DFRobot_C4004(object):
   def set_tags_from_config(self, tags):
     '''!
     @brief Set tag configurations in coordinate mode.
-    @param tags Iterable of TagConfig objects.
+    @param tags Iterable of DFRobot_TagConfig objects.
     @return true if succeeded, otherwise false.
     @note The number of input tags is limited to 32 by protocol.
     '''
@@ -809,7 +809,7 @@ class DFRobot_C4004(object):
   def get_tag_info(self):
     '''!
     @brief Get the last tag event decoded from active report packet (CTRL 0x07, CMD 0x1B).
-    @return TagInfo object if valid, otherwise None.
+    @return DFRobot_TagInfo object if valid, otherwise None.
     @note This API reads report cache only. Call get_reported_info() first to receive new report data.
     '''
     if not self._tag_info_valid:
@@ -819,7 +819,7 @@ class DFRobot_C4004(object):
   def set_four_sided_range_mode(self, range_info):
     '''!
     @brief Set four-side boundary detection range (mode 0x04).
-    @param range_info FourSidedRange_t object.
+    @param range_info FourSidedRange object.
     @return true if succeeded, otherwise false.
     @note Position values use sign-bit int16 encoding (bit15: 0=positive, 1=negative).
     '''
@@ -841,7 +841,7 @@ class DFRobot_C4004(object):
   def get_four_sided_range_mode(self, range_info):
     '''!
     @brief Query and get four-side boundary detection range.
-    @param range_info FourSidedRange_t object to receive result.
+    @param range_info FourSidedRange object to receive result.
     @return true if succeeded, otherwise false.
     '''
     if range_info is None:
@@ -868,7 +868,7 @@ class DFRobot_C4004(object):
   def set_config_file_mode_points(self, points):
     '''!
     @brief Set detection range points in config-file mode (mode 0x06).
-    @param points Iterable of Point objects.
+    @param points Iterable of DFRobot_Point objects.
     @return true if succeeded, otherwise false.
     @note Payload format: 0x06 + 2B point_count + n*(2B X + 2B Y).
     @note Position values use sign-bit int16 encoding (bit15: 0=positive, 1=negative).
@@ -909,7 +909,7 @@ class DFRobot_C4004(object):
   def get_trajectory_range_mode(self, points, point_count):
     '''!
     @brief Query and get trajectory detection range points (mode 0x05).
-    @param points List used to receive Point objects.
+    @param points List used to receive DFRobot_Point objects.
     @param point_count Output container for point count.
     @n Supported output containers: list/dict/object(with value field).
     @return true if succeeded, otherwise false.
@@ -936,7 +936,7 @@ class DFRobot_C4004(object):
     points[:] = []
     for i in range(count):
       offset = 3 + i * 4
-      points.append(Point(self._sb16(packet.data, offset), self._sb16(packet.data, offset + 2)))
+      points.append(DFRobot_Point(self._sb16(packet.data, offset), self._sb16(packet.data, offset + 2)))
 
     if isinstance(point_count, list):
       if len(point_count) == 0:
@@ -955,7 +955,7 @@ class DFRobot_C4004(object):
   def get_config_file_mode_points(self, points, point_count):
     '''!
     @brief Query and get config-file mode points (mode 0x06).
-    @param points List used to receive Point objects.
+    @param points List used to receive DFRobot_Point objects.
     @param point_count Output container for point count.
     @n Supported output containers: list/dict/object(with value field).
     @return true if succeeded, otherwise false.
@@ -982,7 +982,7 @@ class DFRobot_C4004(object):
     points[:] = []
     for i in range(count):
       offset = 3 + i * 4
-      points.append(Point(self._sb16(packet.data, offset), self._sb16(packet.data, offset + 2)))
+      points.append(DFRobot_Point(self._sb16(packet.data, offset), self._sb16(packet.data, offset + 2)))
 
     if isinstance(point_count, list):
       if len(point_count) == 0:
@@ -1204,7 +1204,7 @@ class DFRobot_C4004(object):
       if self._asm_checksum != self._asm_recv_checksum:
         self._reset_rx_parser()
         return
-      self._pending_packet = Packet(self._asm_control, self._asm_cmd, self._asm_data)
+      self._pending_packet = DFRobot_Packet(self._asm_control, self._asm_cmd, self._asm_data)
       self._pending_valid = True
       self._reset_rx_parser()
 
@@ -1332,12 +1332,12 @@ class DFRobot_C4004(object):
     self._targets = []
     for i in range(count):
       offset = i * target_len
-      target = TargetInfo()
+      target = DFRobot_TargetInfo()
       target.index = data[offset]
       target.kinesia = data[offset + 1]
       target.target_feature = data[offset + 2]
-      target.x = self._sb16(data, offset + 3)
-      target.y = self._sb16(data, offset + 5)
+      target.pos_x = self._sb16(data, offset + 3)
+      target.pos_y = self._sb16(data, offset + 5)
       target.height = self._sb16(data, offset + 7)
       target.speed = self._sb16(data, offset + 9)
       self._targets.append(target)
@@ -1357,7 +1357,7 @@ class DFRobot_C4004(object):
       copy_count = max_tags
     for i in range(copy_count):
       offset = 2 + i * tag_len
-      tag = TagConfig()
+      tag = DFRobot_TagConfig()
       tag.tag_index = data[offset]
       tag.tag_type = data[offset + 1]
       tag.scope_type = data[offset + 2]
@@ -1373,7 +1373,7 @@ class DFRobot_C4004(object):
     if data is None or len(data) < 8:
       self._tag_info_valid = False
       return
-    info = TagInfo()
+    info = DFRobot_TagInfo()
     info.tag_index = data[0]
     info.tag_type = data[1]
     info.io_index = data[2]

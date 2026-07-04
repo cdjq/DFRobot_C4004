@@ -24,45 +24,45 @@ while cur_path != os.path.dirname(cur_path):
     break
   cur_path = os.path.dirname(cur_path)
 
-from DFRobot_C4004 import DFRobot_C4004, TagConfig, FourSidedRange_t
+from DFRobot_C4004 import DFRobot_C4004, DFRobot_TagConfig, FourSidedRange
 
 try:
-  import RPi.GPIO as GPIO
-except Exception:
-  GPIO = None
+  import RPi.GPIO as rpi_gpio
+except ImportError:
+  rpi_gpio = None
 
-PORT = '/dev/ttyAMA0'
-c4004 = DFRobot_C4004(PORT, 115200)
+port = '/dev/ttyAMA0'
+c4004 = DFRobot_C4004(port, 115200)
 
-TV_CTRL_PIN = 2
-LIGHT_CTRL_PIN = 3
+tv_ctrl_pin = 2
+light_ctrl_pin = 3
 
-TAG_GAME = 0
-TAG_SOFA = 1
-TAG_HOME_DOOR = 2
-TAG_KITCHEN_DOOR = 3
-TAG_DINING = 4
-TAG_CURTAIN = 5
-TAG_PLANT = 6
-TAG_TOTAL = 7
+tag_game = 0
+tag_sofa = 1
+tag_home_door = 2
+tag_kitchen_door = 3
+tag_dining = 4
+tag_curtain = 5
+tag_plant = 6
+tag_total = 7
 
 # Users can adjust these times according to their own preferences, needs,
 # application scenarios, etc. The default time is 5 seconds.
-GAME_NO_PERSON_DELAY_S = 5.0   # Delay before the game area is treated as empty.
-SOFA_STATIC_DELAY_S = 5.0      # Delay before the sofa area is treated as static.
-SOFA_MOTION_DELAY_S = 5.0      # Delay before the sofa area is treated as motion.
-SOFA_EMPTY_DELAY_S = 5.0       # Delay before the sofa area is treated as empty.
-LIGHT_PWM_LOW = 0
-LIGHT_PWM_DIM = 150
-LIGHT_PWM_HIGH = 255
+game_no_person_delay_s = 5.0   # Delay before the game area is treated as empty.
+sofa_static_delay_s = 5.0      # Delay before the sofa area is treated as static.
+sofa_motion_delay_s = 5.0      # Delay before the sofa area is treated as motion.
+sofa_empty_delay_s = 5.0       # Delay before the sofa area is treated as empty.
+light_pwm_low = 0
+light_pwm_dim = 150
+light_pwm_high = 255
 
-TAG_NAMES = ['Game', 'Sofa', 'HomeDoor', 'KitchenDoor', 'Dining', 'CurtainNoise', 'PlantNoise']
+tag_names = ['Game', 'Sofa', 'HomeDoor', 'KitchenDoor', 'Dining', 'CurtainNoise', 'PlantNoise']
 
 # Tag cache entries keep one snapshot per tag index.
 tag_cache = []
 tag_print_pending = False
 tv_output_high = False
-light_output_value = LIGHT_PWM_LOW
+light_output_value = light_pwm_low
 game_no_person_start_s = 0.0
 sofa_static_start_s = 0.0
 sofa_motion_start_s = 0.0
@@ -117,10 +117,10 @@ def make_empty_cache(index):
 
 def init_tag_cache_from_config(tags):
   global tag_cache
-  tag_cache = [make_empty_cache(i) for i in range(TAG_TOTAL)]
+  tag_cache = [make_empty_cache(i) for i in range(tag_total)]
   for tag in tags:
     index = tag.tag_index
-    if index < 0 or index >= TAG_TOTAL:
+    if index < 0 or index >= tag_total:
       continue
     tag_cache[index]['tag_index'] = index
     tag_cache[index]['tag_type'] = tag.tag_type
@@ -138,31 +138,31 @@ def init_tag_cache_from_device():
 
 def setup_gpio():
   global _pwm
-  if GPIO is None:
+  if rpi_gpio is None:
     print('RPi.GPIO is not available, running without physical output control.')
     return
 
-  GPIO.setmode(GPIO.BCM)
-  GPIO.setup(TV_CTRL_PIN, GPIO.OUT)
-  GPIO.setup(LIGHT_CTRL_PIN, GPIO.OUT)
-  GPIO.output(TV_CTRL_PIN, GPIO.LOW)
+  rpi_gpio.setmode(rpi_gpio.BCM)
+  rpi_gpio.setup(tv_ctrl_pin, rpi_gpio.OUT)
+  rpi_gpio.setup(light_ctrl_pin, rpi_gpio.OUT)
+  rpi_gpio.output(tv_ctrl_pin, rpi_gpio.LOW)
 
   # Map 0~255 logical brightness to PWM duty on GPIO.
-  _pwm = GPIO.PWM(LIGHT_CTRL_PIN, 1000)
+  _pwm = rpi_gpio.PWM(light_ctrl_pin, 1000)
   _pwm.start(0)
 
 
 def apply_outputs():
-  if GPIO is None:
+  if rpi_gpio is None:
     return
 
-  GPIO.output(TV_CTRL_PIN, GPIO.HIGH if tv_output_high else GPIO.LOW)
+  rpi_gpio.output(tv_ctrl_pin, rpi_gpio.HIGH if tv_output_high else rpi_gpio.LOW)
 
   if _pwm is not None:
     duty = max(0.0, min(100.0, float(light_output_value) * 100.0 / 255.0))
     _pwm.ChangeDutyCycle(duty)
   else:
-    GPIO.output(LIGHT_CTRL_PIN, GPIO.HIGH if light_output_value > 0 else GPIO.LOW)
+    rpi_gpio.output(light_ctrl_pin, rpi_gpio.HIGH if light_output_value > 0 else rpi_gpio.LOW)
 
 
 def setup_sensor_and_tags():
@@ -182,7 +182,7 @@ def setup_sensor_and_tags():
   else:
     print('Set presence enable failed.')
 
-  range_info = FourSidedRange_t()
+  range_info = FourSidedRange()
   range_info.mode = c4004.RANGE_FOUR_SIDE
   range_info.x_positive_cm = 200
   range_info.x_negative_cm = -200
@@ -220,8 +220,8 @@ def setup_sensor_and_tags():
 
   tags = []
 
-  tag = TagConfig()
-  tag.tag_index = TAG_GAME
+  tag = DFRobot_TagConfig()
+  tag.tag_index = tag_game
   tag.tag_type = c4004.TAG_PEOPLE_COUNTING
   tag.scope_type = c4004.TAG_RANGE_CIRCLE
   tag.io_index = 0
@@ -231,8 +231,8 @@ def setup_sensor_and_tags():
   tag.height = 0
   tags.append(tag)
 
-  tag = TagConfig()
-  tag.tag_index = TAG_SOFA
+  tag = DFRobot_TagConfig()
+  tag.tag_index = tag_sofa
   tag.tag_type = c4004.TAG_PEOPLE_COUNTING
   tag.scope_type = c4004.TAG_RANGE_RECTANGLE
   tag.io_index = 0
@@ -242,8 +242,8 @@ def setup_sensor_and_tags():
   tag.height = 300
   tags.append(tag)
 
-  tag = TagConfig()
-  tag.tag_index = TAG_HOME_DOOR
+  tag = DFRobot_TagConfig()
+  tag.tag_index = tag_home_door
   tag.tag_type = c4004.TAG_BOUNDARY
   tag.scope_type = c4004.TAG_RANGE_RECTANGLE
   tag.io_index = 0
@@ -253,8 +253,8 @@ def setup_sensor_and_tags():
   tag.height = 40
   tags.append(tag)
 
-  tag = TagConfig()
-  tag.tag_index = TAG_KITCHEN_DOOR
+  tag = DFRobot_TagConfig()
+  tag.tag_index = tag_kitchen_door
   tag.tag_type = c4004.TAG_BOUNDARY
   tag.scope_type = c4004.TAG_RANGE_RECTANGLE
   tag.io_index = 0
@@ -264,8 +264,8 @@ def setup_sensor_and_tags():
   tag.height = 40
   tags.append(tag)
 
-  tag = TagConfig()
-  tag.tag_index = TAG_DINING
+  tag = DFRobot_TagConfig()
+  tag.tag_index = tag_dining
   tag.tag_type = c4004.TAG_PEOPLE_COUNTING
   tag.scope_type = c4004.TAG_RANGE_RECTANGLE
   tag.io_index = 0
@@ -275,8 +275,8 @@ def setup_sensor_and_tags():
   tag.height = 150
   tags.append(tag)
 
-  tag = TagConfig()
-  tag.tag_index = TAG_CURTAIN
+  tag = DFRobot_TagConfig()
+  tag.tag_index = tag_curtain
   tag.tag_type = c4004.TAG_NOISE
   tag.scope_type = c4004.TAG_RANGE_RECTANGLE
   tag.io_index = 0
@@ -286,8 +286,8 @@ def setup_sensor_and_tags():
   tag.height = 300
   tags.append(tag)
 
-  tag = TagConfig()
-  tag.tag_index = TAG_PLANT
+  tag = DFRobot_TagConfig()
+  tag.tag_index = tag_plant
   tag.tag_type = c4004.TAG_NOISE
   tag.scope_type = c4004.TAG_RANGE_CIRCLE
   tag.io_index = 0
@@ -318,9 +318,9 @@ def print_tag_cache_table():
   print('===================================================================')
   print('Tag Cache Table')
   print('Idx\tName\t\tType\t\tIO\tCenterX\tCenterY\tMotion\tStatic\tDir\tBoundary')
-  for i in range(TAG_TOTAL):
+  for i in range(tag_total):
     info = tag_cache[i]
-    name = TAG_NAMES[i]
+    name = tag_names[i]
     type_text = tag_type_to_text(info['tag_type'])
 
     motion_num = info['motion_num'] if info['tag_type'] == c4004.TAG_PEOPLE_COUNTING else 0
@@ -370,7 +370,7 @@ def main():
 
       if event == c4004.EVENT_TAG:
         info = c4004.get_tag_info()
-        if info is not None and 0 <= info.tag_index < TAG_TOTAL:
+        if info is not None and 0 <= info.tag_index < tag_total:
           cache = tag_cache[info.tag_index]
           cache['tag_index'] = info.tag_index
           cache['tag_type'] = info.tag_type
@@ -383,40 +383,40 @@ def main():
           cache['static_num'] = info.static_num
           tag_print_pending = True
 
-      game_has_person = (tag_cache[TAG_GAME]['motion_num'] + tag_cache[TAG_GAME]['static_num']) > 0
+      game_has_person = (tag_cache[tag_game]['motion_num'] + tag_cache[tag_game]['static_num']) > 0
       if game_has_person:
         tv_output_high = True
         game_no_person_start_s = 0
       elif tv_output_high:
         if game_no_person_start_s == 0:
           game_no_person_start_s = now_s
-        elif now_s - game_no_person_start_s >= GAME_NO_PERSON_DELAY_S:
+        elif now_s - game_no_person_start_s >= game_no_person_delay_s:
           tv_output_high = False
       else:
         game_no_person_start_s = 0
 
-      sofa_static_only = tag_cache[TAG_SOFA]['static_num'] > 0 and tag_cache[TAG_SOFA]['motion_num'] == 0
-      sofa_has_motion = tag_cache[TAG_SOFA]['motion_num'] > 0
-      sofa_no_person = (tag_cache[TAG_SOFA]['static_num'] + tag_cache[TAG_SOFA]['motion_num']) == 0
+      sofa_static_only = tag_cache[tag_sofa]['static_num'] > 0 and tag_cache[tag_sofa]['motion_num'] == 0
+      sofa_has_motion = tag_cache[tag_sofa]['motion_num'] > 0
+      sofa_no_person = (tag_cache[tag_sofa]['static_num'] + tag_cache[tag_sofa]['motion_num']) == 0
       if sofa_static_only:
         if sofa_static_start_s == 0:
           sofa_static_start_s = now_s
-        elif now_s - sofa_static_start_s >= SOFA_STATIC_DELAY_S:
-          light_output_value = LIGHT_PWM_DIM
+        elif now_s - sofa_static_start_s >= sofa_static_delay_s:
+          light_output_value = light_pwm_dim
         sofa_motion_start_s = 0
         sofa_empty_start_s = 0
       elif sofa_has_motion:
         if sofa_motion_start_s == 0:
           sofa_motion_start_s = now_s
-        elif now_s - sofa_motion_start_s >= SOFA_MOTION_DELAY_S:
-          light_output_value = LIGHT_PWM_LOW
+        elif now_s - sofa_motion_start_s >= sofa_motion_delay_s:
+          light_output_value = light_pwm_low
         sofa_static_start_s = 0
         sofa_empty_start_s = 0
       elif sofa_no_person:
         if sofa_empty_start_s == 0:
           sofa_empty_start_s = now_s
-        elif now_s - sofa_empty_start_s >= SOFA_EMPTY_DELAY_S:
-          light_output_value = LIGHT_PWM_HIGH
+        elif now_s - sofa_empty_start_s >= sofa_empty_delay_s:
+          light_output_value = light_pwm_high
         sofa_static_start_s = 0
         sofa_motion_start_s = 0
       else:
@@ -433,8 +433,8 @@ def main():
   finally:
     if _pwm is not None:
       _pwm.stop()
-    if GPIO is not None:
-      GPIO.cleanup()
+    if rpi_gpio is not None:
+      rpi_gpio.cleanup()
 
 
 if __name__ == '__main__':

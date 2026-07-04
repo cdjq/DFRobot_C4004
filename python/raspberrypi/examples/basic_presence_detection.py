@@ -20,10 +20,10 @@ while cur_path != os.path.dirname(cur_path):
     sys.path.insert(0, cur_path)
     break
   cur_path = os.path.dirname(cur_path)
-from DFRobot_C4004 import DFRobot_C4004, FourSidedRange_t
+from DFRobot_C4004 import DFRobot_C4004, FourSidedRange
 
-PORT = '/dev/ttyAMA0'
-c4004 = DFRobot_C4004(PORT, 115200)
+port = '/dev/ttyAMA0'
+c4004 = DFRobot_C4004(port, 115200)
 
 
 def main():
@@ -48,7 +48,7 @@ def main():
   else:
     print('Set trajectory LED failed.')
 
-  range_info = FourSidedRange_t()
+  range_info = FourSidedRange()
   range_info.mode = c4004.RANGE_FOUR_SIDE
   range_info.x_positive_cm = 200
   range_info.x_negative_cm = -200

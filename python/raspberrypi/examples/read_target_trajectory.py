@@ -20,7 +20,7 @@ while cur_path != os.path.dirname(cur_path):
     sys.path.insert(0, cur_path)
     break
   cur_path = os.path.dirname(cur_path)
-from DFRobot_C4004 import DFRobot_C4004, FourSidedRange_t
+from DFRobot_C4004 import DFRobot_C4004, FourSidedRange
 
 c4004 = DFRobot_C4004('/dev/ttyAMA0', 115200)
 
@@ -31,7 +31,7 @@ def target_feature_to_string(feature):
   if feature == c4004.MOTION:
     return 'Motion'
   if feature == c4004.UNCERTAIN:
-    return 'Uncertain'
+    return 'Unsure'
   return 'Unknown'
 
 
@@ -54,7 +54,7 @@ def print_trajectory_data(data_mode):
     print('Row\tIndex\tKinesia\tFeature\tX\tY\tSpeed')
     for i in range(min(count, len(targets))):
       target = targets[i]
-      print('%d\t%d\t%d\t%s\t%d\t%d\t%d' % (i, target.index, target.kinesia, target_feature_to_string(target.target_feature), target.x, target.y, target.speed))
+      print('%d\t%d\t%d\t%s\t%d\t%d\t%d' % (i, target.index, target.kinesia, target_feature_to_string(target.target_feature), target.pos_x, target.pos_y, target.speed))
   print('')
 
 
@@ -70,7 +70,7 @@ def main():
     print('Set check-to-active frames failed.')
   time.sleep(0.05)
 
-  range_info = FourSidedRange_t()
+  range_info = FourSidedRange()
   range_info.mode = c4004.RANGE_FOUR_SIDE
   range_info.x_positive_cm = 200
   range_info.x_negative_cm = -200

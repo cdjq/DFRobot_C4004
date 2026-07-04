@@ -20,7 +20,7 @@ while cur_path != os.path.dirname(cur_path):
     sys.path.insert(0, cur_path)
     break
   cur_path = os.path.dirname(cur_path)
-from DFRobot_C4004 import DFRobot_C4004, FourSidedRange_t, Point
+from DFRobot_C4004 import DFRobot_C4004, FourSidedRange
 
 c4004 = DFRobot_C4004('/dev/ttyAMA0', 115200)
 
@@ -100,7 +100,7 @@ def main():
   print('Current motion LED:', 'ON' if c4004.get_motion_led() else 'OFF')
   print('Current trajectory LED:', 'ON' if c4004.get_trajectory_led() else 'OFF')
 
-  range_info = FourSidedRange_t()
+  range_info = FourSidedRange()
   range_info.mode = c4004.RANGE_FOUR_SIDE
   range_info.x_positive_cm = 200
   range_info.x_negative_cm = -200
@@ -124,7 +124,7 @@ def main():
     print('Other')
 
   if mode == c4004.RANGE_FOUR_SIDE:
-    current_range = FourSidedRange_t()
+    current_range = FourSidedRange()
     if c4004.get_four_sided_range_mode(current_range):
       print('Current boundary x+/x-/y+/y- (cm): %d/%d/%d/%d' % (current_range.x_positive_cm, current_range.x_negative_cm, current_range.y_positive_cm, current_range.y_negative_cm))
     else:

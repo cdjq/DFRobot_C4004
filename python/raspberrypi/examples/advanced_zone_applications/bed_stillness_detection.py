@@ -25,28 +25,28 @@ while cur_path != os.path.dirname(cur_path):
     break
   cur_path = os.path.dirname(cur_path)
 
-from DFRobot_C4004 import DFRobot_C4004, TagConfig, FourSidedRange_t
+from DFRobot_C4004 import DFRobot_C4004, DFRobot_TagConfig, FourSidedRange
 
 try:
-  import RPi.GPIO as GPIO
-except Exception:
-  GPIO = None
+  import RPi.GPIO as rpi_gpio
+except ImportError:
+  rpi_gpio = None
 
-PORT = '/dev/ttyAMA0'
-c4004 = DFRobot_C4004(PORT, 115200)
+port = '/dev/ttyAMA0'
+c4004 = DFRobot_C4004(port, 115200)
 
-BED_TAG_INDEX = 0
-BEDROOM_TAG_INDEX = 1
-BEDROOM_DOOR_TAG_INDEX = 2
-LIGHT_CTRL_PIN = 3
+bed_tag_index = 0
+bedroom_tag_index = 1
+bedroom_door_tag_index = 2
+light_ctrl_pin = 3
 
 # Users can adjust these times according to their own preferences, needs,
 # application scenarios, etc. The default time is 5 seconds.
-BED_STATIC_HOLD_S = 5.0       # Time required to keep the bed state static.
-BEDROOM_EMPTY_HOLD_S = 5.0    # Time required to keep the bedroom state empty.
+bed_static_hold_s = 5.0       # Time required to keep the bed state static.
+bedroom_empty_hold_s = 5.0    # Time required to keep the bedroom state empty.
 
-LIGHT_OFF_LEVEL = 1
-LIGHT_ON_LEVEL = 0
+light_off_level = 1
+light_on_level = 0
 
 bed_static_start_s = 0.0
 bedroom_empty_start_s = 0.0
@@ -56,23 +56,23 @@ bed_motion_count = 0
 bed_static_count = 0
 bedroom_motion_count = 0
 bedroom_static_count = 0
-current_light_level = LIGHT_OFF_LEVEL
+current_light_level = light_off_level
 
 
 def apply_light_output(level):
   global current_light_level
   current_light_level = level
-  if GPIO is not None:
-    GPIO.output(LIGHT_CTRL_PIN, GPIO.HIGH if level else GPIO.LOW)
+  if rpi_gpio is not None:
+    rpi_gpio.output(light_ctrl_pin, rpi_gpio.HIGH if level else rpi_gpio.LOW)
 
 
 def setup_gpio():
-  if GPIO is None:
+  if rpi_gpio is None:
     print('RPi.GPIO is not available, running without physical output control.')
     return
-  GPIO.setmode(GPIO.BCM)
-  GPIO.setup(LIGHT_CTRL_PIN, GPIO.OUT)
-  apply_light_output(LIGHT_OFF_LEVEL)
+  rpi_gpio.setmode(rpi_gpio.BCM)
+  rpi_gpio.setup(light_ctrl_pin, rpi_gpio.OUT)
+  apply_light_output(light_off_level)
 
 
 def setup_sensor_and_tags():
@@ -92,7 +92,7 @@ def setup_sensor_and_tags():
   else:
     print('Set presence enable failed.')
 
-  range_info = FourSidedRange_t()
+  range_info = FourSidedRange()
   range_info.mode = c4004.RANGE_FOUR_SIDE
   range_info.x_positive_cm = 200
   range_info.x_negative_cm = -200
@@ -125,8 +125,8 @@ def setup_sensor_and_tags():
 
   tags = []
 
-  bed = TagConfig()
-  bed.tag_index = BED_TAG_INDEX
+  bed = DFRobot_TagConfig()
+  bed.tag_index = bed_tag_index
   bed.tag_type = c4004.TAG_PEOPLE_COUNTING
   bed.scope_type = c4004.TAG_RANGE_RECTANGLE
   bed.io_index = 0
@@ -136,8 +136,8 @@ def setup_sensor_and_tags():
   bed.height = 250
   tags.append(bed)
 
-  bedroom = TagConfig()
-  bedroom.tag_index = BEDROOM_TAG_INDEX
+  bedroom = DFRobot_TagConfig()
+  bedroom.tag_index = bedroom_tag_index
   bedroom.tag_type = c4004.TAG_PEOPLE_COUNTING
   bedroom.scope_type = c4004.TAG_RANGE_RECTANGLE
   bedroom.io_index = 0
@@ -147,8 +147,8 @@ def setup_sensor_and_tags():
   bedroom.height = 700
   tags.append(bedroom)
 
-  door = TagConfig()
-  door.tag_index = BEDROOM_DOOR_TAG_INDEX
+  door = DFRobot_TagConfig()
+  door.tag_index = bedroom_door_tag_index
   door.tag_type = c4004.TAG_APPROACH_AWAY
   door.scope_type = c4004.TAG_RANGE_RECTANGLE
   door.io_index = 0
@@ -172,7 +172,7 @@ def setup_sensor_and_tags():
   print('============================================================')
 
 
-def update_people_counts_from_tag_report():
+def update_tag_people_counts():
   global bed_motion_count
   global bed_static_count
   global bedroom_motion_count
@@ -185,10 +185,10 @@ def update_people_counts_from_tag_report():
     info = c4004.get_tag_info()
     if info is None or info.tag_type != c4004.TAG_PEOPLE_COUNTING:
       continue
-    if info.tag_index == BED_TAG_INDEX:
+    if info.tag_index == bed_tag_index:
       bed_motion_count = info.motion_num
       bed_static_count = info.static_num
-    elif info.tag_index == BEDROOM_TAG_INDEX:
+    elif info.tag_index == bedroom_tag_index:
       bedroom_motion_count = info.motion_num
       bedroom_static_count = info.static_num
 
@@ -200,14 +200,14 @@ def main():
   global bedroom_was_occupied
 
   setup_gpio()
-  apply_light_output(LIGHT_OFF_LEVEL)
+  apply_light_output(light_off_level)
   setup_sensor_and_tags()
 
   last_print_s = 0.0
   try:
     while True:
       now_s = time.time()
-      update_people_counts_from_tag_report()
+      update_tag_people_counts()
 
       bed_has_static_person = bed_static_count > 0
       bedroom_people_count = bedroom_motion_count + bedroom_static_count
@@ -216,7 +216,7 @@ def main():
       if bed_has_static_person:
         if bed_static_start_s == 0:
           bed_static_start_s = now_s
-        elif now_s - bed_static_start_s >= BED_STATIC_HOLD_S:
+        elif now_s - bed_static_start_s >= bed_static_hold_s:
           bed_static_lock_off = True
       else:
         bed_static_start_s = 0
@@ -236,12 +236,12 @@ def main():
           if bedroom_was_occupied:
             if bedroom_empty_start_s == 0:
               bedroom_empty_start_s = now_s
-            elif now_s - bedroom_empty_start_s >= BEDROOM_EMPTY_HOLD_S:
+            elif now_s - bedroom_empty_start_s >= bedroom_empty_hold_s:
               light_should_off = True
           else:
             light_should_off = True
 
-      apply_light_output(LIGHT_OFF_LEVEL if light_should_off else LIGHT_ON_LEVEL)
+      apply_light_output(light_off_level if light_should_off else light_on_level)
 
       if now_s - last_print_s >= 1.0:
         last_print_s = now_s
@@ -250,12 +250,12 @@ def main():
         print('Bedroom motion/static    : %d/%d' % (bedroom_motion_count, bedroom_static_count))
         print('Bed motion/static count  : %d/%d' % (bed_motion_count, bed_static_count))
         print('Bed static hold active   : %s' % ('YES' if bed_static_lock_off else 'NO'))
-        print('Light pin(3)             : %s' % ('OFF' if current_light_level == LIGHT_OFF_LEVEL else 'ON'))
+        print('Light pin(3)             : %s' % ('OFF' if current_light_level == light_off_level else 'ON'))
 
       time.sleep(0.1)
   finally:
-    if GPIO is not None:
-      GPIO.cleanup()
+    if rpi_gpio is not None:
+      rpi_gpio.cleanup()
 
 
 if __name__ == '__main__':

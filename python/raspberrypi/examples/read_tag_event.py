@@ -20,7 +20,7 @@ while cur_path != os.path.dirname(cur_path):
     sys.path.insert(0, cur_path)
     break
   cur_path = os.path.dirname(cur_path)
-from DFRobot_C4004 import DFRobot_C4004, TagConfig, FourSidedRange_t
+from DFRobot_C4004 import DFRobot_C4004, DFRobot_TagConfig, FourSidedRange
 
 c4004 = DFRobot_C4004('/dev/ttyAMA0', 115200)
 
@@ -120,7 +120,7 @@ def main():
     print('Set check-to-active frames failed.')
   time.sleep(0.05)
 
-  range_info = FourSidedRange_t()
+  range_info = FourSidedRange()
   range_info.mode = c4004.RANGE_FOUR_SIDE
   range_info.x_positive_cm = 200
   range_info.x_negative_cm = -200
@@ -138,7 +138,7 @@ def main():
 
   set_tags = []
 
-  tag0 = TagConfig()
+  tag0 = DFRobot_TagConfig()
   tag0.tag_index = 0
   tag0.tag_type = c4004.TAG_NONE
   tag0.scope_type = c4004.TAG_RANGE_RECTANGLE
@@ -149,7 +149,7 @@ def main():
   tag0.height = 120
   set_tags.append(tag0)
 
-  tag1 = TagConfig()
+  tag1 = DFRobot_TagConfig()
   tag1.tag_index = 1
   tag1.tag_type = c4004.TAG_BOUNDARY
   tag1.scope_type = c4004.TAG_RANGE_RECTANGLE
@@ -160,7 +160,7 @@ def main():
   tag1.height = 120
   set_tags.append(tag1)
 
-  tag2 = TagConfig()
+  tag2 = DFRobot_TagConfig()
   tag2.tag_index = 2
   tag2.tag_type = c4004.TAG_APPROACH_AWAY
   tag2.scope_type = c4004.TAG_RANGE_CIRCLE
@@ -173,7 +173,7 @@ def main():
   # For rectangle tags, width and height are the rectangle dimensions.
   set_tags.append(tag2)
 
-  tag3 = TagConfig()
+  tag3 = DFRobot_TagConfig()
   tag3.tag_index = 3
   tag3.tag_type = c4004.TAG_PEOPLE_COUNTING
   tag3.scope_type = c4004.TAG_RANGE_RECTANGLE
@@ -184,7 +184,7 @@ def main():
   tag3.height = 160
   set_tags.append(tag3)
 
-  tag4 = TagConfig()
+  tag4 = DFRobot_TagConfig()
   tag4.tag_index = 4
   tag4.tag_type = c4004.TAG_NOISE
   tag4.scope_type = c4004.TAG_RANGE_RECTANGLE
