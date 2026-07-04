@@ -1,6 +1,6 @@
 /*!
  * @file learningTrajectoryRange.ino
- * @brief Example for learning trajectory range
+ * @brief Example for learning trajectory range.
  * @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
  * @license The MIT License (MIT)
  * @author JiaLi(zhixin.liu@dfrobot.com)

@@ -9,7 +9,7 @@
  * @license The MIT License (MIT)
  * @author JiaLi(zhixin.liu@dfrobot.com)
  * @version V1.0.0
- * @date 2026-05-25
+ * @date 2026-05-22
  * @url https://github.com/DFRobot/DFRobot_C4004
  */
 
