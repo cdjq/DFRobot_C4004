@@ -24,34 +24,34 @@ DFRobot_C4004 c4004(&Serial1, 115200, /*D2*/ D2, /*D3*/ D3);
 DFRobot_C4004 c4004(&Serial1, 115200);
 #endif
 
-const uint8_t TV_CTRL_PIN    = 2;    // HIGH: turn off TV
-const uint8_t LIGHT_CTRL_PIN = 3;    // HIGH: dim lights
+const uint8_t tvCtrlPin    = 2;    // HIGH: turn off TV
+const uint8_t lightCtrlPin = 3;    // HIGH: dim lights
 
-const uint8_t TAG_GAME         = 0;
-const uint8_t TAG_SOFA         = 1;
-const uint8_t TAG_HOME_DOOR    = 2;
-const uint8_t TAG_KITCHEN_DOOR = 3;
-const uint8_t TAG_DINING       = 4;
-const uint8_t TAG_CURTAIN      = 5;
-const uint8_t TAG_PLANT        = 6;
-const uint8_t TAG_TOTAL        = 7;
+const uint8_t tagGame         = 0;
+const uint8_t tagSofa         = 1;
+const uint8_t tagHomeDoor     = 2;
+const uint8_t tagKitchenDoor  = 3;
+const uint8_t tagDining       = 4;
+const uint8_t tagCurtain      = 5;
+const uint8_t tagPlant        = 6;
+const uint8_t tagTotal        = 7;
 
 // Users can adjust these times according to their own preferences, needs, application scenarios, etc. The default time is 5 seconds
-const uint32_t GAME_NO_PERSON_DELAY_MS = 5000;    // The game area becomes a time for no one to delay
-const uint32_t SOFA_STATIC_DELAY_MS    = 5000;    // The sofa area becomes a static delay area
-const uint32_t SOFA_MOTION_DELAY_MS    = 5000;    // The sofa area becomes a motion delay area
-const uint32_t SOFA_EMPTY_DELAY_MS     = 5000;    // The sofa area becomes an empty delay area
+const uint32_t gameNoPersonDelayMs = 5000;    // The game area becomes a time for no one to delay
+const uint32_t sofaStaticDelayMs   = 5000;    // The sofa area becomes a static delay area
+const uint32_t sofaMotionDelayMs   = 5000;    // The sofa area becomes a motion delay area
+const uint32_t sofaEmptyDelayMs    = 5000;    // The sofa area becomes an empty delay area
 
-const uint8_t LIGHT_PWM_LOW  = 0;
-const uint8_t LIGHT_PWM_DIM  = 150;
-const uint8_t LIGHT_PWM_HIGH = 255;
+const uint8_t lightPwmLow  = 0;
+const uint8_t lightPwmDim  = 150;
+const uint8_t lightPwmHigh = 255;
 
-const char *tagNames[TAG_TOTAL] = { "Game", "Sofa", "HomeDoor", "KitchenDoor", "Dining", "CurtainNoise", "PlantNoise" };
+const char *tagNames[tagTotal] = { "Game", "Sofa", "HomeDoor", "KitchenDoor", "Dining", "CurtainNoise", "PlantNoise" };
 
-sTagInfo_t tagCache[TAG_TOTAL];
+sTagInfo_t tagCache[tagTotal];
 bool       tagPrintPending     = false;
 bool       tvOutputHigh        = false;
-uint8_t    lightOutputValue    = LIGHT_PWM_LOW;
+uint8_t    lightOutputValue    = lightPwmLow;
 uint32_t   gameNoPersonStartMs = 0;
 uint32_t   sofaStaticStartMs   = 0;
 uint32_t   sofaMotionStartMs   = 0;
@@ -75,7 +75,7 @@ const char *tagTypeToText(eTagType_t type)
 
 void initTagCacheFromConfig(const sTagConfig_t *tags, uint8_t count)
 {
-  for (uint8_t i = 0; i < TAG_TOTAL; i++) {
+  for (uint8_t i = 0; i < tagTotal; i++) {
     memset(&tagCache[i], 0, sizeof(sTagInfo_t));
     tagCache[i].tagIndex  = i;
     tagCache[i].tagType   = eTagNone;
@@ -85,7 +85,7 @@ void initTagCacheFromConfig(const sTagConfig_t *tags, uint8_t count)
 
   for (uint8_t i = 0; i < count; i++) {
     uint8_t index = tags[i].tagIndex;
-    if (index >= TAG_TOTAL) {
+    if (index >= tagTotal) {
       continue;
     }
     tagCache[index].tagIndex = tags[i].tagIndex;
@@ -98,7 +98,7 @@ void initTagCacheFromConfig(const sTagConfig_t *tags, uint8_t count)
 
 bool initTagCacheFromDevice()
 {
-  sTagConfig_t tags[TAG_TOTAL];
+  sTagConfig_t tags[tagTotal];
   uint8_t      count = c4004.getTags(tags, (uint8_t)(sizeof(tags) / sizeof(tags[0])));
 
   initTagCacheFromConfig(tags, count);
@@ -112,10 +112,10 @@ void setup()
 {
   Serial.begin(115200);
 
-  pinMode(TV_CTRL_PIN, OUTPUT);
-  pinMode(LIGHT_CTRL_PIN, OUTPUT);
-  digitalWrite(TV_CTRL_PIN, LOW);
-  analogWrite(LIGHT_CTRL_PIN, LIGHT_PWM_LOW);
+  pinMode(tvCtrlPin, OUTPUT);
+  pinMode(lightCtrlPin, OUTPUT);
+  digitalWrite(tvCtrlPin, LOW);
+  analogWrite(lightCtrlPin, lightPwmLow);
 
   while (!c4004.begin()) {
     Serial.println(F("DFRobot C4004 begin failed, retrying..."));
@@ -148,7 +148,7 @@ void setup()
     Serial.println(F("Set boundary detection range failed."));
   }
 
-  sTagConfig_t tags[TAG_TOTAL] = {};
+  sTagConfig_t tags[tagTotal] = {};
 
   /**
  * Tag configuration note:
@@ -175,7 +175,7 @@ void setup()
     Serial.println(F("Clear all tags failed."));
   }
 
-  tags[0].tagIndex  = TAG_GAME;
+  tags[0].tagIndex  = tagGame;
   tags[0].tagType   = eTagPeopleCounting;
   tags[0].scopeType = eTagRangeCircle;
   tags[0].ioIndex   = 0;
@@ -184,7 +184,7 @@ void setup()
   tags[0].width     = 80;
   tags[0].height    = 0;
 
-  tags[1].tagIndex  = TAG_SOFA;
+  tags[1].tagIndex  = tagSofa;
   tags[1].tagType   = eTagPeopleCounting;
   tags[1].scopeType = eTagRangeRectangle;
   tags[1].ioIndex   = 0;
@@ -193,7 +193,7 @@ void setup()
   tags[1].width     = 100;
   tags[1].height    = 300;
 
-  tags[2].tagIndex  = TAG_HOME_DOOR;
+  tags[2].tagIndex  = tagHomeDoor;
   tags[2].tagType   = eTagBoundary;
   tags[2].scopeType = eTagRangeRectangle;
   tags[2].ioIndex   = 0;
@@ -202,7 +202,7 @@ void setup()
   tags[2].width     = 80;
   tags[2].height    = 40;
 
-  tags[3].tagIndex  = TAG_KITCHEN_DOOR;
+  tags[3].tagIndex  = tagKitchenDoor;
   tags[3].tagType   = eTagBoundary;
   tags[3].scopeType = eTagRangeRectangle;
   tags[3].ioIndex   = 0;
@@ -211,7 +211,7 @@ void setup()
   tags[3].width     = 80;
   tags[3].height    = 40;
 
-  tags[4].tagIndex  = TAG_DINING;
+  tags[4].tagIndex  = tagDining;
   tags[4].tagType   = eTagPeopleCounting;
   tags[4].scopeType = eTagRangeRectangle;
   tags[4].ioIndex   = 0;
@@ -220,7 +220,7 @@ void setup()
   tags[4].width     = 300;
   tags[4].height    = 150;
 
-  tags[5].tagIndex  = TAG_CURTAIN;
+  tags[5].tagIndex  = tagCurtain;
   tags[5].tagType   = eTagNoise;
   tags[5].scopeType = eTagRangeRectangle;
   tags[5].ioIndex   = 0;
@@ -229,7 +229,7 @@ void setup()
   tags[5].width     = 50;
   tags[5].height    = 300;
 
-  tags[6].tagIndex  = TAG_PLANT;
+  tags[6].tagIndex  = tagPlant;
   tags[6].tagType   = eTagNoise;
   tags[6].scopeType = eTagRangeCircle;
   tags[6].ioIndex   = 0;
@@ -238,7 +238,7 @@ void setup()
   tags[6].width     = 40;
   tags[6].height    = 0;
 
-  if (c4004.setTagsFromConfig(tags, TAG_TOTAL)) {
+  if (c4004.setTagsFromConfig(tags, tagTotal)) {
     Serial.println(F("Set 7 tags from config success."));
   } else {
     Serial.println(F("Set 7 tags from config failed."));
@@ -265,7 +265,7 @@ void loop()
 
   if (event == eEventTag) {
     sTagInfo_t tagInfo;
-    if (c4004.getTagInfo(&tagInfo) && tagInfo.tagIndex < TAG_TOTAL) {
+    if (c4004.getTagInfo(&tagInfo) && tagInfo.tagIndex < tagTotal) {
       tagCache[tagInfo.tagIndex].tagIndex  = tagInfo.tagIndex;
       tagCache[tagInfo.tagIndex].tagType   = tagInfo.tagType;
       tagCache[tagInfo.tagIndex].ioIndex   = tagInfo.ioIndex;
@@ -279,44 +279,44 @@ void loop()
     }
   }
 
-  bool gameHasPerson = (tagCache[TAG_GAME].motionNum + tagCache[TAG_GAME].staticNum) > 0;
+  bool gameHasPerson = (tagCache[tagGame].motionNum + tagCache[tagGame].staticNum) > 0;
   if (gameHasPerson) {
     tvOutputHigh        = true;
     gameNoPersonStartMs = 0;
   } else if (tvOutputHigh) {
     if (gameNoPersonStartMs == 0) {
       gameNoPersonStartMs = nowMs;
-    } else if ((uint32_t)(nowMs - gameNoPersonStartMs) >= GAME_NO_PERSON_DELAY_MS) {
+    } else if ((uint32_t)(nowMs - gameNoPersonStartMs) >= gameNoPersonDelayMs) {
       tvOutputHigh = false;
     }
   } else {
     gameNoPersonStartMs = 0;
   }
 
-  bool sofaStaticOnly = (tagCache[TAG_SOFA].staticNum > 0 && tagCache[TAG_SOFA].motionNum == 0);
-  bool sofaHasMotion  = (tagCache[TAG_SOFA].motionNum > 0);
-  bool sofaNoPerson   = ((tagCache[TAG_SOFA].staticNum + tagCache[TAG_SOFA].motionNum) == 0);
+  bool sofaStaticOnly = (tagCache[tagSofa].staticNum > 0 && tagCache[tagSofa].motionNum == 0);
+  bool sofaHasMotion  = (tagCache[tagSofa].motionNum > 0);
+  bool sofaNoPerson   = ((tagCache[tagSofa].staticNum + tagCache[tagSofa].motionNum) == 0);
   if (sofaStaticOnly) {
     if (sofaStaticStartMs == 0) {
       sofaStaticStartMs = nowMs;
-    } else if ((uint32_t)(nowMs - sofaStaticStartMs) >= SOFA_STATIC_DELAY_MS) {
-      lightOutputValue = LIGHT_PWM_DIM;
+    } else if ((uint32_t)(nowMs - sofaStaticStartMs) >= sofaStaticDelayMs) {
+      lightOutputValue = lightPwmDim;
     }
     sofaMotionStartMs = 0;
     sofaEmptyStartMs  = 0;
   } else if (sofaHasMotion) {
     if (sofaMotionStartMs == 0) {
       sofaMotionStartMs = nowMs;
-    } else if ((uint32_t)(nowMs - sofaMotionStartMs) >= SOFA_MOTION_DELAY_MS) {
-      lightOutputValue = LIGHT_PWM_LOW;
+    } else if ((uint32_t)(nowMs - sofaMotionStartMs) >= sofaMotionDelayMs) {
+      lightOutputValue = lightPwmLow;
     }
     sofaStaticStartMs = 0;
     sofaEmptyStartMs  = 0;
   } else if (sofaNoPerson) {
     if (sofaEmptyStartMs == 0) {
       sofaEmptyStartMs = nowMs;
-    } else if ((uint32_t)(nowMs - sofaEmptyStartMs) >= SOFA_EMPTY_DELAY_MS) {
-      lightOutputValue = LIGHT_PWM_HIGH;
+    } else if ((uint32_t)(nowMs - sofaEmptyStartMs) >= sofaEmptyDelayMs) {
+      lightOutputValue = lightPwmHigh;
     }
     sofaStaticStartMs = 0;
     sofaMotionStartMs = 0;
@@ -326,8 +326,8 @@ void loop()
     sofaEmptyStartMs  = 0;
   }
 
-  digitalWrite(TV_CTRL_PIN, tvOutputHigh ? HIGH : LOW);
-  analogWrite(LIGHT_CTRL_PIN, lightOutputValue);
+  digitalWrite(tvCtrlPin, tvOutputHigh ? HIGH : LOW);
+  analogWrite(lightCtrlPin, lightOutputValue);
 
   static uint32_t lastPrintMs = 0;
   if (tagPrintPending || (uint32_t)(nowMs - lastPrintMs) >= 3000) {
@@ -336,7 +336,7 @@ void loop()
     Serial.println(F("==================================================================="));
     Serial.println(F("Tag Cache Table"));
     Serial.println(F("Idx\tName\t\tType\t\tIO\tCenterX\tCenterY\tMotion\tStatic\tDir\tBoundary"));
-    for (uint8_t i = 0; i < TAG_TOTAL; i++) {
+    for (uint8_t i = 0; i < tagTotal; i++) {
       Serial.print(i);
       Serial.print(F("\t"));
       Serial.print(tagNames[i]);

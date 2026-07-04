@@ -25,17 +25,17 @@ DFRobot_C4004 c4004(&Serial1, 115200, /*D2*/ D2, /*D3*/ D3);
 DFRobot_C4004 c4004(&Serial1, 115200);
 #endif
 
-const uint8_t BED_TAG_INDEX          = 0;
-const uint8_t BEDROOM_TAG_INDEX      = 1;
-const uint8_t BEDROOM_DOOR_TAG_INDEX = 2;
-const uint8_t LIGHT_CTRL_PIN         = 3;
+const uint8_t bedTagIndex         = 0;
+const uint8_t bedroomTagIndex     = 1;
+const uint8_t bedroomDoorTagIndex = 2;
+const uint8_t lightCtrlPin        = 3;
 
 // Users can adjust these times according to their own preferences, needs, application scenarios, etc. The default time is 5 seconds.
-const uint32_t BED_STATIC_HOLD_MS    = 5000;    // The time required to maintain a transition from other states to rest.
-const uint32_t BEDROOM_EMPTY_HOLD_MS = 5000;    // The time required to maintain a transition from other states to empty.
+const uint32_t bedStaticHoldMs    = 5000;    // The time required to maintain a transition from other states to rest.
+const uint32_t bedroomEmptyHoldMs = 5000;    // The time required to maintain a transition from other states to empty.
 
-const uint8_t LIGHT_OFF_LEVEL = HIGH;
-const uint8_t LIGHT_ON_LEVEL  = LOW;
+const uint8_t lightOffLevel = HIGH;
+const uint8_t lightOnLevel  = LOW;
 
 uint32_t bedStaticStartMs    = 0;
 uint32_t bedroomEmptyStartMs = 0;
@@ -50,8 +50,8 @@ void setup()
 {
   Serial.begin(115200);
 
-  pinMode(LIGHT_CTRL_PIN, OUTPUT);
-  digitalWrite(LIGHT_CTRL_PIN, LIGHT_OFF_LEVEL);
+  pinMode(lightCtrlPin, OUTPUT);
+  digitalWrite(lightCtrlPin, lightOffLevel);
 
   while (!c4004.begin()) {
     Serial.println(F("DFRobot C4004 begin failed, retrying..."));
@@ -92,7 +92,7 @@ void setup()
 
   sTagConfig_t setTags[3] = {};
 
-  setTags[0].tagIndex  = BED_TAG_INDEX;
+  setTags[0].tagIndex  = bedTagIndex;
   setTags[0].tagType   = eTagPeopleCounting;
   setTags[0].scopeType = eTagRangeRectangle;
   setTags[0].ioIndex   = 0;
@@ -101,7 +101,7 @@ void setup()
   setTags[0].width     = 300;
   setTags[0].height    = 250;
 
-  setTags[1].tagIndex  = BEDROOM_TAG_INDEX;
+  setTags[1].tagIndex  = bedroomTagIndex;
   setTags[1].tagType   = eTagPeopleCounting;
   setTags[1].scopeType = eTagRangeRectangle;
   setTags[1].ioIndex   = 0;
@@ -110,7 +110,7 @@ void setup()
   setTags[1].width     = 400;
   setTags[1].height    = 700;
 
-  setTags[2].tagIndex  = BEDROOM_DOOR_TAG_INDEX;
+  setTags[2].tagIndex  = bedroomDoorTagIndex;
   setTags[2].tagType   = eTagApproachAway;
   setTags[2].scopeType = eTagRangeRectangle;
   setTags[2].ioIndex   = 0;
@@ -141,10 +141,10 @@ void updatePeopleCountsFromTagReport()
     if (event == eEventTag) {
       sTagInfo_t tagInfo;
       if (c4004.getTagInfo(&tagInfo) && tagInfo.tagType == eTagPeopleCounting) {
-        if (tagInfo.tagIndex == BED_TAG_INDEX) {
+        if (tagInfo.tagIndex == bedTagIndex) {
           bedMotionCount = tagInfo.motionNum;
           bedStaticCount = tagInfo.staticNum;
-        } else if (tagInfo.tagIndex == BEDROOM_TAG_INDEX) {
+        } else if (tagInfo.tagIndex == bedroomTagIndex) {
           bedroomMotionCount = tagInfo.motionNum;
           bedroomStaticCount = tagInfo.staticNum;
         }
@@ -166,7 +166,7 @@ void loop()
   if (bedHasStaticPerson) {
     if (bedStaticStartMs == 0) {
       bedStaticStartMs = nowMs;
-    } else if ((uint32_t)(nowMs - bedStaticStartMs) >= BED_STATIC_HOLD_MS) {
+    } else if ((uint32_t)(nowMs - bedStaticStartMs) >= bedStaticHoldMs) {
       bedStaticLockOff = true;
     }
   } else {
@@ -189,7 +189,7 @@ void loop()
       if (bedroomWasOccupied) {
         if (bedroomEmptyStartMs == 0) {
           bedroomEmptyStartMs = nowMs;
-        } else if ((uint32_t)(nowMs - bedroomEmptyStartMs) >= BEDROOM_EMPTY_HOLD_MS) {
+        } else if ((uint32_t)(nowMs - bedroomEmptyStartMs) >= bedroomEmptyHoldMs) {
           lightShouldOff = true;
         }
       } else {
@@ -198,7 +198,7 @@ void loop()
     }
   }
 
-  digitalWrite(LIGHT_CTRL_PIN, lightShouldOff ? LIGHT_OFF_LEVEL : LIGHT_ON_LEVEL);
+  digitalWrite(lightCtrlPin, lightShouldOff ? lightOffLevel : lightOnLevel);
 
   static uint32_t lastPrintMs = 0;
   if ((uint32_t)(nowMs - lastPrintMs) >= 1000) {
@@ -217,7 +217,7 @@ void loop()
     Serial.print(F("Bed static hold active   : "));
     Serial.println(bedStaticLockOff ? F("YES") : F("NO"));
     Serial.print(F("Light pin(3)             : "));
-    Serial.println(digitalRead(LIGHT_CTRL_PIN) == LIGHT_OFF_LEVEL ? F("OFF") : F("ON"));
+    Serial.println(digitalRead(lightCtrlPin) == lightOffLevel ? F("OFF") : F("ON"));
   }
 
   delay(100);

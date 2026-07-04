@@ -20,8 +20,8 @@ DFRobot_C4004 c4004(&Serial1, 115200, /*D2*/ D2, /*D3*/ D3);
 DFRobot_C4004 c4004(&Serial1, 115200);
 #endif
 
-static const uint8_t  SINGLE_PERSON_CONFIRM_TIMES = 5;
-static const uint16_t PEOPLE_QUERY_INTERVAL_MS    = 1000;
+static const uint8_t  singlePersonConfirmTimes = 5;
+static const uint16_t peopleQueryIntervalMs    = 1000;
 
 void printMenu(void);
 void learnTrajectoryRange(void);
@@ -212,7 +212,7 @@ bool waitForSinglePerson(void)
 {
   uint8_t confirmCount = 0;
 
-  while (confirmCount < SINGLE_PERSON_CONFIRM_TIMES) {
+  while (confirmCount < singlePersonConfirmTimes) {
     uint32_t startTime   = millis();
     uint8_t  targetCount = c4004.getTargetList(NULL, 0, eGetDataActive);
 
@@ -228,9 +228,9 @@ bool waitForSinglePerson(void)
     Serial.print(F("  confirm: "));
     Serial.print(confirmCount);
     Serial.print(F("/"));
-    Serial.println(SINGLE_PERSON_CONFIRM_TIMES);
+    Serial.println(singlePersonConfirmTimes);
 
-    while ((uint32_t)(millis() - startTime) < PEOPLE_QUERY_INTERVAL_MS) {
+    while ((uint32_t)(millis() - startTime) < peopleQueryIntervalMs) {
       char cmd = readCommand();
 
       if (cmd == 'q' || cmd == 'Q') {

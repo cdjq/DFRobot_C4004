@@ -24,28 +24,28 @@ DFRobot_C4004 c4004(&Serial1, 115200, /*D2*/ D2, /*D3*/ D3);
 DFRobot_C4004 c4004(&Serial1, 115200);
 #endif
 
-const uint8_t TAG_LIVING_ROOM  = 0;
-const uint8_t TAG_KITCHEN      = 1;    // Configured only; kitchen people count uses door enter/exit events.
-const uint8_t TAG_KITCHEN_DOOR = 2;
+const uint8_t tagLivingRoom  = 0;
+const uint8_t tagKitchen     = 1;    // Configured only; kitchen people count uses door enter/exit events.
+const uint8_t tagKitchenDoor = 2;
 
-const uint8_t  CHECK_TO_ACTIVE_FRAMES = 2;
-const uint32_t NO_PERSON_DELAY_S      = 5;
-const uint32_t TRACK_EXISTS_TIME_S    = 1;
+const uint8_t  checkToActiveFrames = 2;
+const uint32_t noPersonDelayS      = 5;
+const uint32_t trackExistsTimeS    = 1;
 
-const int16_t  LIVING_ROOM_CENTER_X_CM = 0;
-const int16_t  LIVING_ROOM_CENTER_Y_CM = 200;
-const uint16_t LIVING_ROOM_SIZE_X_CM   = 400;
-const uint16_t LIVING_ROOM_SIZE_Y_CM   = 400;
+const int16_t  livingRoomCenterXCm = 0;
+const int16_t  livingRoomCenterYCm = 200;
+const uint16_t livingRoomSizeXCm   = 400;
+const uint16_t livingRoomSizeYCm   = 400;
 
-const int16_t  KITCHEN_CENTER_X_CM = 0;
-const int16_t  KITCHEN_CENTER_Y_CM = 600;
-const uint16_t KITCHEN_SIZE_X_CM   = 200;
-const uint16_t KITCHEN_SIZE_Y_CM   = 400;
+const int16_t  kitchenCenterXCm = 0;
+const int16_t  kitchenCenterYCm = 600;
+const uint16_t kitchenSizeXCm   = 200;
+const uint16_t kitchenSizeYCm   = 400;
 
-const int16_t  DOOR_CENTER_X_CM = 0;
-const int16_t  DOOR_CENTER_Y_CM = 400;
-const uint16_t DOOR_SIZE_X_CM   = 100;
-const uint16_t DOOR_SIZE_Y_CM   = 100;
+const int16_t  doorCenterXCm = 0;
+const int16_t  doorCenterYCm = 400;
+const uint16_t doorSizeXCm   = 100;
+const uint16_t doorSizeYCm   = 100;
 
 uint8_t livingMotionCount = 0;
 uint8_t livingStaticCount = 0;
@@ -104,9 +104,9 @@ void processTagEvent()
     return;
   }
 
-  if (tagInfo.tagIndex == TAG_LIVING_ROOM && tagInfo.tagType == eTagPeopleCounting) {
+  if (tagInfo.tagIndex == tagLivingRoom && tagInfo.tagType == eTagPeopleCounting) {
     processLivingRoomTag(tagInfo);
-  } else if (tagInfo.tagIndex == TAG_KITCHEN_DOOR && tagInfo.tagType == eTagBoundary) {
+  } else if (tagInfo.tagIndex == tagKitchenDoor && tagInfo.tagType == eTagBoundary) {
     processKitchenDoorTag(tagInfo);
   }
 }
@@ -127,7 +127,7 @@ void setup()
     Serial.println(F("Set presence enable failed."));
   }
 
-  if (c4004.setCheckToActiveFrames(CHECK_TO_ACTIVE_FRAMES)) {
+  if (c4004.setCheckToActiveFrames(checkToActiveFrames)) {
     Serial.println(F("Set check-to-active frames success."));
   } else {
     Serial.println(F("Set check-to-active frames failed."));
@@ -162,32 +162,32 @@ void setup()
 
   sTagConfig_t tags[3] = {};
 
-  tags[0].tagIndex  = TAG_LIVING_ROOM;
+  tags[0].tagIndex  = tagLivingRoom;
   tags[0].tagType   = eTagPeopleCounting;
   tags[0].scopeType = eTagRangeRectangle;
   tags[0].ioIndex   = 0;
-  tags[0].centerX   = LIVING_ROOM_CENTER_X_CM;
-  tags[0].centerY   = LIVING_ROOM_CENTER_Y_CM;
-  tags[0].width     = LIVING_ROOM_SIZE_X_CM;
-  tags[0].height    = LIVING_ROOM_SIZE_Y_CM;
+  tags[0].centerX   = livingRoomCenterXCm;
+  tags[0].centerY   = livingRoomCenterYCm;
+  tags[0].width     = livingRoomSizeXCm;
+  tags[0].height    = livingRoomSizeYCm;
 
-  tags[1].tagIndex  = TAG_KITCHEN;
+  tags[1].tagIndex  = tagKitchen;
   tags[1].tagType   = eTagPeopleCounting;
   tags[1].scopeType = eTagRangeRectangle;
   tags[1].ioIndex   = 0;
-  tags[1].centerX   = KITCHEN_CENTER_X_CM;
-  tags[1].centerY   = KITCHEN_CENTER_Y_CM;
-  tags[1].width     = KITCHEN_SIZE_X_CM;
-  tags[1].height    = KITCHEN_SIZE_Y_CM;
+  tags[1].centerX   = kitchenCenterXCm;
+  tags[1].centerY   = kitchenCenterYCm;
+  tags[1].width     = kitchenSizeXCm;
+  tags[1].height    = kitchenSizeYCm;
 
-  tags[2].tagIndex  = TAG_KITCHEN_DOOR;
+  tags[2].tagIndex  = tagKitchenDoor;
   tags[2].tagType   = eTagBoundary;
   tags[2].scopeType = eTagRangeRectangle;
   tags[2].ioIndex   = 0;
-  tags[2].centerX   = DOOR_CENTER_X_CM;
-  tags[2].centerY   = DOOR_CENTER_Y_CM;
-  tags[2].width     = DOOR_SIZE_X_CM;
-  tags[2].height    = DOOR_SIZE_Y_CM;
+  tags[2].centerX   = doorCenterXCm;
+  tags[2].centerY   = doorCenterYCm;
+  tags[2].width     = doorSizeXCm;
+  tags[2].height    = doorSizeYCm;
 
   if (c4004.setTagsFromConfig(tags, 3)) {
     Serial.println(F("Set living/kitchen/door tags success."));
@@ -201,13 +201,13 @@ void setup()
     Serial.println(F("Set trajectory track enable failed."));
   }
 
-  if (c4004.setTrackExistsTime(TRACK_EXISTS_TIME_S)) {
+  if (c4004.setTrackExistsTime(trackExistsTimeS)) {
     Serial.println(F("Set TrackExistsTime success."));
   } else {
     Serial.println(F("Set TrackExistsTime failed."));
   }
 
-  if (c4004.setUnmannedTime(NO_PERSON_DELAY_S)) {
+  if (c4004.setUnmannedTime(noPersonDelayS)) {
     Serial.println(F("Set UnmannedTime success."));
   } else {
     Serial.println(F("Set UnmannedTime failed."));
