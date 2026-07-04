@@ -1,17 +1,19 @@
 # -*- coding: utf-8 -*
 '''!
-  @file factory_reset_and_reboot.py
-  @brief Restore factory settings and reboot the module.
-  @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
-  @license The MIT License (MIT)
-  @author JiaLi(zhixin.liu@dfrobot.com)
-  @version V1.0.0
-  @date 2026-05-22
-  @url https://github.com/DFRobot/DFRobot_C4004
+@file factory_reset_and_reboot.py
+@brief Restore factory settings and reboot the module.
+@copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
+@license The MIT License (MIT)
+@author JiaLi(zhixin.liu@dfrobot.com)
+@version V1.0.0
+@date 2026-05-22
+@url https://github.com/DFRobot/DFRobot_C4004
 '''
+
 import os
 import sys
 import time
+
 cur_path = os.path.dirname(os.path.abspath(__file__))
 while cur_path != os.path.dirname(cur_path):
   if os.path.exists(os.path.join(cur_path, 'DFRobot_C4004.py')):

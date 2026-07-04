@@ -13,15 +13,15 @@
 
 #if defined(ESP8266) || defined(ARDUINO_AVR_UNO)
 SoftwareSerial mySerial(4, 5);
-DFRobot_C4004 c4004(&mySerial, 115200);
+DFRobot_C4004  c4004(&mySerial, 115200);
 #elif defined(ESP32)
 DFRobot_C4004 c4004(&Serial1, 115200, /*D2*/ D2, /*D3*/ D3);
 #else
 DFRobot_C4004 c4004(&Serial1, 115200);
 #endif
 
-static const uint8_t SINGLE_PERSON_CONFIRM_TIMES = 5;
-static const uint16_t PEOPLE_QUERY_INTERVAL_MS = 1000;
+static const uint8_t  SINGLE_PERSON_CONFIRM_TIMES = 5;
+static const uint16_t PEOPLE_QUERY_INTERVAL_MS    = 1000;
 
 void printMenu(void);
 void learnTrajectoryRange(void);
@@ -53,7 +53,7 @@ void setup()
   Serial.println(F(" ====================Init Params==================="));
 
   sFourSidedRange_t range;
-  range.mode = eRangeFourSide;
+  range.mode        = eRangeFourSide;
   range.xPositiveCm = 500;
   range.xNegativeCm = -500;
   range.yPositiveCm = 800;
@@ -213,8 +213,8 @@ bool waitForSinglePerson(void)
   uint8_t confirmCount = 0;
 
   while (confirmCount < SINGLE_PERSON_CONFIRM_TIMES) {
-    uint32_t startTime = millis();
-    uint8_t targetCount = c4004.getTargetList(NULL, 0, eGetDataActive);
+    uint32_t startTime   = millis();
+    uint8_t  targetCount = c4004.getTargetList(NULL, 0, eGetDataActive);
 
     Serial.print(F("Active target count: "));
     Serial.print(targetCount);

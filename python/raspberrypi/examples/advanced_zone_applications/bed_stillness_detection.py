@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*
 '''!
-  @file bedStillnessDetection.py
+  @file bed_stillness_detection.py
   @brief Bed-zone stillness lighting control using active polling APIs.
   @details Rule summary:
   @n 1) If any static person exists in bed area for over 5s, turn room light OFF.

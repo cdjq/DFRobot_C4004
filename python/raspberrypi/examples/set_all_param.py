@@ -1,17 +1,19 @@
 # -*- coding: utf-8 -*
 '''!
-  @file set_all_param.py
-  @brief Configure and read back major DFRobot C4004 parameters.
-  @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
-  @license The MIT License (MIT)
-  @author JiaLi(zhixin.liu@dfrobot.com)
-  @version V1.0.0
-  @date 2026-05-22
-  @url https://github.com/DFRobot/DFRobot_C4004
+@file set_all_param.py
+@brief Configure and read back major DFRobot C4004 parameters.
+@copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
+@license The MIT License (MIT)
+@author JiaLi(zhixin.liu@dfrobot.com)
+@version V1.0.0
+@date 2026-05-22
+@url https://github.com/DFRobot/DFRobot_C4004
 '''
+
 import os
 import sys
 import time
+
 cur_path = os.path.dirname(os.path.abspath(__file__))
 while cur_path != os.path.dirname(cur_path):
   if os.path.exists(os.path.join(cur_path, 'DFRobot_C4004.py')):
@@ -124,11 +126,7 @@ def main():
   if mode == c4004.RANGE_FOUR_SIDE:
     current_range = FourSidedRange_t()
     if c4004.get_four_sided_range_mode(current_range):
-      print('Current boundary x+/x-/y+/y- (cm): %d/%d/%d/%d' % (
-        current_range.x_positive_cm,
-        current_range.x_negative_cm,
-        current_range.y_positive_cm,
-        current_range.y_negative_cm))
+      print('Current boundary x+/x-/y+/y- (cm): %d/%d/%d/%d' % (current_range.x_positive_cm, current_range.x_negative_cm, current_range.y_positive_cm, current_range.y_negative_cm))
     else:
       print('Read current boundary range failed.')
   else:

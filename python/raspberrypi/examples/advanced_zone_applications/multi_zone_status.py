@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*
 '''!
-  @file multiZoneStatus.py
+  @file multi_zone_status.py
   @brief Read multi-zone tag events and print living-room scene linkage status.
   @details This routine can use tags configured by the PC tool or optionally configure
   @n tags in code. It keeps the last event result for each tag, prints a summary table

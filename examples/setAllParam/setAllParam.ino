@@ -13,7 +13,7 @@
 
 #if defined(ESP8266) || defined(ARDUINO_AVR_UNO)
 SoftwareSerial mySerial(4, 5);
-DFRobot_C4004 c4004(&mySerial, 115200);
+DFRobot_C4004  c4004(&mySerial, 115200);
 #elif defined(ESP32)
 DFRobot_C4004 c4004(&Serial1, 115200, /*D2*/ D2, /*D3*/ D3);
 #else
@@ -38,7 +38,7 @@ void setup()
 
   Serial.println(F("=================Set install info================="));
   if (c4004.setInstallHigh(180)) {
-      Serial.println(F("Set install high success!"));
+    Serial.println(F("Set install high success!"));
   } else {
     Serial.println(F("Set install high failed!"));
   }
@@ -120,7 +120,7 @@ void setup()
   Serial.println(F("====================Range Param==================="));
   /* Set the four-side boundary detection range */
   sFourSidedRange_t range;
-  range.mode = eRangeFourSide;
+  range.mode        = eRangeFourSide;
   range.xPositiveCm = 200;
   range.xNegativeCm = -200;
   range.yPositiveCm = 700;
@@ -165,7 +165,7 @@ void setup()
   /*
   * Set the trajectory detection range mode
   * Setting it to false means using this mode and not performing trajectory learning
-  */ 
+  */
   // c4004.setTrajectoryRangeMode(false);
   // delay(50);
 
@@ -187,7 +187,7 @@ void setup()
   //   Serial.println(F("Current trajectory range query failed."));
   // }
 
-  /* Set multi-point config by config-file mode points */ 
+  /* Set multi-point config by config-file mode points */
   // sPoint_t cfgPoints[4];
   // cfgPoints[0].x = 200;  cfgPoints[0].y = 0;
   // cfgPoints[1].x = 200;  cfgPoints[1].y = 400;

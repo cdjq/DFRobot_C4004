@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*
 '''!
-  @file read_zone_state_by_gpio.py
-  @brief Configure tag zones and read local GPIO presence states.
-  @details GPIO 1 is the whole area output. GPIO 2-6 are divided zone outputs.
-  @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
-  @license The MIT License (MIT)
-  @author JiaLi(zhixin.liu@dfrobot.com)
-  @version V1.0.0
-  @date 2026-05-22
-  @url https://github.com/DFRobot/DFRobot_C4004
+@file read_zone_state_by_gpio.py
+@brief Configure tag zones and read local GPIO presence states.
+@details GPIO 1 is the whole area output. GPIO 2-6 are divided zone outputs.
+@copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
+@license The MIT License (MIT)
+@author JiaLi(zhixin.liu@dfrobot.com)
+@version V1.0.0
+@date 2026-05-22
+@url https://github.com/DFRobot/DFRobot_C4004
 '''
+
 import os
 import sys
 import time
+
 cur_path = os.path.dirname(os.path.abspath(__file__))
 while cur_path != os.path.dirname(cur_path):
   if os.path.exists(os.path.join(cur_path, 'DFRobot_C4004.py')):

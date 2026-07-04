@@ -22,14 +22,14 @@
 
 // #define ENABLE_DBG
 #ifdef ENABLE_DBG
-#define DBG(...)                    \
-  {                                 \
-    Serial.print("[");              \
-    Serial.print(__FUNCTION__);     \
-    Serial.print("(): ");           \
-    Serial.print(__LINE__);         \
-    Serial.print(" ] ");            \
-    Serial.println(__VA_ARGS__);    \
+#define DBG(...)                 \
+  {                              \
+    Serial.print("[");           \
+    Serial.print(__FUNCTION__);  \
+    Serial.print("(): ");        \
+    Serial.print(__LINE__);      \
+    Serial.print(" ] ");         \
+    Serial.println(__VA_ARGS__); \
   }
 #else
 #define DBG(...)
@@ -38,13 +38,13 @@
 // RAM note: these buffers cost ~2KB of SRAM. Requires an MCU with
 // at least 2KB SRAM. If RAM is tight or you see crashes/garbled RX, lower MAX_POINTS.
 #if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_LEONARDO)
-#define MAX_POINTS            64
+#define MAX_POINTS 64
 #else
-#define MAX_POINTS            150
+#define MAX_POINTS 150
 #endif
-#define MAX_PAYLOAD           (3 + MAX_POINTS * 4)
-#define C4004_MAX_FRAME_SIZE  (9 + MAX_PAYLOAD)
-#define C4004_RX_RING_SIZE    (C4004_MAX_FRAME_SIZE + 128)
+#define MAX_PAYLOAD          (3 + MAX_POINTS * 4)
+#define C4004_MAX_FRAME_SIZE (9 + MAX_PAYLOAD)
+#define C4004_RX_RING_SIZE   (C4004_MAX_FRAME_SIZE + 128)
 
 #define MAX_TARGETS           8
 #define QUERY_DATA            0x0F
@@ -55,76 +55,78 @@
 #define DEFAULT_TIMEOUT       200
 #define RESET_TIMEOUT         300
 #define FACTORY_RESET_TIMEOUT 350
+#define TAG_SET_TIMEOUT       400
+#define SET_RANGE_TIMEOUT     400
 #define HEARTBEAT_TIMEOUT     90000UL
 
-#define CTRL_SYSTEM           0x01
-#define CTRL_PRODUCT_INFO     0x02
-#define CTRL_OTA              0x03
-#define CTRL_WORK_STATUS      0x05
-#define CTRL_INSTALL_INFO     0x06
-#define CTRL_DETECTION_RANGE  0x07
-#define CTRL_PRESENCE         0x80
-#define CTRL_TRAJECTORY       0x82
-#define CTRL_FALL_DETECTION   0x83
-#define CTRL_PEOPLE_COUNT     0x86
+#define CTRL_SYSTEM          0x01
+#define CTRL_PRODUCT_INFO    0x02
+#define CTRL_OTA             0x03
+#define CTRL_WORK_STATUS     0x05
+#define CTRL_INSTALL_INFO    0x06
+#define CTRL_DETECTION_RANGE 0x07
+#define CTRL_PRESENCE        0x80
+#define CTRL_TRAJECTORY      0x82
+#define CTRL_FALL_DETECTION  0x83
+#define CTRL_PEOPLE_COUNT    0x86
 
-#define CMD_SYSTEM_HEARTBEAT_REPORT      0x01
-#define CMD_SYSTEM_RESET                 0x02
-#define CMD_SYSTEM_FACTORY_RESET         0x03
-#define CMD_SYSTEM_HEARTBEAT_QUERY       0x80
+#define CMD_SYSTEM_HEARTBEAT_REPORT 0x01
+#define CMD_SYSTEM_RESET            0x02
+#define CMD_SYSTEM_FACTORY_RESET    0x03
+#define CMD_SYSTEM_HEARTBEAT_QUERY  0x80
 
-#define CMD_PRODUCT_MODEL_QUERY               0xA1
-#define CMD_PRODUCT_ID_QUERY                  0xA2
-#define CMD_PRODUCT_HARDWARE_VERSION_QUERY    0xA3
-#define CMD_PRODUCT_FIRMWARE_VERSION_QUERY    0xA4
+#define CMD_PRODUCT_MODEL_QUERY            0xA1
+#define CMD_PRODUCT_ID_QUERY               0xA2
+#define CMD_PRODUCT_HARDWARE_VERSION_QUERY 0xA3
+#define CMD_PRODUCT_FIRMWARE_VERSION_QUERY 0xA4
 
-#define CMD_WORK_STATUS_INIT_FINISHED_REPORT  0x01
-#define CMD_WORK_STATUS_INIT_FINISHED_QUERY   0x81
+#define CMD_WORK_STATUS_INIT_FINISHED_REPORT 0x01
+#define CMD_WORK_STATUS_INIT_FINISHED_QUERY  0x81
 
-#define CMD_INSTALL_SET_ANGLE                 0x01
-#define CMD_INSTALL_SET_HEIGHT                0x02
-#define CMD_INSTALL_SET_MODE                  0x06
-#define CMD_INSTALL_QUERY_ANGLE               0x81
-#define CMD_INSTALL_QUERY_HEIGHT              0x82
-#define CMD_INSTALL_QUERY_MODE                0x86
+#define CMD_INSTALL_SET_ANGLE    0x01
+#define CMD_INSTALL_SET_HEIGHT   0x02
+#define CMD_INSTALL_SET_MODE     0x06
+#define CMD_INSTALL_QUERY_ANGLE  0x81
+#define CMD_INSTALL_QUERY_HEIGHT 0x82
+#define CMD_INSTALL_QUERY_MODE   0x86
 
-#define CMD_PRESENCE_SET_ENABLE               0x00
-#define CMD_PRESENCE_REPORT                   0x01
-#define CMD_PRESENCE_MOTION_REPORT            0x02
-#define CMD_PRESENCE_QUERY_ENABLE             0x80
-#define CMD_PRESENCE_QUERY_STATE              0x81
-#define CMD_PRESENCE_QUERY_MOTION             0x82
+#define CMD_PRESENCE_SET_ENABLE    0x00
+#define CMD_PRESENCE_REPORT        0x01
+#define CMD_PRESENCE_MOTION_REPORT 0x02
+#define CMD_PRESENCE_QUERY_ENABLE  0x80
+#define CMD_PRESENCE_QUERY_STATE   0x81
+#define CMD_PRESENCE_QUERY_MOTION  0x82
 
-#define CMD_TRAJECTORY_SET_ENABLE                     0x00
-#define CMD_TRAJECTORY_TARGET_REPORT                  0x02
-#define CMD_TRAJECTORY_QUERY_ENABLE                   0x80
-#define CMD_TRAJECTORY_QUERY_TARGET                   0x82
-#define CMD_TRAJECTORY_SET_TRAJECTORY_LED             0x0B
-#define CMD_TRAJECTORY_SET_MOTION_LED                 0x0C
-#define CMD_TRAJECTORY_SET_CHECK_TO_ACTIVE_FRAMES     0x0D
-#define CMD_TRAJECTORY_QUERY_TRAJECTORY_LED           0x8B
-#define CMD_TRAJECTORY_QUERY_MOTION_LED               0x8C
-#define CMD_TRAJECTORY_QUERY_CHECK_TO_ACTIVE_FRAMES   0x8D
+#define CMD_TRAJECTORY_SET_ENABLE                   0x00
+#define CMD_TRAJECTORY_TARGET_REPORT                0x02
+#define CMD_TRAJECTORY_QUERY_ENABLE                 0x80
+#define CMD_TRAJECTORY_QUERY_TARGET                 0x82
+#define CMD_TRAJECTORY_SET_TRAJECTORY_LED           0x0B
+#define CMD_TRAJECTORY_SET_MOTION_LED               0x0C
+#define CMD_TRAJECTORY_SET_CHECK_TO_ACTIVE_FRAMES   0x0D
+#define CMD_TRAJECTORY_QUERY_TRAJECTORY_LED         0x8B
+#define CMD_TRAJECTORY_QUERY_MOTION_LED             0x8C
+#define CMD_TRAJECTORY_QUERY_CHECK_TO_ACTIVE_FRAMES 0x8D
 
-#define CMD_DETECTION_RANGE_QUERY_TAGS                0x91
-#define CMD_DETECTION_RANGE_SET_TAG                   0x11
-#define CMD_DETECTION_RANGE_CLEAR_TAG                 0x13
-#define CMD_DETECTION_RANGE_SET_TAGS_FROM_CONFIG      0x19
-#define CMD_DETECTION_RANGE_SET_RANGE                 0x1A
-#define CMD_DETECTION_RANGE_QUERY_RANGE               0x9A
-#define CMD_DETECTION_RANGE_TAG_REPORT                0x1B
+#define CMD_DETECTION_RANGE_QUERY_TAGS           0x91
+#define CMD_DETECTION_RANGE_SET_TAG              0x11
+#define CMD_DETECTION_RANGE_CLEAR_TAG            0x13
+#define CMD_DETECTION_RANGE_SET_TAGS_FROM_CONFIG 0x19
+#define CMD_DETECTION_RANGE_SET_RANGE            0x1A
+#define CMD_DETECTION_RANGE_QUERY_RANGE          0x9A
+#define CMD_DETECTION_RANGE_TAG_REPORT           0x1B
 
-#define CMD_PEOPLE_COUNT_REPORT                       0x0A
-#define CMD_PEOPLE_COUNT_QUERY_COUNT                  0x8A
-#define CMD_PEOPLE_COUNT_SET_REPORT_INTERVAL          0x0B
-#define CMD_PEOPLE_COUNT_QUERY_REPORT_INTERVAL        0x8B
-#define CMD_PEOPLE_COUNT_CLEAR_COUNT                  0x11
-#define CMD_PEOPLE_COUNT_SET_TRAJECTORY_DISTANCE      0x0E
-#define CMD_PEOPLE_COUNT_QUERY_TRAJECTORY_DISTANCE    0x8E
-#define CMD_PEOPLE_COUNT_SET_TRAJECTORY_HOLD_TIME     0x15
-#define CMD_PEOPLE_COUNT_QUERY_TRAJECTORY_HOLD_TIME   0x95
-#define CMD_PEOPLE_COUNT_SET_NO_PERSON_DELAY          0x17
-#define CMD_PEOPLE_COUNT_QUERY_NO_PERSON_DELAY        0x97
+#define CMD_PEOPLE_COUNT_REPORT                     0x0A
+#define CMD_PEOPLE_COUNT_QUERY_COUNT                0x8A
+#define CMD_PEOPLE_COUNT_SET_REPORT_INTERVAL        0x0B
+#define CMD_PEOPLE_COUNT_QUERY_REPORT_INTERVAL      0x8B
+#define CMD_PEOPLE_COUNT_CLEAR_COUNT                0x11
+#define CMD_PEOPLE_COUNT_SET_TRAJECTORY_DISTANCE    0x0E
+#define CMD_PEOPLE_COUNT_QUERY_TRAJECTORY_DISTANCE  0x8E
+#define CMD_PEOPLE_COUNT_SET_TRAJECTORY_HOLD_TIME   0x15
+#define CMD_PEOPLE_COUNT_QUERY_TRAJECTORY_HOLD_TIME 0x95
+#define CMD_PEOPLE_COUNT_SET_NO_PERSON_DELAY        0x17
+#define CMD_PEOPLE_COUNT_QUERY_NO_PERSON_DELAY      0x97
 
 /**
  * @enum eReportedEvent_t
@@ -199,11 +201,11 @@ typedef enum {
  * @brief Tag property type.
  */
 typedef enum {
-  eTagNone                = 0x00,
-  eTagBoundary            = 0x01,  ///> Boundary mode
-  eTagApproachAway        = 0x02,  ///> Near and far mode
-  eTagPeopleCounting      = 0x03,  ///> Moving, stationary, people counting
-  eTagNoise               = 0x04   ///> Noise
+  eTagNone           = 0x00,
+  eTagBoundary       = 0x01,    ///> Boundary mode
+  eTagApproachAway   = 0x02,    ///> Near and far mode
+  eTagPeopleCounting = 0x03,    ///> Moving, stationary, people counting
+  eTagNoise          = 0x04     ///> Noise
 } eTagType_t;
 
 /**
@@ -237,7 +239,7 @@ typedef enum {
 
 /**
  * @enum eTagSetStatus_t
- * @brief Tag set status code returned by CMD_DETECTION_RANGE_SET_TAG.
+ * @brief Tag set status returned by setTag().
  */
 typedef enum {
   eTagSetCommError       = 0x00,
@@ -265,18 +267,18 @@ typedef enum {
  * @brief Detection boundary mode defined by the DFRobot C4004 protocol.
  */
 typedef enum {
-  eRangeSideDefault      = 0x00,
-  eRangeSideLeftEdge     = 0x01,
-  eRangeSideRightEdge    = 0x02,
-  eRangeHotelCorridor    = 0x03,
-  eRangeFourSide = 0x04,
-  eRangeTrajectory       = 0x05,
-  eRangeConfigFile       = 0x06,
-  eRangeNoBoundary       = 0x07,
-  eRangeTopDefault       = 0x08,
-  eRangeTopLeftEdge      = 0x09,
-  eRangeTopRightEdge     = 0x0A,
-  eRangeUnknown          = 0xFF
+  eRangeSideDefault   = 0x00,
+  eRangeSideLeftEdge  = 0x01,
+  eRangeSideRightEdge = 0x02,
+  eRangeHotelCorridor = 0x03,
+  eRangeFourSide      = 0x04,
+  eRangeTrajectory    = 0x05,
+  eRangeConfigFile    = 0x06,
+  eRangeNoBoundary    = 0x07,
+  eRangeTopDefault    = 0x08,
+  eRangeTopLeftEdge   = 0x09,
+  eRangeTopRightEdge  = 0x0A,
+  eRangeUnknown       = 0xFF
 } eDetectionRangeMode_t;
 
 /**
@@ -285,10 +287,10 @@ typedef enum {
  */
 typedef struct {
   eInstallMode_t mode;
-  uint16_t heightCm;
-  int16_t xAngle;         // Unit: degree
-  int16_t yAngle;
-  int16_t zAngle;
+  uint16_t       heightCm;
+  int16_t        xAngle;    // Unit: degree
+  int16_t        yAngle;
+  int16_t        zAngle;
 } sInstallInfo_t;
 
 /**
@@ -296,13 +298,13 @@ typedef struct {
  * @brief One tracked target information block.
  */
 typedef struct {
-  uint8_t index;
-  uint8_t kinesia;
+  uint8_t          index;
+  uint8_t          kinesia;
   eTargetFeature_t targetFeature;
-  int16_t x;
-  int16_t y;
-  int16_t height;
-  int16_t speed;
+  int16_t          x;
+  int16_t          y;
+  int16_t          height;
+  int16_t          speed;
 } sTargetInfo_t;
 
 /**
@@ -319,14 +321,14 @@ typedef struct {
  * @brief Tag configuration used by tag query and batch config APIs.
  */
 typedef struct {
-  uint8_t tagIndex;
-  eTagType_t tagType;
+  uint8_t         tagIndex;
+  eTagType_t      tagType;
   eTagRangeType_t scopeType;
-  uint8_t ioIndex;       // 0: unused; 2-6: IO2-IO6 linkage
-  int16_t centerX;
-  int16_t centerY;
-  uint16_t width;
-  uint16_t height;
+  uint8_t         ioIndex;    // 0: unused; 2-6: IO2-IO6 linkage
+  int16_t         centerX;
+  int16_t         centerY;
+  uint16_t        width;
+  uint16_t        height;
 } sTagConfig_t;
 
 /**
@@ -335,15 +337,15 @@ typedef struct {
  * @note Tag event reports include ioIndex.
  */
 typedef struct {
-  uint8_t tagIndex;
-  eTagType_t tagType;
-  uint8_t ioIndex;
-  int16_t centerX;
-  int16_t centerY;
-  eBoundaryDirection_t enterExit;
+  uint8_t                  tagIndex;
+  eTagType_t               tagType;
+  uint8_t                  ioIndex;
+  int16_t                  centerX;
+  int16_t                  centerY;
+  eBoundaryDirection_t     enterExit;
   eApproachAwayDirection_t motionDir;
-  uint8_t motionNum;
-  uint8_t staticNum;
+  uint8_t                  motionNum;
+  uint8_t                  staticNum;
 } sTagInfo_t;
 
 /**
@@ -352,10 +354,10 @@ typedef struct {
  */
 typedef struct {
   eDetectionRangeMode_t mode;
-  int16_t xPositiveCm;
-  int16_t xNegativeCm;
-  int16_t yPositiveCm;
-  int16_t yNegativeCm;
+  int16_t               xPositiveCm;
+  int16_t               xNegativeCm;
+  int16_t               yPositiveCm;
+  int16_t               yNegativeCm;
 } sFourSidedRange_t;
 
 /**
@@ -363,15 +365,14 @@ typedef struct {
  * @brief UART frame packet used internally by the driver.
  */
 typedef struct {
-  uint8_t control;
-  uint8_t cmd;
+  uint8_t  control;
+  uint8_t  cmd;
   uint16_t len;
-  uint8_t data[MAX_PAYLOAD];
+  uint8_t  data[MAX_PAYLOAD];
 } sPacket_t;
 
 class DFRobot_C4004 {
 public:
-
 #if defined(ESP8266) || defined(ARDUINO_AVR_UNO)
   DFRobot_C4004(SoftwareSerial *sSerial, uint32_t baud);
 #else
@@ -646,8 +647,10 @@ public:
   /**
    * @fn clearTag
    * @brief Clear the tag configuration.
-   * @param tagIndex: Tag index (2-byte index in protocol payload).
+   * @param tagIndex: Tag index (1-byte index in protocol payload, 0-254).
    * @return true: Clear succeeded, false: Clear failed.
+   * @note 0xFF is reserved for clearAllTags(); do not pass it to clearTag().
+   * @note Device returns 0xFE in response when tag index is out of range.
   */
   bool clearTag(uint16_t tagIndex);
 
@@ -829,38 +832,38 @@ public:
   bool getUnmannedTime(uint32_t *delayTime);
 
 protected:
-  bool isInitFinished(void);
-  String getProductModel(void);
-  uint16_t getProductID(void);
-  bool sendCommand(uint8_t control, uint8_t cmd, const uint8_t *data, uint16_t len);
-  bool requestFrame(uint8_t control, uint8_t cmd, const uint8_t *data, uint16_t len, sPacket_t *response, uint16_t timeoutMs = 200);
-  bool readFrame(sPacket_t *packet, uint16_t timeoutMs);
-  bool readByte(uint8_t *value, uint16_t timeoutMs);
-  void flushInput(void);
+  bool             isInitFinished(void);
+  String           getProductModel(void);
+  uint16_t         getProductID(void);
+  bool             sendCommand(uint8_t control, uint8_t cmd, const uint8_t *data, uint16_t len);
+  bool             requestFrame(uint8_t control, uint8_t cmd, const uint8_t *data, uint16_t len, sPacket_t *response, uint16_t timeoutMs = 200);
+  bool             readFrame(sPacket_t *packet, uint16_t timeoutMs);
+  bool             readByte(uint8_t *value, uint16_t timeoutMs);
+  void             flushInput(void);
   eReportedEvent_t handlePacket(const sPacket_t *packet);
   eReportedEvent_t classifyPacket(const sPacket_t *packet);
 
-  bool queryByte(uint8_t control, uint8_t cmd, uint8_t *value);
-  bool setByte(uint8_t control, uint8_t cmd, uint8_t value);
-  bool queryUint32(uint8_t control, uint8_t cmd, uint32_t *value);
-  bool setUint32(uint8_t control, uint8_t cmd, uint32_t value);
+  bool   queryByte(uint8_t control, uint8_t cmd, uint8_t *value);
+  bool   setByte(uint8_t control, uint8_t cmd, uint8_t value);
+  bool   queryUint32(uint8_t control, uint8_t cmd, uint32_t *value);
+  bool   setUint32(uint8_t control, uint8_t cmd, uint32_t value);
   String queryString(uint8_t control, uint8_t cmd);
 
-  void parseTargets(const uint8_t *data, uint16_t len);
+  void    parseTargets(const uint8_t *data, uint16_t len);
   uint8_t parseTagList(const uint8_t *data, uint16_t len, sTagConfig_t *tags, uint8_t maxTags);
-  void parseTagEvent(const uint8_t *data, uint16_t len);
-  void parseBoundaryRange(const uint8_t *data, uint16_t len);
-  void parsePeopleCount(const uint8_t *data, uint16_t len);
+  void    parseTagEvent(const uint8_t *data, uint16_t len);
+  void    parseBoundaryRange(const uint8_t *data, uint16_t len);
+  void    parsePeopleCount(const uint8_t *data, uint16_t len);
 
   uint16_t readUint16(const uint8_t *data) const;
-  int16_t readInt16(const uint8_t *data) const;
-  int16_t readSignBitInt16(const uint8_t *data) const;
+  int16_t  readInt16(const uint8_t *data) const;
+  int16_t  readSignBitInt16(const uint8_t *data) const;
   uint32_t readUint32(const uint8_t *data) const;
-  void writeUint16(uint8_t *data, uint16_t value) const;
-  void writeInt16(uint8_t *data, int16_t value) const;
-  void writeSignBitInt16(uint8_t *data, int16_t value) const;
-  void writeUint32(uint8_t *data, uint32_t value) const;
-  void initObject(void);
+  void     writeUint16(uint8_t *data, uint16_t value) const;
+  void     writeInt16(uint8_t *data, int16_t value) const;
+  void     writeSignBitInt16(uint8_t *data, int16_t value) const;
+  void     writeUint32(uint8_t *data, uint32_t value) const;
+  void     initObject(void);
 
   void pumpRx(void);
   void resetRxParser(void);
@@ -891,31 +894,31 @@ private:
 #else
   HardwareSerial *_serial;
 #endif
-  uint32_t _baud;
-  uint8_t _rxpin;
-  uint8_t _txpin;
-  sPacket_t _rxPacket;
-  bool _heartbeat;
-  bool _initFinished;
-  ePresenceState_t _presence;
-  eMotionState_t _motionState;
-  uint8_t _trajectoryLed;
-  uint8_t _motionLed;
-  sTargetInfo_t _targets[MAX_TARGETS];
-  uint8_t _targetCount;
-  sTagInfo_t _tagInfo;
-  bool _tagInfoValid;
+  uint32_t          _baud;
+  uint8_t           _rxpin;
+  uint8_t           _txpin;
+  sPacket_t         _rxPacket;
+  bool              _heartbeat;
+  bool              _initFinished;
+  ePresenceState_t  _presence;
+  eMotionState_t    _motionState;
+  uint8_t           _trajectoryLed;
+  uint8_t           _motionLed;
+  sTargetInfo_t     _targets[MAX_TARGETS];
+  uint8_t           _targetCount;
+  sTagInfo_t        _tagInfo;
+  bool              _tagInfoValid;
   sFourSidedRange_t _rangeInfo;
-  uint8_t _peopleCount;
-  uint8_t _rxRing[C4004_RX_RING_SIZE];
-  uint16_t _rxHead;
-  uint16_t _rxTail;
-  eRxAsmState_t _asmState;
-  uint8_t _asmChecksum;
-  uint16_t _asmIdx;
-  uint8_t _asmRecvChecksum;
-  sPacket_t _pendingPacket;
-  bool _pendingValid;
+  uint8_t           _peopleCount;
+  uint8_t           _rxRing[C4004_RX_RING_SIZE];
+  uint16_t          _rxHead;
+  uint16_t          _rxTail;
+  eRxAsmState_t     _asmState;
+  uint8_t           _asmChecksum;
+  uint16_t          _asmIdx;
+  uint8_t           _asmRecvChecksum;
+  sPacket_t         _pendingPacket;
+  bool              _pendingValid;
 };
 
 #endif

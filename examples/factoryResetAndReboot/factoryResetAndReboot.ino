@@ -13,7 +13,7 @@
 
 #if defined(ESP8266) || defined(ARDUINO_AVR_UNO)
 SoftwareSerial mySerial(4, 5);
-DFRobot_C4004 c4004(&mySerial, 115200);
+DFRobot_C4004  c4004(&mySerial, 115200);
 #elif defined(ESP32)
 DFRobot_C4004 c4004(&Serial1, 115200, /*D2*/ D2, /*D3*/ D3);
 #else
@@ -28,8 +28,6 @@ void setup()
     Serial.println(F("DFRobot C4004 begin failed, retrying..."));
     delay(1000);
   }
-
-  
 
   Serial.print(F("Hardware version: "));
   Serial.println(c4004.getHardwareVersion());

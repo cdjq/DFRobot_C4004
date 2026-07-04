@@ -17,44 +17,44 @@
 
 #if defined(ESP8266) || defined(ARDUINO_AVR_UNO)
 SoftwareSerial mySerial(4, 5);
-DFRobot_C4004 c4004(&mySerial, 115200);
+DFRobot_C4004  c4004(&mySerial, 115200);
 #elif defined(ESP32)
 DFRobot_C4004 c4004(&Serial1, 115200, /*D2*/ D2, /*D3*/ D3);
 #else
 DFRobot_C4004 c4004(&Serial1, 115200);
 #endif
 
-const uint8_t TAG_LIVING_ROOM = 0;
-const uint8_t TAG_KITCHEN = 1;       // Configured only; kitchen people count uses door enter/exit events.
+const uint8_t TAG_LIVING_ROOM  = 0;
+const uint8_t TAG_KITCHEN      = 1;    // Configured only; kitchen people count uses door enter/exit events.
 const uint8_t TAG_KITCHEN_DOOR = 2;
 
-const uint8_t CHECK_TO_ACTIVE_FRAMES = 2;
-const uint32_t NO_PERSON_DELAY_S = 5;
-const uint32_t TRACK_EXISTS_TIME_S = 1;
+const uint8_t  CHECK_TO_ACTIVE_FRAMES = 2;
+const uint32_t NO_PERSON_DELAY_S      = 5;
+const uint32_t TRACK_EXISTS_TIME_S    = 1;
 
-const int16_t LIVING_ROOM_CENTER_X_CM = 0;
-const int16_t LIVING_ROOM_CENTER_Y_CM = 200;
-const uint16_t LIVING_ROOM_SIZE_X_CM = 400;
-const uint16_t LIVING_ROOM_SIZE_Y_CM = 400;
+const int16_t  LIVING_ROOM_CENTER_X_CM = 0;
+const int16_t  LIVING_ROOM_CENTER_Y_CM = 200;
+const uint16_t LIVING_ROOM_SIZE_X_CM   = 400;
+const uint16_t LIVING_ROOM_SIZE_Y_CM   = 400;
 
-const int16_t KITCHEN_CENTER_X_CM = 0;
-const int16_t KITCHEN_CENTER_Y_CM = 600;
-const uint16_t KITCHEN_SIZE_X_CM = 200;
-const uint16_t KITCHEN_SIZE_Y_CM = 400;
+const int16_t  KITCHEN_CENTER_X_CM = 0;
+const int16_t  KITCHEN_CENTER_Y_CM = 600;
+const uint16_t KITCHEN_SIZE_X_CM   = 200;
+const uint16_t KITCHEN_SIZE_Y_CM   = 400;
 
-const int16_t DOOR_CENTER_X_CM = 0;
-const int16_t DOOR_CENTER_Y_CM = 400;
-const uint16_t DOOR_SIZE_X_CM = 100;
-const uint16_t DOOR_SIZE_Y_CM = 100;
+const int16_t  DOOR_CENTER_X_CM = 0;
+const int16_t  DOOR_CENTER_Y_CM = 400;
+const uint16_t DOOR_SIZE_X_CM   = 100;
+const uint16_t DOOR_SIZE_Y_CM   = 100;
 
 uint8_t livingMotionCount = 0;
 uint8_t livingStaticCount = 0;
 uint8_t livingPeopleCount = 0;
 
-uint16_t kitchenDoorEnterCount = 0;
-uint16_t kitchenDoorExitCount = 0;
-int16_t kitchenInferredPeople = 0;
-const char *lastDoorEvent = "None";
+uint16_t    kitchenDoorEnterCount = 0;
+uint16_t    kitchenDoorExitCount  = 0;
+int16_t     kitchenInferredPeople = 0;
+const char *lastDoorEvent         = "None";
 
 const char *doorEventToText(eBoundaryDirection_t enterExit)
 {
@@ -143,7 +143,7 @@ void setup()
   }
 
   sFourSidedRange_t range;
-  range.mode = eRangeFourSide;
+  range.mode        = eRangeFourSide;
   range.xPositiveCm = 200;
   range.xNegativeCm = -200;
   range.yPositiveCm = 400;
@@ -162,32 +162,32 @@ void setup()
 
   sTagConfig_t tags[3] = {};
 
-  tags[0].tagIndex = TAG_LIVING_ROOM;
-  tags[0].tagType = eTagPeopleCounting;
+  tags[0].tagIndex  = TAG_LIVING_ROOM;
+  tags[0].tagType   = eTagPeopleCounting;
   tags[0].scopeType = eTagRangeRectangle;
-  tags[0].ioIndex = 0;
-  tags[0].centerX = LIVING_ROOM_CENTER_X_CM;
-  tags[0].centerY = LIVING_ROOM_CENTER_Y_CM;
-  tags[0].width = LIVING_ROOM_SIZE_X_CM;
-  tags[0].height = LIVING_ROOM_SIZE_Y_CM;
+  tags[0].ioIndex   = 0;
+  tags[0].centerX   = LIVING_ROOM_CENTER_X_CM;
+  tags[0].centerY   = LIVING_ROOM_CENTER_Y_CM;
+  tags[0].width     = LIVING_ROOM_SIZE_X_CM;
+  tags[0].height    = LIVING_ROOM_SIZE_Y_CM;
 
-  tags[1].tagIndex = TAG_KITCHEN;
-  tags[1].tagType = eTagPeopleCounting;
+  tags[1].tagIndex  = TAG_KITCHEN;
+  tags[1].tagType   = eTagPeopleCounting;
   tags[1].scopeType = eTagRangeRectangle;
-  tags[1].ioIndex = 0;
-  tags[1].centerX = KITCHEN_CENTER_X_CM;
-  tags[1].centerY = KITCHEN_CENTER_Y_CM;
-  tags[1].width = KITCHEN_SIZE_X_CM;
-  tags[1].height = KITCHEN_SIZE_Y_CM;
+  tags[1].ioIndex   = 0;
+  tags[1].centerX   = KITCHEN_CENTER_X_CM;
+  tags[1].centerY   = KITCHEN_CENTER_Y_CM;
+  tags[1].width     = KITCHEN_SIZE_X_CM;
+  tags[1].height    = KITCHEN_SIZE_Y_CM;
 
-  tags[2].tagIndex = TAG_KITCHEN_DOOR;
-  tags[2].tagType = eTagBoundary;
+  tags[2].tagIndex  = TAG_KITCHEN_DOOR;
+  tags[2].tagType   = eTagBoundary;
   tags[2].scopeType = eTagRangeRectangle;
-  tags[2].ioIndex = 0;
-  tags[2].centerX = DOOR_CENTER_X_CM;
-  tags[2].centerY = DOOR_CENTER_Y_CM;
-  tags[2].width = DOOR_SIZE_X_CM;
-  tags[2].height = DOOR_SIZE_Y_CM;
+  tags[2].ioIndex   = 0;
+  tags[2].centerX   = DOOR_CENTER_X_CM;
+  tags[2].centerY   = DOOR_CENTER_Y_CM;
+  tags[2].width     = DOOR_SIZE_X_CM;
+  tags[2].height    = DOOR_SIZE_Y_CM;
 
   if (c4004.setTagsFromConfig(tags, 3)) {
     Serial.println(F("Set living/kitchen/door tags success."));
@@ -211,7 +211,7 @@ void setup()
     Serial.println(F("Set UnmannedTime success."));
   } else {
     Serial.println(F("Set UnmannedTime failed."));
-  } 
+  }
 
   Serial.println(F("============================================================"));
   Serial.println(F("Kitchen occupancy inference started."));
@@ -224,7 +224,7 @@ void setup()
 
 void loop()
 {
-  uint32_t nowMs = millis();
+  uint32_t         nowMs = millis();
   eReportedEvent_t event = c4004.getReportedInfo(50);
 
   if (event == eEventTag) {

@@ -18,33 +18,33 @@
 
 #if defined(ESP8266) || defined(ARDUINO_AVR_UNO)
 SoftwareSerial mySerial(4, 5);
-DFRobot_C4004 c4004(&mySerial, 115200);
+DFRobot_C4004  c4004(&mySerial, 115200);
 #elif defined(ESP32)
 DFRobot_C4004 c4004(&Serial1, 115200, /*D2*/ D2, /*D3*/ D3);
 #else
 DFRobot_C4004 c4004(&Serial1, 115200);
 #endif
 
-const uint8_t BED_TAG_INDEX = 0;
-const uint8_t BEDROOM_TAG_INDEX = 1;
+const uint8_t BED_TAG_INDEX          = 0;
+const uint8_t BEDROOM_TAG_INDEX      = 1;
 const uint8_t BEDROOM_DOOR_TAG_INDEX = 2;
-const uint8_t LIGHT_CTRL_PIN = 3;
+const uint8_t LIGHT_CTRL_PIN         = 3;
 
 // Users can adjust these times according to their own preferences, needs, application scenarios, etc. The default time is 5 seconds.
-const uint32_t BED_STATIC_HOLD_MS = 5000; // The time required to maintain a transition from other states to rest.
-const uint32_t BEDROOM_EMPTY_HOLD_MS = 5000; // The time required to maintain a transition from other states to empty.
+const uint32_t BED_STATIC_HOLD_MS    = 5000;    // The time required to maintain a transition from other states to rest.
+const uint32_t BEDROOM_EMPTY_HOLD_MS = 5000;    // The time required to maintain a transition from other states to empty.
 
 const uint8_t LIGHT_OFF_LEVEL = HIGH;
-const uint8_t LIGHT_ON_LEVEL = LOW;
+const uint8_t LIGHT_ON_LEVEL  = LOW;
 
-uint32_t bedStaticStartMs = 0;
+uint32_t bedStaticStartMs    = 0;
 uint32_t bedroomEmptyStartMs = 0;
-bool bedStaticLockOff = false;
-bool bedroomWasOccupied = false;
-uint8_t bedMotionCount = 0;
-uint8_t bedStaticCount = 0;
-uint8_t bedroomMotionCount = 0;
-uint8_t bedroomStaticCount = 0;
+bool     bedStaticLockOff    = false;
+bool     bedroomWasOccupied  = false;
+uint8_t  bedMotionCount      = 0;
+uint8_t  bedStaticCount      = 0;
+uint8_t  bedroomMotionCount  = 0;
+uint8_t  bedroomStaticCount  = 0;
 
 void setup()
 {
@@ -73,7 +73,7 @@ void setup()
   }
 
   sFourSidedRange_t range;
-  range.mode = eRangeFourSide;
+  range.mode        = eRangeFourSide;
   range.xPositiveCm = 200;
   range.xNegativeCm = -200;
   range.yPositiveCm = 700;
@@ -92,32 +92,32 @@ void setup()
 
   sTagConfig_t setTags[3] = {};
 
-  setTags[0].tagIndex = BED_TAG_INDEX;
-  setTags[0].tagType = eTagPeopleCounting;
+  setTags[0].tagIndex  = BED_TAG_INDEX;
+  setTags[0].tagType   = eTagPeopleCounting;
   setTags[0].scopeType = eTagRangeRectangle;
-  setTags[0].ioIndex = 0;
-  setTags[0].centerX = -50;
-  setTags[0].centerY = 300;
-  setTags[0].width = 300;
-  setTags[0].height = 250;
+  setTags[0].ioIndex   = 0;
+  setTags[0].centerX   = -50;
+  setTags[0].centerY   = 300;
+  setTags[0].width     = 300;
+  setTags[0].height    = 250;
 
-  setTags[1].tagIndex = BEDROOM_TAG_INDEX;
-  setTags[1].tagType = eTagPeopleCounting;
+  setTags[1].tagIndex  = BEDROOM_TAG_INDEX;
+  setTags[1].tagType   = eTagPeopleCounting;
   setTags[1].scopeType = eTagRangeRectangle;
-  setTags[1].ioIndex = 0;
-  setTags[1].centerX = 0;
-  setTags[1].centerY = 350;
-  setTags[1].width = 400;
-  setTags[1].height = 700;
+  setTags[1].ioIndex   = 0;
+  setTags[1].centerX   = 0;
+  setTags[1].centerY   = 350;
+  setTags[1].width     = 400;
+  setTags[1].height    = 700;
 
-  setTags[2].tagIndex = BEDROOM_DOOR_TAG_INDEX;
-  setTags[2].tagType = eTagApproachAway;
+  setTags[2].tagIndex  = BEDROOM_DOOR_TAG_INDEX;
+  setTags[2].tagType   = eTagApproachAway;
   setTags[2].scopeType = eTagRangeRectangle;
-  setTags[2].ioIndex = 0;
-  setTags[2].centerX = 100;
-  setTags[2].centerY = 700;
-  setTags[2].width = 80;
-  setTags[2].height = 40;
+  setTags[2].ioIndex   = 0;
+  setTags[2].centerX   = 100;
+  setTags[2].centerY   = 700;
+  setTags[2].width     = 80;
+  setTags[2].height    = 40;
 
   if (c4004.setTagsFromConfig(setTags, 3)) {
     Serial.println(F("Set bed/bedroom/door tags success."));
@@ -159,9 +159,9 @@ void loop()
 
   updatePeopleCountsFromTagReport();
 
-  bool bedHasStaticPerson = (bedStaticCount > 0);
+  bool    bedHasStaticPerson = (bedStaticCount > 0);
   uint8_t bedroomPeopleCount = (uint8_t)(bedroomMotionCount + bedroomStaticCount);
-  bool bedroomHasPeople = (bedroomPeopleCount > 0);
+  bool    bedroomHasPeople   = (bedroomPeopleCount > 0);
 
   if (bedHasStaticPerson) {
     if (bedStaticStartMs == 0) {
@@ -177,14 +177,14 @@ void loop()
   bool lightShouldOff = false;
 
   if (bedStaticLockOff) {
-    lightShouldOff = true;
+    lightShouldOff      = true;
     bedroomEmptyStartMs = 0;
-    bedroomWasOccupied = bedroomHasPeople;
+    bedroomWasOccupied  = bedroomHasPeople;
   } else {
     if (bedroomHasPeople) {
-      bedroomWasOccupied = true;
+      bedroomWasOccupied  = true;
       bedroomEmptyStartMs = 0;
-      lightShouldOff = false;
+      lightShouldOff      = false;
     } else {
       if (bedroomWasOccupied) {
         if (bedroomEmptyStartMs == 0) {

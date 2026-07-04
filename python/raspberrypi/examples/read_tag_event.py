@@ -1,17 +1,19 @@
 # -*- coding: utf-8 -*
 '''!
-  @file read_tag_event.py
-  @brief Configure tags and print tag region event reports.
-  @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
-  @license The MIT License (MIT)
-  @author JiaLi(zhixin.liu@dfrobot.com)
-  @version V1.0.0
-  @date 2026-05-22
-  @url https://github.com/DFRobot/DFRobot_C4004
+@file read_tag_event.py
+@brief Configure tags and print tag region event reports.
+@copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
+@license The MIT License (MIT)
+@author JiaLi(zhixin.liu@dfrobot.com)
+@version V1.0.0
+@date 2026-05-22
+@url https://github.com/DFRobot/DFRobot_C4004
 '''
+
 import os
 import sys
 import time
+
 cur_path = os.path.dirname(os.path.abspath(__file__))
 while cur_path != os.path.dirname(cur_path):
   if os.path.exists(os.path.join(cur_path, 'DFRobot_C4004.py')):
@@ -91,16 +93,19 @@ def print_tag_list(title, tags):
   for tag in tags:
     type_text = tag_type_to_string(tag.tag_type)
     range_text = 'Circle' if tag.scope_type == c4004.TAG_RANGE_CIRCLE else 'Rectangle'
-    print('%3d  %-16s %-10s %2d  %7d  %7d  %5d  %6d' % (
-      tag.tag_index,
-      type_text,
-      range_text,
-      tag.io_index,
-      tag.center_x,
-      tag.center_y,
-      tag.width,
-      tag.height,
-    ))
+    print(
+      '%3d  %-16s %-10s %2d  %7d  %7d  %5d  %6d'
+      % (
+        tag.tag_index,
+        type_text,
+        range_text,
+        tag.io_index,
+        tag.center_x,
+        tag.center_y,
+        tag.width,
+        tag.height,
+      )
+    )
   print('')
 
 

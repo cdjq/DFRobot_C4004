@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*
 '''!
-  @file DFRobot_C4004.py
-  @brief Raspberry Pi library for the DFRobot C4004 (SKU:SEN0753).
-  @details The DFRobot C4004 uses the UART frame protocol 0x53 0x59 ... checksum 0x54 0x43.
-  @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
-  @license The MIT License (MIT)
-  @author JiaLi(zhixin.liu@dfrobot.com)
-  @version V1.0.0
-  @date 2026-05-22
-  @url https://github.com/DFRobot/DFRobot_C4004
+@file DFRobot_C4004.py
+@brief Raspberry Pi library for the DFRobot C4004 (SKU:SEN0753).
+@details The DFRobot C4004 uses the UART frame protocol 0x53 0x59 ... checksum 0x54 0x43.
+@copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
+@license The MIT License (MIT)
+@author JiaLi(zhixin.liu@dfrobot.com)
+@version V1.0.0
+@date 2026-05-22
+@url https://github.com/DFRobot/DFRobot_C4004
 '''
 
 import time
@@ -17,7 +17,8 @@ from collections import deque
 
 
 class InstallInfo(object):
-  '''! @brief Complete installation information. '''
+  '''! @brief Complete installation information.'''
+
   def __init__(self, mode=0, height_cm=0, x_angle=0, y_angle=0, z_angle=0):
     self.mode = mode
     self.height_cm = height_cm
@@ -27,7 +28,8 @@ class InstallInfo(object):
 
 
 class TargetInfo(object):
-  '''! @brief One tracked target information block. '''
+  '''! @brief One tracked target information block.'''
+
   def __init__(self):
     self.index = 0
     self.kinesia = 0
@@ -39,7 +41,8 @@ class TargetInfo(object):
 
 
 class TagConfig(object):
-  '''! @brief Tag configuration. '''
+  '''! @brief Tag configuration.'''
+
   def __init__(self):
     self.tag_index = 0
     self.tag_type = 0
@@ -52,7 +55,8 @@ class TagConfig(object):
 
 
 class TagInfo(object):
-  '''! @brief Last tag event decoded from a report. '''
+  '''! @brief Last tag event decoded from a report.'''
+
   def __init__(self):
     self.tag_index = 0
     self.tag_type = 0
@@ -66,7 +70,8 @@ class TagInfo(object):
 
 
 class FourSidedRange_t(object):
-  '''! @brief Four-side detection boundary settings. '''
+  '''! @brief Four-side detection boundary settings.'''
+
   def __init__(self):
     self.mode = 0xFF
     self.x_positive_cm = 0
@@ -76,14 +81,16 @@ class FourSidedRange_t(object):
 
 
 class Point(object):
-  '''! @brief One point for trajectory/config range modes. '''
+  '''! @brief One point for trajectory/config range modes.'''
+
   def __init__(self, x=0, y=0):
     self.x = x
     self.y = y
 
 
 class Packet(object):
-  '''! @brief Decoded UART packet. '''
+  '''! @brief Decoded UART packet.'''
+
   def __init__(self, control=0, cmd=0, data=None):
     self.control = control
     self.cmd = cmd
@@ -92,7 +99,7 @@ class Packet(object):
 
 class DFRobot_C4004(object):
   '''!
-    @brief DFRobot C4004 (SKU:SEN0753) driver.
+  @brief DFRobot C4004 (SKU:SEN0753) driver.
   '''
 
   FRAME_HEAD1 = 0x53
@@ -108,6 +115,8 @@ class DFRobot_C4004(object):
   DEFAULT_TIMEOUT = 0.2
   RESET_TIMEOUT = 0.3
   FACTORY_RESET_TIMEOUT = 0.35
+  TAG_SET_TIMEOUT = 0.4
+  SET_RANGE_TIMEOUT = 0.4
   _TAG_CONFIG_LIMIT = 32
 
   _RX_ASM_SYNC_H1 = 0
@@ -265,10 +274,10 @@ class DFRobot_C4004(object):
 
   def __init__(self, port='/dev/ttyAMA0', baudrate=115200, timeout=0.2):
     '''!
-      @brief Constructor.
-      @param port Serial port path or an opened serial-like object.
-      @param baudrate UART baudrate.
-      @param timeout Serial timeout in seconds.
+    @brief Constructor.
+    @param port Serial port path or an opened serial-like object.
+    @param baudrate UART baudrate.
+    @param timeout Serial timeout in seconds.
     '''
     self._port = port
     self._baudrate = baudrate
@@ -297,8 +306,8 @@ class DFRobot_C4004(object):
 
   def begin(self):
     '''!
-      @brief Open serial port and query initialization state.
-      @return True if the DFRobot C4004 replied.
+    @brief Open serial port and query initialization state.
+    @return True if the DFRobot C4004 replied.
     '''
     if self.ser is None:
       self.ser = serial.Serial(self._port, self._baudrate, timeout=self._timeout)
@@ -314,14 +323,14 @@ class DFRobot_C4004(object):
     return self.is_connected()
 
   def close(self):
-    '''! @brief Close serial port. '''
+    '''! @brief Close serial port.'''
     if self.ser is not None and hasattr(self.ser, 'close'):
       self.ser.close()
 
   def is_init_finished(self):
     '''!
-      @brief Query whether module initialization is finished.
-      @return true if initialization is finished, otherwise false.
+    @brief Query whether module initialization is finished.
+    @return true if initialization is finished, otherwise false.
     '''
     packet = self._request_frame(self.CTRL_WORK_STATUS, self.CMD_WORK_STATUS_INIT_FINISHED_QUERY, [self.QUERY_DATA])
     if packet is not None and len(packet.data) > 0:
@@ -330,15 +339,15 @@ class DFRobot_C4004(object):
 
   def is_connected(self):
     '''!
-      @brief Check whether the module is connected.
-      @return true if connected, otherwise false.
+    @brief Check whether the module is connected.
+    @return true if connected, otherwise false.
     '''
     return self.get_heartbeat(self.GET_DATA_ACTIVE)
 
   def reset(self):
     '''!
-      @brief Reboot the module.
-      @return true if succeeded, otherwise false.
+    @brief Reboot the module.
+    @return true if succeeded, otherwise false.
     '''
     ret = self._request_frame(self.CTRL_SYSTEM, self.CMD_SYSTEM_RESET, [self.QUERY_DATA], self.RESET_TIMEOUT) is not None
     time.sleep(0.1)
@@ -346,8 +355,8 @@ class DFRobot_C4004(object):
 
   def factory_reset(self):
     '''!
-      @brief Restore module to factory settings.
-      @return true if succeeded, otherwise false.
+    @brief Restore module to factory settings.
+    @return true if succeeded, otherwise false.
     '''
     ret = self._request_frame(self.CTRL_SYSTEM, self.CMD_SYSTEM_FACTORY_RESET, [self.QUERY_DATA], self.FACTORY_RESET_TIMEOUT) is not None
     time.sleep(0.1)
@@ -355,11 +364,11 @@ class DFRobot_C4004(object):
 
   def get_heartbeat(self, mode=GET_DATA_ACTIVE):
     '''!
-      @brief Get heartbeat status.
-      @param mode Data acquisition mode.
-      @n GET_DATA_ACTIVE: Active query heartbeat.
-      @n GET_DATA_REPORT: Read heartbeat from cached report status.
-      @return true if heartbeat is available, otherwise false.
+    @brief Get heartbeat status.
+    @param mode Data acquisition mode.
+    @n GET_DATA_ACTIVE: Active query heartbeat.
+    @n GET_DATA_REPORT: Read heartbeat from cached report status.
+    @return true if heartbeat is available, otherwise false.
     '''
     if mode == self.GET_DATA_REPORT:
       return self._heartbeat
@@ -375,9 +384,9 @@ class DFRobot_C4004(object):
 
   def get_reported_info(self, timeout=0.05):
     '''!
-      @brief Read and decode one reported event.
-      @param timeout Maximum wait time in seconds.
-      @return Event type, such as EVENT_PRESENCE, EVENT_MOTION, EVENT_TRAJECTORY, etc.
+    @brief Read and decode one reported event.
+    @param timeout Maximum wait time in seconds.
+    @return Event type, such as EVENT_PRESENCE, EVENT_MOTION, EVENT_TRAJECTORY, etc.
     '''
     packet = self._read_frame(timeout)
     if packet is None:
@@ -386,27 +395,27 @@ class DFRobot_C4004(object):
 
   def get_hardware_version(self):
     '''!
-      @brief Query hardware version string.
-      @return Hardware version string.
+    @brief Query hardware version string.
+    @return Hardware version string.
     '''
     return self._query_string(self.CTRL_PRODUCT_INFO, self.CMD_PRODUCT_HARDWARE_VERSION_QUERY)
 
   def get_firmware_version(self):
     '''!
-      @brief Query firmware version string.
-      @return Firmware version string.
+    @brief Query firmware version string.
+    @return Firmware version string.
     '''
     return self._query_string(self.CTRL_PRODUCT_INFO, self.CMD_PRODUCT_FIRMWARE_VERSION_QUERY)
 
   def set_install_info(self, info):
     '''!
-      @brief Set installation information.
-      @param info InstallInfo object.
-      @n info.mode: INSTALL_MODE_SIDE or INSTALL_MODE_TOP.
-      @n info.height_cm: Installation height in cm, valid range 0-65535.
-      @n info.x_angle/y_angle/z_angle: Installation angles in degree, valid range -180 to 180.
-      @return true if succeeded, otherwise false.
-      @note Invalid mode or height returns false. Out-of-range angles are clamped.
+    @brief Set installation information.
+    @param info InstallInfo object.
+    @n info.mode: INSTALL_MODE_SIDE or INSTALL_MODE_TOP.
+    @n info.height_cm: Installation height in cm, valid range 0-65535.
+    @n info.x_angle/y_angle/z_angle: Installation angles in degree, valid range -180 to 180.
+    @return true if succeeded, otherwise false.
+    @note Invalid mode or height returns false. Out-of-range angles are clamped.
     '''
     if info.mode not in (self.INSTALL_MODE_SIDE, self.INSTALL_MODE_TOP):
       return False
@@ -422,16 +431,18 @@ class DFRobot_C4004(object):
 
     angle = self._i16_bytes(x_angle) + self._i16_bytes(y_angle) + self._i16_bytes(z_angle)
     height = self._u16_bytes(height_cm)
-    return (self._request_frame(self.CTRL_INSTALL_INFO, self.CMD_INSTALL_SET_MODE, [info.mode]) is not None and
-            self._request_frame(self.CTRL_INSTALL_INFO, self.CMD_INSTALL_SET_ANGLE, angle) is not None and
-            self._request_frame(self.CTRL_INSTALL_INFO, self.CMD_INSTALL_SET_HEIGHT, height) is not None)
+    return (
+      self._request_frame(self.CTRL_INSTALL_INFO, self.CMD_INSTALL_SET_MODE, [info.mode]) is not None
+      and self._request_frame(self.CTRL_INSTALL_INFO, self.CMD_INSTALL_SET_ANGLE, angle) is not None
+      and self._request_frame(self.CTRL_INSTALL_INFO, self.CMD_INSTALL_SET_HEIGHT, height) is not None
+    )
 
   def get_install_info(self, info):
     '''!
-      @brief Query installation information.
-      @param info InstallInfo object to receive result.
-      @return true if succeeded, otherwise false.
-      @note Returned angle values are degree.
+    @brief Query installation information.
+    @param info InstallInfo object to receive result.
+    @return true if succeeded, otherwise false.
+    @note Returned angle values are degree.
     '''
     if info is None:
       return False
@@ -461,9 +472,9 @@ class DFRobot_C4004(object):
 
   def set_install_high(self, hight):
     '''!
-      @brief Set installation height.
-      @param hight Installation height in cm.
-      @return true if succeeded, otherwise false.
+    @brief Set installation height.
+    @param hight Installation height in cm.
+    @return true if succeeded, otherwise false.
     '''
     hight = int(hight)
     if hight < 0 or hight > 0xFFFF:
@@ -472,8 +483,8 @@ class DFRobot_C4004(object):
 
   def get_install_high(self):
     '''!
-      @brief Query installation height.
-      @return Installation height in cm. Returns 0 on failure.
+    @brief Query installation height.
+    @return Installation height in cm. Returns 0 on failure.
     '''
     packet = self._request_frame(self.CTRL_INSTALL_INFO, self.CMD_INSTALL_QUERY_HEIGHT, [self.QUERY_DATA])
     if packet is None or len(packet.data) < 2:
@@ -482,9 +493,9 @@ class DFRobot_C4004(object):
 
   def set_presence_enable(self, enable):
     '''!
-      @brief Enable or disable presence detection.
-      @param enable true to enable, false to disable.
-      @return true if succeeded, otherwise false.
+    @brief Enable or disable presence detection.
+    @param enable true to enable, false to disable.
+    @return true if succeeded, otherwise false.
     '''
     ret = self._set_byte(self.CTRL_PRESENCE, self.CMD_PRESENCE_SET_ENABLE, 1 if enable else 0)
     if ret:
@@ -493,10 +504,10 @@ class DFRobot_C4004(object):
 
   def get_presence_enable(self, enable):
     '''!
-      @brief Query whether presence detection is enabled.
-      @param enable Output container for bool state.
-      @n Supported output containers: list/dict/object(with value field).
-      @return true if succeeded, otherwise false.
+    @brief Query whether presence detection is enabled.
+    @param enable Output container for bool state.
+    @n Supported output containers: list/dict/object(with value field).
+    @return true if succeeded, otherwise false.
     '''
     if enable is None:
       return False
@@ -521,11 +532,11 @@ class DFRobot_C4004(object):
 
   def get_presence_state(self, mode=GET_DATA_ACTIVE):
     '''!
-      @brief Get presence state.
-      @param mode Data acquisition mode.
-      @n GET_DATA_ACTIVE: Query latest presence state before reading cache.
-      @n GET_DATA_REPORT: Read from report cache only.
-      @return NO_PRESENCE / PRESENCE / PRESENCE_UNKNOWN.
+    @brief Get presence state.
+    @param mode Data acquisition mode.
+    @n GET_DATA_ACTIVE: Query latest presence state before reading cache.
+    @n GET_DATA_REPORT: Read from report cache only.
+    @return NO_PRESENCE / PRESENCE / PRESENCE_UNKNOWN.
     '''
     if isinstance(mode, bool):
       mode = self.GET_DATA_ACTIVE if mode else self.GET_DATA_REPORT
@@ -537,11 +548,11 @@ class DFRobot_C4004(object):
 
   def get_motion_state(self, mode=GET_DATA_ACTIVE):
     '''!
-      @brief Get motion state.
-      @param mode Data acquisition mode.
-      @n GET_DATA_ACTIVE: Query latest motion state before reading cache.
-      @n GET_DATA_REPORT: Read from report cache only.
-      @return MOTION_NONE / MOTION_STATIC / MOTION_ACTIVE / MOTION_UNKNOWN.
+    @brief Get motion state.
+    @param mode Data acquisition mode.
+    @n GET_DATA_ACTIVE: Query latest motion state before reading cache.
+    @n GET_DATA_REPORT: Read from report cache only.
+    @return MOTION_NONE / MOTION_STATIC / MOTION_ACTIVE / MOTION_UNKNOWN.
     '''
     if isinstance(mode, bool):
       mode = self.GET_DATA_ACTIVE if mode else self.GET_DATA_REPORT
@@ -553,18 +564,18 @@ class DFRobot_C4004(object):
 
   def set_trajectory_track_enable(self, enable):
     '''!
-      @brief Enable or disable trajectory tracking function.
-      @param enable true to enable, false to disable.
-      @return true if succeeded, otherwise false.
+    @brief Enable or disable trajectory tracking function.
+    @param enable true to enable, false to disable.
+    @return true if succeeded, otherwise false.
     '''
     return self._set_byte(self.CTRL_TRAJECTORY, self.CMD_TRAJECTORY_SET_ENABLE, 1 if enable else 0)
 
   def get_trajectory_track_enable(self, enable):
     '''!
-      @brief Query trajectory tracking enable state.
-      @param enable Output container for bool state.
-      @n Supported output containers: list/dict/object(with value field).
-      @return true if succeeded, otherwise false.
+    @brief Query trajectory tracking enable state.
+    @param enable Output container for bool state.
+    @n Supported output containers: list/dict/object(with value field).
+    @return true if succeeded, otherwise false.
     '''
     if enable is None:
       return False
@@ -588,9 +599,9 @@ class DFRobot_C4004(object):
 
   def set_check_to_active_frames(self, frames):
     '''!
-      @brief Set the frame count used to confirm transition from check state to active state.
-      @param frames Frame count, valid range: 1-7.
-      @return true if succeeded, otherwise false.
+    @brief Set the frame count used to confirm transition from check state to active state.
+    @param frames Frame count, valid range: 1-7.
+    @return true if succeeded, otherwise false.
     '''
     frames = int(frames)
     if frames < 1 or frames > 7:
@@ -599,10 +610,10 @@ class DFRobot_C4004(object):
 
   def get_check_to_active_frames(self, frames):
     '''!
-      @brief Query the frame count used to confirm transition from check state to active state.
-      @param frames Output container for frame count.
-      @n Supported output containers: list/dict/object(with value field).
-      @return true if succeeded, otherwise false.
+    @brief Query the frame count used to confirm transition from check state to active state.
+    @param frames Output container for frame count.
+    @n Supported output containers: list/dict/object(with value field).
+    @return true if succeeded, otherwise false.
     '''
     if frames is None:
       return False
@@ -613,11 +624,11 @@ class DFRobot_C4004(object):
 
   def get_target_list(self, mode=GET_DATA_ACTIVE):
     '''!
-      @brief Get target list.
-      @param mode Data acquisition mode.
-      @n GET_DATA_ACTIVE: Query latest target list before reading cache.
-      @n GET_DATA_REPORT: Read from report cache only.
-      @return List of TargetInfo objects.
+    @brief Get target list.
+    @param mode Data acquisition mode.
+    @n GET_DATA_ACTIVE: Query latest target list before reading cache.
+    @n GET_DATA_REPORT: Read from report cache only.
+    @return List of TargetInfo objects.
     '''
     if isinstance(mode, bool):
       mode = self.GET_DATA_ACTIVE if mode else self.GET_DATA_REPORT
@@ -627,9 +638,9 @@ class DFRobot_C4004(object):
 
   def set_trajectory_led(self, enable):
     '''!
-      @brief Enable or disable trajectory LED.
-      @param enable true to enable, false to disable.
-      @return true if succeeded, otherwise false.
+    @brief Enable or disable trajectory LED.
+    @param enable true to enable, false to disable.
+    @return true if succeeded, otherwise false.
     '''
     ret = self._set_byte(self.CTRL_TRAJECTORY, self.CMD_TRAJECTORY_SET_TRAJECTORY_LED, 1 if enable else 0)
     if ret:
@@ -638,9 +649,9 @@ class DFRobot_C4004(object):
 
   def set_motion_led(self, enable):
     '''!
-      @brief Enable or disable motion LED.
-      @param enable true to enable, false to disable.
-      @return true if succeeded, otherwise false.
+    @brief Enable or disable motion LED.
+    @param enable true to enable, false to disable.
+    @return true if succeeded, otherwise false.
     '''
     ret = self._set_byte(self.CTRL_TRAJECTORY, self.CMD_TRAJECTORY_SET_MOTION_LED, 1 if enable else 0)
     if ret:
@@ -649,8 +660,8 @@ class DFRobot_C4004(object):
 
   def get_trajectory_led(self):
     '''!
-      @brief Query trajectory LED status.
-      @return true if enabled, false if disabled.
+    @brief Query trajectory LED status.
+    @return true if enabled, false if disabled.
     '''
     value = self._query_byte(self.CTRL_TRAJECTORY, self.CMD_TRAJECTORY_QUERY_TRAJECTORY_LED)
     if value is not None:
@@ -659,8 +670,8 @@ class DFRobot_C4004(object):
 
   def get_motion_led(self):
     '''!
-      @brief Query motion LED status.
-      @return true if enabled, false if disabled.
+    @brief Query motion LED status.
+    @return true if enabled, false if disabled.
     '''
     value = self._query_byte(self.CTRL_TRAJECTORY, self.CMD_TRAJECTORY_QUERY_MOTION_LED)
     if value is not None:
@@ -669,12 +680,12 @@ class DFRobot_C4004(object):
 
   def get_tags(self, mode=GET_DATA_ACTIVE, max_tags=None):
     '''!
-      @brief Get all tag configurations from the device.
-      @param mode Data acquisition mode kept for compatibility.
-      @n GET_DATA_ACTIVE: Active query.
-      @n GET_DATA_REPORT: Currently behaves the same as GET_DATA_ACTIVE.
-      @param max_tags Maximum number of tags to return. None returns all parsed tags.
-      @return List of TagConfig objects.
+    @brief Get all tag configurations from the device.
+    @param mode Data acquisition mode kept for compatibility.
+    @n GET_DATA_ACTIVE: Active query.
+    @n GET_DATA_REPORT: Currently behaves the same as GET_DATA_ACTIVE.
+    @param max_tags Maximum number of tags to return. None returns all parsed tags.
+    @return List of TagConfig objects.
     '''
     if isinstance(mode, bool):
       mode = self.GET_DATA_ACTIVE if mode else self.GET_DATA_REPORT
@@ -686,10 +697,10 @@ class DFRobot_C4004(object):
 
   def _is_valid_tag_config(self, tag):
     '''!
-      @brief Validate tag type, range shape and IO linkage index.
-      @param tag TagConfig object.
-      @return True if the tag config is valid, otherwise False.
-      @note io_index is valid only when it is 0 (unused) or within 2-6 (IO2-IO6).
+    @brief Validate tag type, range shape and IO linkage index.
+    @param tag TagConfig object.
+    @return True if the tag config is valid, otherwise False.
+    @note io_index is valid only when it is 0 (unused) or within 2-6 (IO2-IO6).
     '''
     if not (self.TAG_NONE <= tag.tag_type <= self.TAG_NOISE):
       return False
@@ -701,49 +712,55 @@ class DFRobot_C4004(object):
 
   def set_tag(self, tag):
     '''!
-      @brief Set one tag using size mode.
-      @param tag TagConfig object.
-      @return Tag set status code:
-      @n TAG_SET_COMM_ERROR / TAG_SET_SUCCESS / TAG_SET_TRACK_COUNT_ERROR / TAG_SET_ALREADY_USED / TAG_SET_INDEX_OUT_OF_RANGE.
-      @note center_x/center_y fields are ignored by this API.
-      @note Invalid tag_type, scope_type or io_index returns TAG_SET_COMM_ERROR before sending command.
+    @brief Set one tag using size mode.
+    @param tag TagConfig object.
+    @return Tag set status code:
+    @n TAG_SET_COMM_ERROR / TAG_SET_SUCCESS / TAG_SET_TRACK_COUNT_ERROR / TAG_SET_ALREADY_USED / TAG_SET_INDEX_OUT_OF_RANGE.
+    @note center_x/center_y fields are ignored by this API.
+    @note Invalid tag_type, scope_type or io_index returns TAG_SET_COMM_ERROR before sending command.
     '''
     if not self._is_valid_tag_config(tag):
       return self.TAG_SET_COMM_ERROR
     data = [tag.tag_index, tag.tag_type, tag.scope_type, tag.io_index]
     data += self._u16_bytes(tag.width)
     data += self._u16_bytes(tag.height)
-    packet = self._request_frame(self.CTRL_DETECTION_RANGE, self.CMD_DETECTION_RANGE_SET_TAG, data)
-    if packet is None or len(packet.data) < 4:
+    packet = self._request_frame(self.CTRL_DETECTION_RANGE, self.CMD_DETECTION_RANGE_SET_TAG, data, self.TAG_SET_TIMEOUT)
+    # Response payload: tag_index(1) tag_type(1) scope_type(1) io_index(1) status(1) + center(4) + size(4).
+    if packet is None or len(packet.data) < 5:
       return self.TAG_SET_COMM_ERROR
     if packet.data[0] != (tag.tag_index & 0xFF):
       return self.TAG_SET_COMM_ERROR
-    status = packet.data[3]
-    if self.TAG_SET_SUCCESS <= status <= self.TAG_SET_INDEX_OUT_OF_RANGE:
-      return status
+    dev_status = packet.data[4]
+    if self.TAG_SET_SUCCESS <= dev_status <= self.TAG_SET_INDEX_OUT_OF_RANGE:
+      return dev_status
     return self.TAG_SET_COMM_ERROR
 
   def clear_tag(self, tag_index):
     '''!
-      @brief Clear one tag by tag index.
-      @param tag_index Tag index (2-byte index in protocol payload).
-      @return true if succeeded, otherwise false.
+    @brief Clear one tag by tag index.
+    @param tag_index Tag index (1-byte index in protocol payload, 0-254).
+    @return true if succeeded, otherwise false.
+    @note 0xFF is reserved for clear_all_tags(); do not pass it to clear_tag().
+    @note Device returns 0xFE in response when tag index is out of range.
     '''
-    packet = self._request_frame(self.CTRL_DETECTION_RANGE, self.CMD_DETECTION_RANGE_CLEAR_TAG, self._u16_bytes(tag_index))
+    if tag_index == 0xFF or tag_index > 0xFE:
+      return False
+    data = tag_index & 0xFF
+    packet = self._request_frame(self.CTRL_DETECTION_RANGE, self.CMD_DETECTION_RANGE_CLEAR_TAG, [data])
     if packet is None:
       return False
-    if len(packet.data) > 0 and packet.data[0] == 0xFE:
+    if len(packet.data) < 1:
       return False
-    if len(packet.data) < 2:
+    if packet.data[0] == 0xFE:
       return False
-    if self._u16(packet.data, 0) != (tag_index & 0xFFFF):
-      return False
-    return True
+    if packet.data[0] == data:
+      return True
+    return False
 
   def clear_all_tags(self):
     '''!
-      @brief Clear all tags.
-      @return true if succeeded, otherwise false.
+    @brief Clear all tags.
+    @return true if succeeded, otherwise false.
     '''
     packet = self._request_frame(self.CTRL_DETECTION_RANGE, self.CMD_DETECTION_RANGE_CLEAR_TAG, [0xFF])
     if packet is None:
@@ -757,10 +774,10 @@ class DFRobot_C4004(object):
 
   def set_tags_from_config(self, tags):
     '''!
-      @brief Set tag configurations in coordinate mode.
-      @param tags Iterable of TagConfig objects.
-      @return true if succeeded, otherwise false.
-      @note The number of input tags is limited to 32 by protocol.
+    @brief Set tag configurations in coordinate mode.
+    @param tags Iterable of TagConfig objects.
+    @return true if succeeded, otherwise false.
+    @note The number of input tags is limited to 32 by protocol.
     '''
     if tags is None:
       return False
@@ -791,9 +808,9 @@ class DFRobot_C4004(object):
 
   def get_tag_info(self):
     '''!
-      @brief Get the last tag event decoded from active report packet (CTRL 0x07, CMD 0x1B).
-      @return TagInfo object if valid, otherwise None.
-      @note This API reads report cache only. Call get_reported_info() first to receive new report data.
+    @brief Get the last tag event decoded from active report packet (CTRL 0x07, CMD 0x1B).
+    @return TagInfo object if valid, otherwise None.
+    @note This API reads report cache only. Call get_reported_info() first to receive new report data.
     '''
     if not self._tag_info_valid:
       return None
@@ -801,17 +818,17 @@ class DFRobot_C4004(object):
 
   def set_four_sided_range_mode(self, range_info):
     '''!
-      @brief Set four-side boundary detection range (mode 0x04).
-      @param range_info FourSidedRange_t object.
-      @return true if succeeded, otherwise false.
-      @note Position values use sign-bit int16 encoding (bit15: 0=positive, 1=negative).
+    @brief Set four-side boundary detection range (mode 0x04).
+    @param range_info FourSidedRange_t object.
+    @return true if succeeded, otherwise false.
+    @note Position values use sign-bit int16 encoding (bit15: 0=positive, 1=negative).
     '''
     data = [self.RANGE_FOUR_SIDE]
     data += self._sb16_bytes(range_info.x_positive_cm)
     data += self._sb16_bytes(range_info.x_negative_cm)
     data += self._sb16_bytes(range_info.y_positive_cm)
     data += self._sb16_bytes(range_info.y_negative_cm)
-    ret = self._request_frame(self.CTRL_DETECTION_RANGE, self.CMD_DETECTION_RANGE_SET_RANGE, data) is not None
+    ret = self._request_frame(self.CTRL_DETECTION_RANGE, self.CMD_DETECTION_RANGE_SET_RANGE, data, self.SET_RANGE_TIMEOUT) is not None
     if ret:
       # Keep local cache as value-copy to match C++ behavior.
       self._range_info.mode = self.RANGE_FOUR_SIDE
@@ -823,9 +840,9 @@ class DFRobot_C4004(object):
 
   def get_four_sided_range_mode(self, range_info):
     '''!
-      @brief Query and get four-side boundary detection range.
-      @param range_info FourSidedRange_t object to receive result.
-      @return true if succeeded, otherwise false.
+    @brief Query and get four-side boundary detection range.
+    @param range_info FourSidedRange_t object to receive result.
+    @return true if succeeded, otherwise false.
     '''
     if range_info is None:
       return False
@@ -841,8 +858,8 @@ class DFRobot_C4004(object):
 
   def set_trajectory_range_mode(self, learning):
     '''!
-      @brief Start trajectory-range learning or use the learned trajectory range (mode 0x05).
-      @param learning True starts trajectory-range learning; False uses trajectory range mode without learning.
+    @brief Start trajectory-range learning or use the learned trajectory range (mode 0x05).
+    @param learning True starts trajectory-range learning; False uses trajectory range mode without learning.
     '''
     data = [self.RANGE_TRAJECTORY, 1 if learning else 0]
     self._request_frame(self.CTRL_DETECTION_RANGE, self.CMD_DETECTION_RANGE_SET_RANGE, data)
@@ -850,16 +867,16 @@ class DFRobot_C4004(object):
 
   def set_config_file_mode_points(self, points):
     '''!
-      @brief Set detection range points in config-file mode (mode 0x06).
-      @param points Iterable of Point objects.
-      @return true if succeeded, otherwise false.
-      @note Payload format: 0x06 + 2B point_count + n*(2B X + 2B Y).
-      @note Position values use sign-bit int16 encoding (bit15: 0=positive, 1=negative).
+    @brief Set detection range points in config-file mode (mode 0x06).
+    @param points Iterable of Point objects.
+    @return true if succeeded, otherwise false.
+    @note Payload format: 0x06 + 2B point_count + n*(2B X + 2B Y).
+    @note Position values use sign-bit int16 encoding (bit15: 0=positive, 1=negative).
     '''
     if points is None:
       return False
 
-    points = list(points)[:self.MAX_POINTS]
+    points = list(points)[: self.MAX_POINTS]
     data = [self.RANGE_CONFIG_FILE]
     data += self._u16_bytes(len(points))
     for point in points:
@@ -883,19 +900,19 @@ class DFRobot_C4004(object):
 
   def get_detection_range_mode(self):
     '''!
-      @brief Query current detection range mode.
-      @return Current mode value.
+    @brief Query current detection range mode.
+    @return Current mode value.
     '''
     self._request_frame(self.CTRL_DETECTION_RANGE, self.CMD_DETECTION_RANGE_QUERY_RANGE, [self.QUERY_DATA])
     return self._range_info.mode
 
   def get_trajectory_range_mode(self, points, point_count):
     '''!
-      @brief Query and get trajectory detection range points (mode 0x05).
-      @param points List used to receive Point objects.
-      @param point_count Output container for point count.
-      @n Supported output containers: list/dict/object(with value field).
-      @return true if succeeded, otherwise false.
+    @brief Query and get trajectory detection range points (mode 0x05).
+    @param points List used to receive Point objects.
+    @param point_count Output container for point count.
+    @n Supported output containers: list/dict/object(with value field).
+    @return true if succeeded, otherwise false.
     '''
     if points is None or point_count is None:
       return False
@@ -937,11 +954,11 @@ class DFRobot_C4004(object):
 
   def get_config_file_mode_points(self, points, point_count):
     '''!
-      @brief Query and get config-file mode points (mode 0x06).
-      @param points List used to receive Point objects.
-      @param point_count Output container for point count.
-      @n Supported output containers: list/dict/object(with value field).
-      @return true if succeeded, otherwise false.
+    @brief Query and get config-file mode points (mode 0x06).
+    @param points List used to receive Point objects.
+    @param point_count Output container for point count.
+    @n Supported output containers: list/dict/object(with value field).
+    @return true if succeeded, otherwise false.
     '''
     if points is None or point_count is None:
       return False
@@ -983,11 +1000,11 @@ class DFRobot_C4004(object):
 
   def get_people_time(self, mode=GET_DATA_ACTIVE):
     '''!
-      @brief Get people count information.
-      @param mode Data acquisition mode.
-      @n GET_DATA_ACTIVE: Query latest people count before reading cache.
-      @n GET_DATA_REPORT: Read from report cache only.
-      @return Current people count value.
+    @brief Get people count information.
+    @param mode Data acquisition mode.
+    @n GET_DATA_ACTIVE: Query latest people count before reading cache.
+    @n GET_DATA_REPORT: Read from report cache only.
+    @return Current people count value.
     '''
     if isinstance(mode, bool):
       mode = self.GET_DATA_ACTIVE if mode else self.GET_DATA_REPORT
@@ -997,68 +1014,68 @@ class DFRobot_C4004(object):
 
   def set_real_time_people_time(self, interval):
     '''!
-      @brief Set people count report interval.
-      @param interval Interval in seconds.
-      @return true if succeeded, otherwise false.
+    @brief Set people count report interval.
+    @param interval Interval in seconds.
+    @return true if succeeded, otherwise false.
     '''
     return self._set_u32(self.CTRL_PEOPLE_COUNT, self.CMD_PEOPLE_COUNT_SET_REPORT_INTERVAL, interval)
 
   def get_real_time_people_time(self):
     '''!
-      @brief Query people count report interval.
-      @return Interval in seconds. Returns 0 on failure.
+    @brief Query people count report interval.
+    @return Interval in seconds. Returns 0 on failure.
     '''
     return self._query_u32(self.CTRL_PEOPLE_COUNT, self.CMD_PEOPLE_COUNT_QUERY_REPORT_INTERVAL)
 
   def clear_people_count(self):
     '''!
-      @brief Clear people count statistics.
-      @return true if succeeded, otherwise false.
+    @brief Clear people count statistics.
+    @return true if succeeded, otherwise false.
     '''
     return self._request_frame(self.CTRL_PEOPLE_COUNT, self.CMD_PEOPLE_COUNT_CLEAR_COUNT, [self.QUERY_DATA]) is not None
 
   def set_track_meters(self, distance_cm):
     '''!
-      @brief Set trajectory generation distance threshold.
-      @param distance_cm Distance threshold in cm.
-      @return true if succeeded, otherwise false.
+    @brief Set trajectory generation distance threshold.
+    @param distance_cm Distance threshold in cm.
+    @return true if succeeded, otherwise false.
     '''
     return self._set_u32(self.CTRL_PEOPLE_COUNT, self.CMD_PEOPLE_COUNT_SET_TRAJECTORY_DISTANCE, distance_cm)
 
   def get_track_meters(self):
     '''!
-      @brief Query trajectory generation distance threshold.
-      @return Distance threshold in cm. Returns 0 on failure.
+    @brief Query trajectory generation distance threshold.
+    @return Distance threshold in cm. Returns 0 on failure.
     '''
     return self._query_u32(self.CTRL_PEOPLE_COUNT, self.CMD_PEOPLE_COUNT_QUERY_TRAJECTORY_DISTANCE)
 
   def set_track_exists_time(self, time):
     '''!
-      @brief Set trajectory hold time.
-      @param time Hold time in seconds.
-      @return true if succeeded, otherwise false.
+    @brief Set trajectory hold time.
+    @param time Hold time in seconds.
+    @return true if succeeded, otherwise false.
     '''
     return self._set_u32(self.CTRL_PEOPLE_COUNT, self.CMD_PEOPLE_COUNT_SET_TRAJECTORY_HOLD_TIME, time)
 
   def get_track_exists_time(self):
     '''!
-      @brief Query trajectory hold time.
-      @return Hold time in seconds. Returns 0 on failure.
+    @brief Query trajectory hold time.
+    @return Hold time in seconds. Returns 0 on failure.
     '''
     return self._query_u32(self.CTRL_PEOPLE_COUNT, self.CMD_PEOPLE_COUNT_QUERY_TRAJECTORY_HOLD_TIME)
 
   def set_unmanned_time(self, delay_time):
     '''!
-      @brief Set no-person delay time.
-      @param delay_time Delay time in seconds.
-      @return true if succeeded, otherwise false.
+    @brief Set no-person delay time.
+    @param delay_time Delay time in seconds.
+    @return true if succeeded, otherwise false.
     '''
     return self._set_u32(self.CTRL_PEOPLE_COUNT, self.CMD_PEOPLE_COUNT_SET_NO_PERSON_DELAY, delay_time)
 
   def get_unmanned_time(self):
     '''!
-      @brief Query no-person delay time.
-      @return Delay time in seconds. Returns 0 on failure.
+    @brief Query no-person delay time.
+    @return Delay time in seconds. Returns 0 on failure.
     '''
     return self._query_u32(self.CTRL_PEOPLE_COUNT, self.CMD_PEOPLE_COUNT_QUERY_NO_PERSON_DELAY)
 
@@ -1150,7 +1167,7 @@ class DFRobot_C4004(object):
       self._asm_checksum = (self._asm_checksum + value) & 0xFF
       self._asm_state = self._RX_ASM_LEN_HI
     elif self._asm_state == self._RX_ASM_LEN_HI:
-      self._asm_len = (value << 8)
+      self._asm_len = value << 8
       self._asm_checksum = (self._asm_checksum + value) & 0xFF
       self._asm_state = self._RX_ASM_LEN_LO
     elif self._asm_state == self._RX_ASM_LEN_LO:
@@ -1227,8 +1244,7 @@ class DFRobot_C4004(object):
       return False
     data = bytearray(data or [])
     length = len(data)
-    frame = bytearray([self.FRAME_HEAD1, self.FRAME_HEAD2, control & 0xFF, cmd & 0xFF,
-                       (length >> 8) & 0xFF, length & 0xFF])
+    frame = bytearray([self.FRAME_HEAD1, self.FRAME_HEAD2, control & 0xFF, cmd & 0xFF, (length >> 8) & 0xFF, length & 0xFF])
     frame += data
     checksum = sum(frame) & 0xFF
     frame += bytearray([checksum, self.FRAME_TAIL1, self.FRAME_TAIL2])

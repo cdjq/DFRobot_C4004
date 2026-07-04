@@ -25,42 +25,42 @@ static void appendHexByte(String &text, uint8_t value)
 DFRobot_C4004::DFRobot_C4004(SoftwareSerial *sSerial, uint32_t baud)
 {
   _serial = sSerial;
-  _s = sSerial;
-  _baud = baud;
-  _rxpin = 0;
-  _txpin = 0;
+  _s      = sSerial;
+  _baud   = baud;
+  _rxpin  = 0;
+  _txpin  = 0;
   initObject();
 }
 #else
 DFRobot_C4004::DFRobot_C4004(HardwareSerial *hSerial, uint32_t baud, uint8_t rxpin, uint8_t txpin)
 {
   _serial = hSerial;
-  _s = hSerial;
-  _baud = baud;
-  _rxpin = rxpin;
-  _txpin = txpin;
+  _s      = hSerial;
+  _baud   = baud;
+  _rxpin  = rxpin;
+  _txpin  = txpin;
   initObject();
 }
 #endif
 
 void DFRobot_C4004::initObject(void)
 {
-  _heartbeat = false;
-  _initFinished = false;
-  _presence = ePresenceUnknown;
-  _motionState = eMotionUnknown;
+  _heartbeat     = false;
+  _initFinished  = false;
+  _presence      = ePresenceUnknown;
+  _motionState   = eMotionUnknown;
   _trajectoryLed = 0xFF;
-  _motionLed = 0xFF;
-  _targetCount = 0;
+  _motionLed     = 0xFF;
+  _targetCount   = 0;
   memset(_targets, 0, sizeof(_targets));
   memset(&_tagInfo, 0, sizeof(_tagInfo));
   _tagInfoValid = false;
   memset(&_rangeInfo, 0, sizeof(_rangeInfo));
-  _peopleCount = 0;
+  _peopleCount    = 0;
   _rangeInfo.mode = eRangeUnknown;
-  _rxHead = 0;
-  _rxTail = 0;
-  _pendingValid = false;
+  _rxHead         = 0;
+  _rxTail         = 0;
+  _pendingValid   = false;
   memset(&_pendingPacket, 0, sizeof(_pendingPacket));
   resetRxParser();
 }
@@ -92,7 +92,7 @@ bool DFRobot_C4004::begin(void)
 
 bool DFRobot_C4004::isInitFinished(void)
 {
-  uint8_t data = QUERY_DATA;
+  uint8_t    data   = QUERY_DATA;
   sPacket_t &packet = _rxPacket;
 
   if (requestFrame(CTRL_WORK_STATUS, CMD_WORK_STATUS_INIT_FINISHED_QUERY, &data, 1, &packet)) {
@@ -110,25 +110,25 @@ bool DFRobot_C4004::isConnected(void)
 
 bool DFRobot_C4004::reset(void)
 {
-  uint8_t data = QUERY_DATA;
+  uint8_t    data   = QUERY_DATA;
   sPacket_t &packet = _rxPacket;
-  bool ret = requestFrame(CTRL_SYSTEM, CMD_SYSTEM_RESET, &data, 1, &packet, RESET_TIMEOUT);
+  bool       ret    = requestFrame(CTRL_SYSTEM, CMD_SYSTEM_RESET, &data, 1, &packet, RESET_TIMEOUT);
   delay(100);
   return ret;
 }
 
 bool DFRobot_C4004::factoryReset(void)
 {
-  uint8_t data = QUERY_DATA;
+  uint8_t    data   = QUERY_DATA;
   sPacket_t &packet = _rxPacket;
-  bool ret = requestFrame(CTRL_SYSTEM, CMD_SYSTEM_FACTORY_RESET, &data, 1, &packet, FACTORY_RESET_TIMEOUT);
+  bool       ret    = requestFrame(CTRL_SYSTEM, CMD_SYSTEM_FACTORY_RESET, &data, 1, &packet, FACTORY_RESET_TIMEOUT);
   delay(100);
   return ret;
 }
 
 bool DFRobot_C4004::getHeartbeat(eGetDataMode_t mode)
 {
-  uint8_t data = QUERY_DATA;
+  uint8_t    data   = QUERY_DATA;
   sPacket_t &packet = _rxPacket;
 
   if (mode == eGetDataReport) {
@@ -164,7 +164,7 @@ String DFRobot_C4004::getProductModel(void)
 
 uint16_t DFRobot_C4004::getProductID(void)
 {
-  uint8_t data = QUERY_DATA;
+  uint8_t    data   = QUERY_DATA;
   sPacket_t &packet = _rxPacket;
 
   if (!requestFrame(CTRL_PRODUCT_INFO, CMD_PRODUCT_ID_QUERY, &data, 1, &packet)) {
@@ -191,13 +191,13 @@ String DFRobot_C4004::getFirmwareVersion(void)
 
 bool DFRobot_C4004::setInstallInfo(sInstallInfo_t &info)
 {
-  uint8_t angleData[6];
-  uint8_t heightData[2];
-  uint8_t modeData = (uint8_t)info.mode;
-  sPacket_t &packet = _rxPacket;
-  int32_t xAngleProto = (int32_t)info.xAngle * 100;
-  int32_t yAngleProto = (int32_t)info.yAngle * 100;
-  int32_t zAngleProto = (int32_t)info.zAngle * 100;
+  uint8_t    angleData[6];
+  uint8_t    heightData[2];
+  uint8_t    modeData    = (uint8_t)info.mode;
+  sPacket_t &packet      = _rxPacket;
+  int32_t    xAngleProto = (int32_t)info.xAngle * 100;
+  int32_t    yAngleProto = (int32_t)info.yAngle * 100;
+  int32_t    zAngleProto = (int32_t)info.zAngle * 100;
 
   if (info.mode != eInstallModeSide && info.mode != eInstallModeTop) {
     return false;
@@ -238,7 +238,7 @@ bool DFRobot_C4004::setInstallInfo(sInstallInfo_t &info)
 
 bool DFRobot_C4004::getInstallInfo(sInstallInfo_t *info)
 {
-  uint8_t data = QUERY_DATA;
+  uint8_t    data   = QUERY_DATA;
   sPacket_t &packet = _rxPacket;
 
   if (info == NULL) {
@@ -268,7 +268,7 @@ bool DFRobot_C4004::getInstallInfo(sInstallInfo_t *info)
 
 bool DFRobot_C4004::setInstallHigh(int32_t hight)
 {
-  uint8_t heightData[2];
+  uint8_t    heightData[2];
   sPacket_t &packet = _rxPacket;
 
   if (hight < 0 || hight > 0xFFFFL) {
@@ -281,7 +281,7 @@ bool DFRobot_C4004::setInstallHigh(int32_t hight)
 
 bool DFRobot_C4004::getInstallHigh(int *hight)
 {
-  uint8_t data = QUERY_DATA;
+  uint8_t    data   = QUERY_DATA;
   sPacket_t &packet = _rxPacket;
 
   if (hight == NULL) {
@@ -371,9 +371,9 @@ bool DFRobot_C4004::getCheckToActiveFrames(uint8_t *frames)
 
 uint8_t DFRobot_C4004::getTargetList(sTargetInfo_t *targetBuf, uint8_t maxCount, eGetDataMode_t mode)
 {
-  uint8_t data = QUERY_DATA;
-  sPacket_t &packet = _rxPacket;
-  uint8_t copyCount = 0;
+  uint8_t    data      = QUERY_DATA;
+  sPacket_t &packet    = _rxPacket;
+  uint8_t    copyCount = 0;
 
   if (mode == eGetDataActive) {
     requestFrame(CTRL_TRAJECTORY, CMD_TRAJECTORY_QUERY_TARGET, &data, 1, &packet);
@@ -431,7 +431,7 @@ bool DFRobot_C4004::getMotionLed(void)
 
 uint8_t DFRobot_C4004::getTags(sTagConfig_t *tags, uint8_t maxTags, eGetDataMode_t mode)
 {
-  uint8_t data = QUERY_DATA;
+  uint8_t    data   = QUERY_DATA;
   sPacket_t &packet = _rxPacket;
   (void)mode;
 
@@ -455,9 +455,8 @@ bool DFRobot_C4004::getTagInfo(sTagInfo_t *tagInfo)
 
 eTagSetStatus_t DFRobot_C4004::setTag(const sTagConfig_t &tag)
 {
-  uint8_t data[8];
+  uint8_t    data[8];
   sPacket_t &packet = _rxPacket;
-  eTagSetStatus_t status = eTagSetCommError;
 
   if (tag.tagType > eTagNoise || tag.scopeType > eTagRangeRectangle) {
     return eTagSetCommError;
@@ -473,49 +472,51 @@ eTagSetStatus_t DFRobot_C4004::setTag(const sTagConfig_t &tag)
   writeUint16(&data[4], tag.width);
   writeUint16(&data[6], tag.height);
 
-  if (!requestFrame(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_SET_TAG, data, sizeof(data), &packet)) {
+  if (!requestFrame(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_SET_TAG, data, sizeof(data), &packet, TAG_SET_TIMEOUT)) {
     return eTagSetCommError;
   }
-  if (packet.len < 4) {
+  // Response payload: tagIndex(1) tagType(1) scopeType(1) ioIndex(1) status(1) + center(4) + size(4).
+  if (packet.len < 5) {
     return eTagSetCommError;
   }
   if (packet.data[0] != tag.tagIndex) {
     return eTagSetCommError;
   }
-
-  if (packet.data[3] >= eTagSetSuccess && packet.data[3] <= eTagSetIndexOutOfRange) {
-    status = (eTagSetStatus_t)packet.data[3];
+  if (packet.data[4] >= eTagSetSuccess && packet.data[4] <= eTagSetIndexOutOfRange) {
+    return (eTagSetStatus_t)packet.data[4];
   }
-  return status;
+  return eTagSetCommError;
 }
 
 bool DFRobot_C4004::clearTag(uint16_t tagIndex)
 {
-  uint8_t data[2];
+  uint8_t    data   = 0;
   sPacket_t &packet = _rxPacket;
-  uint16_t respIndex = 0;
 
-  writeUint16(data, tagIndex);
-  if (!requestFrame(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_CLEAR_TAG, data, sizeof(data), &packet)) {
+  if (tagIndex == 0xFF || tagIndex > 0xFE) {
     return false;
   }
-  if (packet.len > 0 && packet.data[0] == 0xFE) {
+
+  data = (uint8_t)tagIndex;
+  if (!requestFrame(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_CLEAR_TAG, &data, 1, &packet)) {
     return false;
   }
-  if (packet.len < 2) {
+  if (packet.len < 1) {
     return false;
   }
-  respIndex = readUint16(packet.data);
-  if (respIndex != tagIndex) {
+  if (packet.data[0] == 0xFE) {
     return false;
   }
-  return true;
+  if (packet.data[0] == data) {
+    return true;
+  }
+  return false;
 }
 
 bool DFRobot_C4004::clearAllTags(void)
 {
-  uint8_t clearAll = 0xFF;
-  sPacket_t &packet = _rxPacket;
+  uint8_t    clearAll = 0xFF;
+  sPacket_t &packet   = _rxPacket;
 
   if (!requestFrame(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_CLEAR_TAG, &clearAll, 1, &packet)) {
     return false;
@@ -533,12 +534,12 @@ bool DFRobot_C4004::clearAllTags(void)
 
 bool DFRobot_C4004::setTagsFromConfig(const sTagConfig_t *tags, uint8_t tagCount)
 {
-  const uint8_t tagLen = 12;
-  uint8_t *data = _rxPacket.data;
-  uint16_t offset = 0;
-  uint16_t expectedLen = 0;
-  sPacket_t &packet = _rxPacket;
-  uint32_t startTime = 0;
+  const uint8_t tagLen      = 12;
+  uint8_t      *data        = _rxPacket.data;
+  uint16_t      offset      = 0;
+  uint16_t      expectedLen = 0;
+  sPacket_t    &packet      = _rxPacket;
+  uint32_t      startTime   = 0;
 
   if (tags == NULL && tagCount > 0) {
     return false;
@@ -607,7 +608,7 @@ bool DFRobot_C4004::setTagsFromConfig(const sTagConfig_t *tags, uint8_t tagCount
 
 bool DFRobot_C4004::setFourSidedRangeMode(sFourSidedRange_t &range)
 {
-  uint8_t data[9];
+  uint8_t    data[9];
   sPacket_t &packet = _rxPacket;
 
   data[0] = eRangeFourSide;
@@ -616,17 +617,17 @@ bool DFRobot_C4004::setFourSidedRangeMode(sFourSidedRange_t &range)
   writeSignBitInt16(&data[5], range.yPositiveCm);
   writeSignBitInt16(&data[7], range.yNegativeCm);
 
-  if (!requestFrame(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_SET_RANGE, data, sizeof(data), &packet)) {
+  if (!requestFrame(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_SET_RANGE, data, sizeof(data), &packet, SET_RANGE_TIMEOUT)) {
     return false;
   }
-  _rangeInfo = range;
+  _rangeInfo      = range;
   _rangeInfo.mode = eRangeFourSide;
   return true;
 }
 
 bool DFRobot_C4004::getFourSidedRangeMode(sFourSidedRange_t *range)
 {
-  uint8_t data = QUERY_DATA;
+  uint8_t    data   = QUERY_DATA;
   sPacket_t &packet = _rxPacket;
 
   if (range == NULL) {
@@ -641,7 +642,7 @@ bool DFRobot_C4004::getFourSidedRangeMode(sFourSidedRange_t *range)
 
 void DFRobot_C4004::setTrajectoryRangeMode(bool learning)
 {
-  uint8_t data[2];
+  uint8_t    data[2];
   sPacket_t &packet = _rxPacket;
 
   data[0] = eRangeTrajectory;
@@ -653,11 +654,11 @@ void DFRobot_C4004::setTrajectoryRangeMode(bool learning)
 
 bool DFRobot_C4004::setConfigFileModePoints(const sPoint_t *points, uint16_t pointCount)
 {
-  uint8_t *data = _rxPacket.data;
-  uint16_t offset = 0;
-  uint16_t respCount = 0;
-  sPacket_t &packet = _rxPacket;
-  uint32_t startTime = 0;
+  uint8_t   *data      = _rxPacket.data;
+  uint16_t   offset    = 0;
+  uint16_t   respCount = 0;
+  sPacket_t &packet    = _rxPacket;
+  uint32_t   startTime = 0;
 
   if (points == NULL && pointCount > 0) {
     return false;
@@ -709,9 +710,9 @@ bool DFRobot_C4004::setConfigFileModePoints(const sPoint_t *points, uint16_t poi
 
 bool DFRobot_C4004::getTrajectoryRangeMode(sPoint_t *points, uint16_t *pointCount)
 {
-  uint8_t data = QUERY_DATA;
+  uint8_t    data   = QUERY_DATA;
   sPacket_t &packet = _rxPacket;
-  uint16_t count = 0;
+  uint16_t   count  = 0;
 
   if (points == NULL || pointCount == NULL) {
     return false;
@@ -738,8 +739,8 @@ bool DFRobot_C4004::getTrajectoryRangeMode(sPoint_t *points, uint16_t *pointCoun
 
   for (uint16_t i = 0; i < count; i++) {
     uint16_t offset = (uint16_t)(3 + i * 4);
-    points[i].x = readSignBitInt16(&packet.data[offset]);
-    points[i].y = readSignBitInt16(&packet.data[offset + 2]);
+    points[i].x     = readSignBitInt16(&packet.data[offset]);
+    points[i].y     = readSignBitInt16(&packet.data[offset + 2]);
   }
   *pointCount = count;
   return true;
@@ -747,9 +748,9 @@ bool DFRobot_C4004::getTrajectoryRangeMode(sPoint_t *points, uint16_t *pointCoun
 
 bool DFRobot_C4004::getConfigFileModePoints(sPoint_t *points, uint16_t *pointCount)
 {
-  uint8_t data = QUERY_DATA;
+  uint8_t    data   = QUERY_DATA;
   sPacket_t &packet = _rxPacket;
-  uint16_t count = 0;
+  uint16_t   count  = 0;
 
   if (points == NULL || pointCount == NULL) {
     return false;
@@ -776,8 +777,8 @@ bool DFRobot_C4004::getConfigFileModePoints(sPoint_t *points, uint16_t *pointCou
 
   for (uint16_t i = 0; i < count; i++) {
     uint16_t offset = (uint16_t)(3 + i * 4);
-    points[i].x = readSignBitInt16(&packet.data[offset]);
-    points[i].y = readSignBitInt16(&packet.data[offset + 2]);
+    points[i].x     = readSignBitInt16(&packet.data[offset]);
+    points[i].y     = readSignBitInt16(&packet.data[offset + 2]);
   }
   *pointCount = count;
   return true;
@@ -785,7 +786,7 @@ bool DFRobot_C4004::getConfigFileModePoints(sPoint_t *points, uint16_t *pointCou
 
 eDetectionRangeMode_t DFRobot_C4004::getDetectionRangeMode(void)
 {
-  uint8_t data = QUERY_DATA;
+  uint8_t    data   = QUERY_DATA;
   sPacket_t &packet = _rxPacket;
 
   if (!requestFrame(CTRL_DETECTION_RANGE, CMD_DETECTION_RANGE_QUERY_RANGE, &data, 1, &packet)) {
@@ -796,7 +797,7 @@ eDetectionRangeMode_t DFRobot_C4004::getDetectionRangeMode(void)
 
 uint8_t DFRobot_C4004::getPeopleTime(eGetDataMode_t mode)
 {
-  uint8_t data = QUERY_DATA;
+  uint8_t    data   = QUERY_DATA;
   sPacket_t &packet = _rxPacket;
 
   if (mode == eGetDataActive) {
@@ -817,7 +818,7 @@ bool DFRobot_C4004::getRealTimePeopleTime(uint32_t *time)
 
 bool DFRobot_C4004::clearPeopleCount(void)
 {
-  uint8_t data = QUERY_DATA;
+  uint8_t    data   = QUERY_DATA;
   sPacket_t &packet = _rxPacket;
   return requestFrame(CTRL_PEOPLE_COUNT, CMD_PEOPLE_COUNT_CLEAR_COUNT, &data, 1, &packet);
 }
@@ -855,7 +856,7 @@ bool DFRobot_C4004::getUnmannedTime(uint32_t *delayTime)
 bool DFRobot_C4004::sendCommand(uint8_t control, uint8_t cmd, const uint8_t *data, uint16_t len)
 {
   uint8_t checksum = 0;
-  uint8_t value = 0;
+  uint8_t value    = 0;
 
   if (_s == NULL || len > MAX_PAYLOAD) {
     return false;
@@ -902,7 +903,7 @@ bool DFRobot_C4004::sendCommand(uint8_t control, uint8_t cmd, const uint8_t *dat
 
     if (len > 0) {
       const uint16_t dumpLen = (len > 24) ? 24 : len;
-      String dataLog = "TX data: ";
+      String         dataLog = "TX data: ";
       for (uint16_t i = 0; i < dumpLen; i++) {
         appendHexByte(dataLog, (data == NULL) ? 0 : data[i]);
         if (i + 1 < dumpLen) {
@@ -923,9 +924,9 @@ bool DFRobot_C4004::sendCommand(uint8_t control, uint8_t cmd, const uint8_t *dat
 
 void DFRobot_C4004::resetRxParser(void)
 {
-  _asmState = eRxAsmSyncH1;
-  _asmIdx = 0;
-  _asmChecksum = 0;
+  _asmState        = eRxAsmSyncH1;
+  _asmIdx          = 0;
+  _asmChecksum     = 0;
   _asmRecvChecksum = 0;
 }
 
@@ -943,7 +944,7 @@ void DFRobot_C4004::rxPushByte(uint8_t value)
     _rxTail = (uint16_t)((_rxTail + 1) % C4004_RX_RING_SIZE);
   }
   _rxRing[_rxHead] = value;
-  _rxHead = nextHead;
+  _rxHead          = nextHead;
 }
 
 bool DFRobot_C4004::rxPopByte(uint8_t *value)
@@ -951,7 +952,7 @@ bool DFRobot_C4004::rxPopByte(uint8_t *value)
   if (value == NULL || _rxTail == _rxHead) {
     return false;
   }
-  *value = _rxRing[_rxTail];
+  *value  = _rxRing[_rxTail];
   _rxTail = (uint16_t)((_rxTail + 1) % C4004_RX_RING_SIZE);
   return true;
 }
@@ -975,7 +976,7 @@ void DFRobot_C4004::logRxPacket(const sPacket_t *packet, uint8_t recvChecksum)
 
   if (packet->len > 0) {
     const uint16_t dumpLen = (packet->len > 24) ? 24 : packet->len;
-    String dataLog = "RX data: ";
+    String         dataLog = "RX data: ";
     for (uint16_t i = 0; i < dumpLen; i++) {
       appendHexByte(dataLog, packet->data[i]);
       if (i + 1 < dumpLen) {
@@ -999,102 +1000,102 @@ void DFRobot_C4004::logRxPacket(const sPacket_t *packet, uint8_t recvChecksum)
 void DFRobot_C4004::feedAsmByte(uint8_t value)
 {
   switch (_asmState) {
-  case eRxAsmSyncH1:
-    if (value == FRAME_HEAD1) {
-      _asmChecksum = value;
-      _asmState = eRxAsmSyncH2;
-    }
-    break;
-
-  case eRxAsmSyncH2:
-    if (value == FRAME_HEAD2) {
-      _asmChecksum += value;
-      _asmState = eRxAsmCtrl;
-    } else {
-      _asmState = eRxAsmSyncH1;
+    case eRxAsmSyncH1:
       if (value == FRAME_HEAD1) {
         _asmChecksum = value;
-        _asmState = eRxAsmSyncH2;
+        _asmState    = eRxAsmSyncH2;
       }
-    }
-    break;
+      break;
 
-  case eRxAsmCtrl:
-    _pendingPacket.control = value;
-    _asmChecksum += value;
-    _asmState = eRxAsmCmd;
-    break;
+    case eRxAsmSyncH2:
+      if (value == FRAME_HEAD2) {
+        _asmChecksum += value;
+        _asmState = eRxAsmCtrl;
+      } else {
+        _asmState = eRxAsmSyncH1;
+        if (value == FRAME_HEAD1) {
+          _asmChecksum = value;
+          _asmState    = eRxAsmSyncH2;
+        }
+      }
+      break;
 
-  case eRxAsmCmd:
-    _pendingPacket.cmd = value;
-    _asmChecksum += value;
-    _asmState = eRxAsmLenHi;
-    break;
+    case eRxAsmCtrl:
+      _pendingPacket.control = value;
+      _asmChecksum += value;
+      _asmState = eRxAsmCmd;
+      break;
 
-  case eRxAsmLenHi:
-    _pendingPacket.len = (uint16_t)((uint16_t)value << 8);
-    _asmChecksum += value;
-    _asmState = eRxAsmLenLo;
-    break;
+    case eRxAsmCmd:
+      _pendingPacket.cmd = value;
+      _asmChecksum += value;
+      _asmState = eRxAsmLenHi;
+      break;
 
-  case eRxAsmLenLo:
-    _pendingPacket.len |= value;
-    _asmChecksum += value;
-    if (_pendingPacket.len > MAX_PAYLOAD) {
+    case eRxAsmLenHi:
+      _pendingPacket.len = (uint16_t)((uint16_t)value << 8);
+      _asmChecksum += value;
+      _asmState = eRxAsmLenLo;
+      break;
+
+    case eRxAsmLenLo:
+      _pendingPacket.len |= value;
+      _asmChecksum += value;
+      if (_pendingPacket.len > MAX_PAYLOAD) {
 #ifdef ENABLE_DBG
-      DBG(String("payload too long, len=") + String(_pendingPacket.len) + String(" max=") + String(MAX_PAYLOAD));
+        DBG(String("payload too long, len=") + String(_pendingPacket.len) + String(" max=") + String(MAX_PAYLOAD));
 #endif
-      resetRxParser();
-      discardRxRing();
+        resetRxParser();
+        discardRxRing();
+        break;
+      }
+      _asmIdx = 0;
+      if (_pendingPacket.len == 0) {
+        _asmState = eRxAsmChecksum;
+      } else {
+        _asmState = eRxAsmPayload;
+      }
       break;
-    }
-    _asmIdx = 0;
-    if (_pendingPacket.len == 0) {
-      _asmState = eRxAsmChecksum;
-    } else {
-      _asmState = eRxAsmPayload;
-    }
-    break;
 
-  case eRxAsmPayload:
-    _pendingPacket.data[_asmIdx++] = value;
-    _asmChecksum += value;
-    if (_asmIdx >= _pendingPacket.len) {
-      _asmState = eRxAsmChecksum;
-    }
-    break;
+    case eRxAsmPayload:
+      _pendingPacket.data[_asmIdx++] = value;
+      _asmChecksum += value;
+      if (_asmIdx >= _pendingPacket.len) {
+        _asmState = eRxAsmChecksum;
+      }
+      break;
 
-  case eRxAsmChecksum:
-    _asmRecvChecksum = value;
-    _asmState = eRxAsmTail1;
-    break;
+    case eRxAsmChecksum:
+      _asmRecvChecksum = value;
+      _asmState        = eRxAsmTail1;
+      break;
 
-  case eRxAsmTail1:
-    if (value != FRAME_TAIL1) {
+    case eRxAsmTail1:
+      if (value != FRAME_TAIL1) {
+        resetRxParser();
+        break;
+      }
+      _asmState = eRxAsmTail2;
+      break;
+
+    case eRxAsmTail2:
+      if (value != FRAME_TAIL2) {
+        resetRxParser();
+        break;
+      }
+      if (_asmChecksum != _asmRecvChecksum) {
+        DBG("checksum error");
+        resetRxParser();
+        break;
+      }
+      _pendingValid = true;
+      logRxPacket(&_pendingPacket, _asmRecvChecksum);
       resetRxParser();
       break;
-    }
-    _asmState = eRxAsmTail2;
-    break;
 
-  case eRxAsmTail2:
-    if (value != FRAME_TAIL2) {
+    default:
       resetRxParser();
       break;
-    }
-    if (_asmChecksum != _asmRecvChecksum) {
-      DBG("checksum error");
-      resetRxParser();
-      break;
-    }
-    _pendingValid = true;
-    logRxPacket(&_pendingPacket, _asmRecvChecksum);
-    resetRxParser();
-    break;
-
-  default:
-    resetRxParser();
-    break;
   }
 }
 
@@ -1270,7 +1271,7 @@ eReportedEvent_t DFRobot_C4004::classifyPacket(const sPacket_t *packet)
 
 bool DFRobot_C4004::queryByte(uint8_t control, uint8_t cmd, uint8_t *value)
 {
-  uint8_t data = QUERY_DATA;
+  uint8_t    data   = QUERY_DATA;
   sPacket_t &packet = _rxPacket;
 
   if (value == NULL) {
@@ -1291,7 +1292,7 @@ bool DFRobot_C4004::setByte(uint8_t control, uint8_t cmd, uint8_t value)
 
 bool DFRobot_C4004::queryUint32(uint8_t control, uint8_t cmd, uint32_t *value)
 {
-  uint8_t data = QUERY_DATA;
+  uint8_t    data   = QUERY_DATA;
   sPacket_t &packet = _rxPacket;
 
   if (value == NULL) {
@@ -1306,7 +1307,7 @@ bool DFRobot_C4004::queryUint32(uint8_t control, uint8_t cmd, uint32_t *value)
 
 bool DFRobot_C4004::setUint32(uint8_t control, uint8_t cmd, uint32_t value)
 {
-  uint8_t data[4];
+  uint8_t    data[4];
   sPacket_t &packet = _rxPacket;
 
   writeUint32(data, value);
@@ -1315,9 +1316,9 @@ bool DFRobot_C4004::setUint32(uint8_t control, uint8_t cmd, uint32_t value)
 
 String DFRobot_C4004::queryString(uint8_t control, uint8_t cmd)
 {
-  uint8_t data = QUERY_DATA;
+  uint8_t    data   = QUERY_DATA;
   sPacket_t &packet = _rxPacket;
-  String ret = "";
+  String     ret    = "";
 
   if (!requestFrame(control, cmd, &data, 1, &packet)) {
     return ret;
@@ -1333,7 +1334,7 @@ String DFRobot_C4004::queryString(uint8_t control, uint8_t cmd)
 void DFRobot_C4004::parseTargets(const uint8_t *data, uint16_t len)
 {
   const uint8_t targetLen = 11;
-  uint8_t count = 0;
+  uint8_t       count     = 0;
 
   if (data == NULL) {
     _targetCount = 0;
@@ -1346,31 +1347,31 @@ void DFRobot_C4004::parseTargets(const uint8_t *data, uint16_t len)
   _targetCount = count;
 
   for (uint8_t i = 0; i < count; i++) {
-    uint16_t offset = i * targetLen;
-    _targets[i].index = data[offset];
-    _targets[i].kinesia = data[offset + 1];
+    uint16_t offset           = i * targetLen;
+    _targets[i].index         = data[offset];
+    _targets[i].kinesia       = data[offset + 1];
     _targets[i].targetFeature = (eTargetFeature_t)data[offset + 2];
-    _targets[i].x = readSignBitInt16(&data[offset + 3]);
-    _targets[i].y = readSignBitInt16(&data[offset + 5]);
-    _targets[i].height = readSignBitInt16(&data[offset + 7]);
-    _targets[i].speed = readSignBitInt16(&data[offset + 9]);
+    _targets[i].x             = readSignBitInt16(&data[offset + 3]);
+    _targets[i].y             = readSignBitInt16(&data[offset + 5]);
+    _targets[i].height        = readSignBitInt16(&data[offset + 7]);
+    _targets[i].speed         = readSignBitInt16(&data[offset + 9]);
   }
 }
 
 uint8_t DFRobot_C4004::parseTagList(const uint8_t *data, uint16_t len, sTagConfig_t *tags, uint8_t maxTags)
 {
-  const uint8_t tagLen = 12;
-  uint16_t availableLen = 0;
-  uint16_t total = 0;
-  uint8_t actualCount = 0;
-  uint8_t copyCount = 0;
+  const uint8_t tagLen       = 12;
+  uint16_t      availableLen = 0;
+  uint16_t      total        = 0;
+  uint8_t       actualCount  = 0;
+  uint8_t       copyCount    = 0;
 
   if (data == NULL || len < 2) {
     return 0;
   }
 
-  total = readUint16(data);
-  actualCount = (total > 0xFF) ? 0xFF : (uint8_t)total;
+  total        = readUint16(data);
+  actualCount  = (total > 0xFF) ? 0xFF : (uint8_t)total;
   availableLen = len - 2;
   if (availableLen < (uint16_t)(actualCount * tagLen)) {
     actualCount = availableLen / tagLen;
@@ -1382,15 +1383,15 @@ uint8_t DFRobot_C4004::parseTagList(const uint8_t *data, uint16_t len, sTagConfi
     }
 
     for (uint8_t i = 0; i < copyCount; i++) {
-      uint16_t offset = 2 + i * tagLen;
-      tags[i].tagIndex = data[offset];
-      tags[i].tagType = (eTagType_t)data[offset + 1];
+      uint16_t offset   = 2 + i * tagLen;
+      tags[i].tagIndex  = data[offset];
+      tags[i].tagType   = (eTagType_t)data[offset + 1];
       tags[i].scopeType = (eTagRangeType_t)data[offset + 2];
-      tags[i].ioIndex = data[offset + 3];
-      tags[i].centerX = readSignBitInt16(&data[offset + 4]);
-      tags[i].centerY = readSignBitInt16(&data[offset + 6]);
-      tags[i].width = readUint16(&data[offset + 8]);
-      tags[i].height = readUint16(&data[offset + 10]);
+      tags[i].ioIndex   = data[offset + 3];
+      tags[i].centerX   = readSignBitInt16(&data[offset + 4]);
+      tags[i].centerY   = readSignBitInt16(&data[offset + 6]);
+      tags[i].width     = readUint16(&data[offset + 8]);
+      tags[i].height    = readUint16(&data[offset + 10]);
     }
   }
   return actualCount;
@@ -1405,10 +1406,10 @@ void DFRobot_C4004::parseTagEvent(const uint8_t *data, uint16_t len)
 
   memset(&_tagInfo, 0, sizeof(_tagInfo));
   _tagInfo.tagIndex = data[0];
-  _tagInfo.tagType = (eTagType_t)data[1];
-  _tagInfo.ioIndex = data[2];
-  _tagInfo.centerX = readSignBitInt16(&data[3]);
-  _tagInfo.centerY = readSignBitInt16(&data[5]);
+  _tagInfo.tagType  = (eTagType_t)data[1];
+  _tagInfo.ioIndex  = data[2];
+  _tagInfo.centerX  = readSignBitInt16(&data[3]);
+  _tagInfo.centerY  = readSignBitInt16(&data[5]);
   if (_tagInfo.tagType == eTagBoundary) {
     _tagInfo.enterExit = static_cast<eBoundaryDirection_t>(data[7]);
   } else if (_tagInfo.tagType == eTagApproachAway) {
@@ -1467,8 +1468,8 @@ int16_t DFRobot_C4004::readInt16(const uint8_t *data) const
 
 int16_t DFRobot_C4004::readSignBitInt16(const uint8_t *data) const
 {
-  uint16_t raw = readUint16(data);
-  int16_t magnitude = (int16_t)(raw & 0x7FFF);
+  uint16_t raw       = readUint16(data);
+  int16_t  magnitude = (int16_t)(raw & 0x7FFF);
 
   if ((raw & 0x8000) != 0) {
     return (int16_t)(-magnitude);
@@ -1494,12 +1495,12 @@ void DFRobot_C4004::writeInt16(uint8_t *data, int16_t value) const
 
 void DFRobot_C4004::writeSignBitInt16(uint8_t *data, int16_t value) const
 {
-  int32_t magnitude = value;
-  uint16_t raw = 0;
+  int32_t  magnitude = value;
+  uint16_t raw       = 0;
 
   if (magnitude < 0) {
     magnitude = -magnitude;
-    raw = 0x8000;
+    raw       = 0x8000;
   }
   if (magnitude > 0x7FFF) {
     magnitude = 0x7FFF;

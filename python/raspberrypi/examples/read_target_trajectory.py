@@ -1,17 +1,19 @@
 # -*- coding: utf-8 -*
 '''!
-  @file read_target_trajectory.py
-  @brief Enable trajectory tracking and print target trajectory information.
-  @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
-  @license The MIT License (MIT)
-  @author JiaLi(zhixin.liu@dfrobot.com)
-  @version V1.0.0
-  @date 2026-05-22
-  @url https://github.com/DFRobot/DFRobot_C4004
+@file read_target_trajectory.py
+@brief Enable trajectory tracking and print target trajectory information.
+@copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
+@license The MIT License (MIT)
+@author JiaLi(zhixin.liu@dfrobot.com)
+@version V1.0.0
+@date 2026-05-22
+@url https://github.com/DFRobot/DFRobot_C4004
 '''
+
 import os
 import sys
 import time
+
 cur_path = os.path.dirname(os.path.abspath(__file__))
 while cur_path != os.path.dirname(cur_path):
   if os.path.exists(os.path.join(cur_path, 'DFRobot_C4004.py')):
@@ -52,14 +54,7 @@ def print_trajectory_data(data_mode):
     print('Row\tIndex\tKinesia\tFeature\tX\tY\tSpeed')
     for i in range(min(count, len(targets))):
       target = targets[i]
-      print('%d\t%d\t%d\t%s\t%d\t%d\t%d' % (
-        i,
-        target.index,
-        target.kinesia,
-        target_feature_to_string(target.target_feature),
-        target.x,
-        target.y,
-        target.speed))
+      print('%d\t%d\t%d\t%s\t%d\t%d\t%d' % (i, target.index, target.kinesia, target_feature_to_string(target.target_feature), target.x, target.y, target.speed))
   print('')
 
 

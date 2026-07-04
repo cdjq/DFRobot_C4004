@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*
 '''!
-  @file roomOccupancyInference.py
+  @file room_occupancy_inference.py
   @brief Infer kitchen occupancy from kitchen-door boundary tag events.
   @details This example configures living-room, kitchen, and kitchen-door tags.
   @n The kitchen-door tag is Boundary relative to the living-room range.

@@ -13,7 +13,7 @@
 
 #if defined(ESP8266) || defined(ARDUINO_AVR_UNO)
 SoftwareSerial mySerial(4, 5);
-DFRobot_C4004 c4004(&mySerial, 115200);
+DFRobot_C4004  c4004(&mySerial, 115200);
 #elif defined(ESP32)
 DFRobot_C4004 c4004(&Serial1, 115200, /*D2*/ D2, /*D3*/ D3);
 #else
@@ -35,16 +35,16 @@ const __FlashStringHelper *targetFeatureToString(eTargetFeature_t feature)
 
 void printTrajectoryData(eGetDataMode_t dataMode)
 {
-  const __FlashStringHelper *title = NULL;
+  const __FlashStringHelper *title    = NULL;
   const __FlashStringHelper *modeText = NULL;
-  sTargetInfo_t targets[MAX_TARGETS];
-  uint8_t count = c4004.getTargetList(targets, MAX_TARGETS, dataMode);
+  sTargetInfo_t              targets[MAX_TARGETS];
+  uint8_t                    count = c4004.getTargetList(targets, MAX_TARGETS, dataMode);
 
   if (dataMode == eGetDataActive) {
-    title = F("======================TrajectoryActive=======================");
+    title    = F("======================TrajectoryActive=======================");
     modeText = F("Active Query");
   } else {
-    title = F("======================TrajectoryReport=======================");
+    title    = F("======================TrajectoryReport=======================");
     modeText = F("Passive Report");
   }
   Serial.println(title);
@@ -92,7 +92,7 @@ void setup()
   delay(50);
 
   sFourSidedRange_t range;
-  range.mode = eRangeFourSide;
+  range.mode        = eRangeFourSide;
   range.xPositiveCm = 200;
   range.xNegativeCm = -200;
   range.yPositiveCm = 700;

@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*
 '''!
-  @file learning_trajectory_range.py
-  @brief Example for learning trajectory range.
-  @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
-  @license The MIT License (MIT)
-  @author JiaLi(zhixin.liu@dfrobot.com)
-  @version V1.0.0
-  @date 2026-05-22
-  @url https://github.com/DFRobot/DFRobot_C4004
+@file learning_trajectory_range.py
+@brief Example for learning trajectory range.
+@copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
+@license The MIT License (MIT)
+@author JiaLi(zhixin.liu@dfrobot.com)
+@version V1.0.0
+@date 2026-05-22
+@url https://github.com/DFRobot/DFRobot_C4004
 '''
+
 import os
 import select
 import sys
@@ -118,7 +119,7 @@ def print_trajectory_points(points):
 
   print('Point coordinates (x, y):')
   for start in range(0, len(points), points_per_line):
-    chunk = points[start:start + points_per_line]
+    chunk = points[start : start + points_per_line]
     print('  '.join('(%5d,%5d)' % (point.x, point.y) for point in chunk))
 
 
@@ -134,10 +135,7 @@ def wait_for_single_person():
     else:
       confirm_count = 0
 
-    print('Active target count: %d  confirm: %d/%d' % (
-      target_count,
-      confirm_count,
-      SINGLE_PERSON_CONFIRM_TIMES))
+    print('Active target count: %d  confirm: %d/%d' % (target_count, confirm_count, SINGLE_PERSON_CONFIRM_TIMES))
 
     while time.time() - start_time < PEOPLE_QUERY_INTERVAL:
       cmd = read_command(0.01)
