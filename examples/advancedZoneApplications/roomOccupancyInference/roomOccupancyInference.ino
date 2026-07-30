@@ -5,15 +5,26 @@
  * @n The kitchen-door tag is Boundary relative to the living-room range.
  * @n Enter-living-room events decrement the kitchen people count, and
  * @n exit-living-room events increment it.
+ * @n Usage environment:
+ * @n - Please install the sensor at a height of 180 cm for use.
  * @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
  * @license The MIT License (MIT)
- * @author JiaLi(zhixin.liu@dfrobot.com)
+ * @author JiaLi(jia.li@dfrobot.com)
  * @version V1.0.0
  * @date 2026-05-22
  * @url https://github.com/DFRobot/DFRobot_C4004
  */
 
 #include "DFRobot_C4004.h"
+
+/* ---------------------------------------------------------------------------------------------------------------------
+ *    board   |             MCU                | Leonardo/Mega2560/M0 |    UNO    | ESP8266 | ESP32 |  microbit  |   M0  |
+ *     VCC    |              5V                |         5V           |     5V    |    5V   |   5V  |     X      |   5V  |
+ *     GND    |              GND               |        GND           |    GND    |   GND   |  GND  |     X      |  GND  |
+ *     RX     |              TX                |     Serial1 TX1      |     5     |   5     |  D3   |     X      |  TX1  |
+ *     TX     |              RX                |     Serial1 RX1      |     4     |   4     |  D2   |     X      |  RX1  |
+ * ----------------------------------------------------------------------------------------------------------------------*/
+/* Baud rate is fixed at 115200. SoftSerial mode cannot guarantee stable data communication! */
 
 #if defined(ESP8266) || defined(ARDUINO_AVR_UNO)
 SoftwareSerial mySerial(4, 5);
@@ -34,6 +45,7 @@ const uint32_t trackExistsTimeS    = 1;
 
 const int16_t  livingRoomCenterXCm = 0;
 const int16_t  livingRoomCenterYCm = 200;
+/* Rectangle SizeX/SizeY map to tag width/height: width along X-axis, height along Y-axis (cm). */
 const uint16_t livingRoomSizeXCm   = 400;
 const uint16_t livingRoomSizeYCm   = 400;
 
@@ -56,33 +68,33 @@ uint16_t    kitchenDoorExitCount  = 0;
 int16_t     kitchenInferredPeople = 0;
 const char *lastDoorEvent         = "None";
 
-const char *doorEventToText(eBoundaryDirection_t enterExit)
+const char *doorEventToText(DFRobot_C4004::eBoundaryDirection_t enterExit)
 {
-  if (enterExit == eBoundaryDirection_t::eEnter) {
+  if (enterExit == DFRobot_C4004::eEnter) {
     return "Enter living room";
   }
-  if (enterExit == eBoundaryDirection_t::eExit) {
+  if (enterExit == DFRobot_C4004::eExit) {
     return "Exit living room";
   }
   return "None";
 }
 
-void processLivingRoomTag(const sTagInfo_t &tagInfo)
+void processLivingRoomTag(const DFRobot_C4004::sTagInfo_t &tagInfo)
 {
   livingMotionCount = tagInfo.motionNum;
   livingStaticCount = tagInfo.staticNum;
   livingPeopleCount = (uint8_t)(livingMotionCount + livingStaticCount);
 }
 
-void processKitchenDoorTag(const sTagInfo_t &tagInfo)
+void processKitchenDoorTag(const DFRobot_C4004::sTagInfo_t &tagInfo)
 {
-  if (tagInfo.enterExit == eBoundaryDirection_t::eEnter) {
+  if (tagInfo.enterExit == DFRobot_C4004::eEnter) {
     kitchenDoorEnterCount++;
     if (kitchenInferredPeople > 0) {
       kitchenInferredPeople--;
     }
     lastDoorEvent = "Enter living room";
-  } else if (tagInfo.enterExit == eBoundaryDirection_t::eExit) {
+  } else if (tagInfo.enterExit == DFRobot_C4004::eExit) {
     kitchenDoorExitCount++;
     kitchenInferredPeople++;
     lastDoorEvent = "Exit living room";
@@ -99,14 +111,14 @@ void processKitchenDoorTag(const sTagInfo_t &tagInfo)
 
 void processTagEvent()
 {
-  sTagInfo_t tagInfo;
+  DFRobot_C4004::sTagInfo_t tagInfo;
   if (!c4004.getTagInfo(&tagInfo)) {
     return;
   }
 
-  if (tagInfo.tagIndex == tagLivingRoom && tagInfo.tagType == eTagPeopleCounting) {
+  if (tagInfo.tagIndex == tagLivingRoom && tagInfo.tagType == DFRobot_C4004::eTagPeopleCounting) {
     processLivingRoomTag(tagInfo);
-  } else if (tagInfo.tagIndex == tagKitchenDoor && tagInfo.tagType == eTagBoundary) {
+  } else if (tagInfo.tagIndex == tagKitchenDoor && tagInfo.tagType == DFRobot_C4004::eTagBoundary) {
     processKitchenDoorTag(tagInfo);
   }
 }
@@ -121,13 +133,21 @@ void setup()
   }
   Serial.println(F("DFRobot C4004 begin success."));
 
+  // Side mount: default 180 cm, recommended 180±20 cm. Top mount: recommended 220-280 cm.
+  if (c4004.setInstallHeight(180)) {
+    Serial.println(F("Set install height success."));
+  } else {
+    Serial.println(F("Set install height failed."));
+  }
+  delay(50);
+
   if (c4004.setPresenceEnable(true)) {
     Serial.println(F("Set presence enable success."));
   } else {
     Serial.println(F("Set presence enable failed."));
   }
 
-  if (c4004.setCheckToActiveFrames(checkToActiveFrames)) {
+  if (c4004.setFrameGenerateCount(checkToActiveFrames)) {
     Serial.println(F("Set check-to-active frames success."));
   } else {
     Serial.println(F("Set check-to-active frames failed."));
@@ -135,19 +155,18 @@ void setup()
   delay(50);
 
   uint8_t checkToActiveFrames = 0;
-  if (c4004.getCheckToActiveFrames(&checkToActiveFrames)) {
+  if (c4004.getFrameGenerateCount(&checkToActiveFrames)) {
     Serial.print(F("Current check-to-active frames: "));
     Serial.println(checkToActiveFrames);
   } else {
     Serial.println(F("Read current check-to-active frames failed."));
   }
 
-  sFourSidedRange_t range;
-  range.mode        = eRangeFourSide;
-  range.xPositiveCm = 200;
-  range.xNegativeCm = -200;
-  range.yPositiveCm = 400;
-  range.yNegativeCm = 0;
+  DFRobot_C4004::sFourSidedRange_t range;
+  range.xMax = 200;
+  range.xMin = -200;
+  range.yMax = 400;
+  range.yMin = 0;
   if (c4004.setFourSidedRangeMode(range)) {
     Serial.println(F("Set boundary detection range success."));
   } else {
@@ -160,11 +179,11 @@ void setup()
     Serial.println(F("Clear all tags failed."));
   }
 
-  sTagConfig_t tags[3] = {};
+  DFRobot_C4004::sTagConfig_t tags[3] = {};
 
   tags[0].tagIndex  = tagLivingRoom;
-  tags[0].tagType   = eTagPeopleCounting;
-  tags[0].scopeType = eTagRangeRectangle;
+  tags[0].tagType   = DFRobot_C4004::eTagPeopleCounting;
+  tags[0].scopeType = DFRobot_C4004::eTagRangeRectangle;
   tags[0].ioIndex   = 0;
   tags[0].centerX   = livingRoomCenterXCm;
   tags[0].centerY   = livingRoomCenterYCm;
@@ -172,8 +191,8 @@ void setup()
   tags[0].height    = livingRoomSizeYCm;
 
   tags[1].tagIndex  = tagKitchen;
-  tags[1].tagType   = eTagPeopleCounting;
-  tags[1].scopeType = eTagRangeRectangle;
+  tags[1].tagType   = DFRobot_C4004::eTagPeopleCounting;
+  tags[1].scopeType = DFRobot_C4004::eTagRangeRectangle;
   tags[1].ioIndex   = 0;
   tags[1].centerX   = kitchenCenterXCm;
   tags[1].centerY   = kitchenCenterYCm;
@@ -181,8 +200,8 @@ void setup()
   tags[1].height    = kitchenSizeYCm;
 
   tags[2].tagIndex  = tagKitchenDoor;
-  tags[2].tagType   = eTagBoundary;
-  tags[2].scopeType = eTagRangeRectangle;
+  tags[2].tagType   = DFRobot_C4004::eTagBoundary;
+  tags[2].scopeType = DFRobot_C4004::eTagRangeRectangle;
   tags[2].ioIndex   = 0;
   tags[2].centerX   = doorCenterXCm;
   tags[2].centerY   = doorCenterYCm;
@@ -225,9 +244,9 @@ void setup()
 void loop()
 {
   uint32_t         nowMs = millis();
-  eReportedEvent_t event = c4004.getReportedInfo(50);
+  DFRobot_C4004::eReportedEvent_t event = c4004.getReportedEvent(50);
 
-  if (event == eEventTag) {
+  if (event == DFRobot_C4004::eEventTag) {
     processTagEvent();
   }
 

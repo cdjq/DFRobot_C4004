@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*
 '''!
-@file read_target_trajectory.py
-@brief Enable trajectory tracking and print target trajectory information.
+@file get_target_tracking.py
+@brief Print live tracked targets in range: position, motion type, speed, and related data.
+@details Use this example to view tracked targets in the detection range, including position,
+@n motion feature, speed and related tracking data printed to the terminal.
+@n Usage environment:
+@n - Please install the sensor at a height of 180 cm for use.
 @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
 @license The MIT License (MIT)
-@author JiaLi(zhixin.liu@dfrobot.com)
+@author JiaLi(jia.li@dfrobot.com)
 @version V1.0.0
 @date 2026-05-22
 @url https://github.com/DFRobot/DFRobot_C4004
@@ -51,7 +55,7 @@ def print_trajectory_data(data_mode):
   if count == 0:
     print('No target.')
   else:
-    print('Row\tIndex\tKinesia\tFeature\tX\tY\tSpeed')
+    print('Row\tIndex\tKinesia\tFeature\tX(cm)\tY(cm)\tSpeed(cm/s)')
     for i in range(min(count, len(targets))):
       target = targets[i]
       print('%d\t%d\t%d\t%s\t%d\t%d\t%d' % (i, target.index, target.kinesia, target_feature_to_string(target.target_feature), target.pos_x, target.pos_y, target.speed))
@@ -64,18 +68,24 @@ def main():
     time.sleep(1)
   print('DFRobot C4004 begin success.')
 
-  if c4004.set_check_to_active_frames(7):
+  # Side mount: default 180 cm, recommended 180±20 cm. Top mount: recommended 220-280 cm.
+  if c4004.set_install_height(180):
+    print('Set install height success.')
+  else:
+    print('Set install height failed.')
+  time.sleep(0.05)
+
+  if c4004.set_frame_generate_count(7):
     print('Set check-to-active frames success.')
   else:
     print('Set check-to-active frames failed.')
   time.sleep(0.05)
 
   range_info = FourSidedRange()
-  range_info.mode = c4004.RANGE_FOUR_SIDE
-  range_info.x_positive_cm = 200
-  range_info.x_negative_cm = -200
-  range_info.y_positive_cm = 700
-  range_info.y_negative_cm = 0
+  range_info.x_max = 200
+  range_info.x_min = -200
+  range_info.y_max = 700
+  range_info.y_min = 0
   if c4004.set_four_sided_range_mode(range_info):
     print('Set boundary detection range success.')
   else:
@@ -86,12 +96,12 @@ def main():
   else:
     print('Set trajectory track enable failed.')
 
-  if c4004.set_motion_led(True):
-    print('Set motion LED success.')
+  if c4004.set_occ_led(True):
+    print('Set occupancy LED success.')
   else:
-    print('Set motion LED failed.')
+    print('Set occupancy LED failed.')
 
-  if c4004.set_trajectory_led(True):
+  if c4004.set_trk_led(True):
     print('Set trajectory LED success.')
   else:
     print('Set trajectory LED failed.')
@@ -99,10 +109,10 @@ def main():
   last_query = 0
   while True:
     # When state or data changes and the corresponding report function is enabled,
-    # the module pushes the update immediately as an event via get_reported_info().
+    # the module pushes the update immediately as an event via get_reported_event().
     # Use the matching getter with GET_DATA_REPORT to read the cached value
     # updated by that report, without issuing an extra UART query.
-    event = c4004.get_reported_info(0.1)
+    event = c4004.get_reported_event(0.1)
     if event == c4004.EVENT_TRAJECTORY:
       print_trajectory_data(c4004.GET_DATA_REPORT)
 

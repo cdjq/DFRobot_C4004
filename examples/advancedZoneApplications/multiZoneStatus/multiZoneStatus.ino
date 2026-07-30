@@ -5,15 +5,26 @@
  * @n tags in code. It keeps the last event result for each tag, prints a summary table
  * @n every 3 seconds or when a tag event arrives, and drives outputs based on
  * @n game-area and sofa-area people counting results.
+ * @n Usage environment:
+ * @n - Please install the sensor at a height of 180 cm for use.
  * @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
  * @license The MIT License (MIT)
- * @author JiaLi(zhixin.liu@dfrobot.com)
+ * @author JiaLi(jia.li@dfrobot.com)
  * @version V1.0.0
  * @date 2026-05-22
  * @url https://github.com/DFRobot/DFRobot_C4004
  */
 
 #include "DFRobot_C4004.h"
+
+/* ---------------------------------------------------------------------------------------------------------------------
+ *    board   |             MCU                | Leonardo/Mega2560/M0 |    UNO    | ESP8266 | ESP32 |  microbit  |   M0  |
+ *     VCC    |              5V                |         5V           |     5V    |    5V   |   5V  |     X      |   5V  |
+ *     GND    |              GND               |        GND           |    GND    |   GND   |  GND  |     X      |  GND  |
+ *     RX     |              TX                |     Serial1 TX1      |     5     |   5     |  D3   |     X      |  TX1  |
+ *     TX     |              RX                |     Serial1 RX1      |     4     |   4     |  D2   |     X      |  RX1  |
+ * ----------------------------------------------------------------------------------------------------------------------*/
+/* Baud rate is fixed at 115200. SoftSerial mode cannot guarantee stable data communication! */
 
 #if defined(ESP8266) || defined(ARDUINO_AVR_UNO)
 SoftwareSerial mySerial(4, 5);
@@ -48,7 +59,7 @@ const uint8_t lightPwmHigh = 255;
 
 const char *tagNames[tagTotal] = { "Game", "Sofa", "HomeDoor", "KitchenDoor", "Dining", "CurtainNoise", "PlantNoise" };
 
-sTagInfo_t tagCache[tagTotal];
+DFRobot_C4004::sTagInfo_t tagCache[tagTotal];
 bool       tagPrintPending     = false;
 bool       tvOutputHigh        = false;
 uint8_t    lightOutputValue    = lightPwmLow;
@@ -57,30 +68,30 @@ uint32_t   sofaStaticStartMs   = 0;
 uint32_t   sofaMotionStartMs   = 0;
 uint32_t   sofaEmptyStartMs    = 0;
 
-const char *tagTypeToText(eTagType_t type)
+const char *tagTypeToText(DFRobot_C4004::eTagType_t type)
 {
-  if (type == eTagNone) {
+  if (type == DFRobot_C4004::eTagNone) {
     return "None";
-  } else if (type == eTagBoundary) {
+  } else if (type == DFRobot_C4004::eTagBoundary) {
     return "Boundary";
-  } else if (type == eTagApproachAway) {
+  } else if (type == DFRobot_C4004::eTagApproachAway) {
     return "ApproachAway";
-  } else if (type == eTagPeopleCounting) {
+  } else if (type == DFRobot_C4004::eTagPeopleCounting) {
     return "PeopleCount";
-  } else if (type == eTagNoise) {
+  } else if (type == DFRobot_C4004::eTagNoise) {
     return "Noise";
   }
   return "Unknown";
 }
 
-void initTagCacheFromConfig(const sTagConfig_t *tags, uint8_t count)
+void initTagCacheFromConfig(const DFRobot_C4004::sTagConfig_t *tags, uint8_t count)
 {
   for (uint8_t i = 0; i < tagTotal; i++) {
-    memset(&tagCache[i], 0, sizeof(sTagInfo_t));
+    memset(&tagCache[i], 0, sizeof(DFRobot_C4004::sTagInfo_t));
     tagCache[i].tagIndex  = i;
-    tagCache[i].tagType   = eTagNone;
-    tagCache[i].enterExit = eBoundaryDirection_t::eNone;
-    tagCache[i].motionDir = eApproachAwayDirection_t::eNone;
+    tagCache[i].tagType   = DFRobot_C4004::eTagNone;
+    tagCache[i].enterExit = DFRobot_C4004::eBoundaryNone;
+    tagCache[i].motionDir = DFRobot_C4004::eApproachAwayNone;
   }
 
   for (uint8_t i = 0; i < count; i++) {
@@ -98,7 +109,7 @@ void initTagCacheFromConfig(const sTagConfig_t *tags, uint8_t count)
 
 bool initTagCacheFromDevice()
 {
-  sTagConfig_t tags[tagTotal];
+  DFRobot_C4004::sTagConfig_t tags[tagTotal];
   uint8_t      count = c4004.getTags(tags, (uint8_t)(sizeof(tags) / sizeof(tags[0])));
 
   initTagCacheFromConfig(tags, count);
@@ -123,7 +134,15 @@ void setup()
   }
   Serial.println(F("DFRobot C4004 begin success."));
 
-  if (c4004.setCheckToActiveFrames(7)) {
+  // Side mount: default 180 cm, recommended 180±20 cm. Top mount: recommended 220-280 cm.
+  if (c4004.setInstallHeight(180)) {
+    Serial.println(F("Set install height success."));
+  } else {
+    Serial.println(F("Set install height failed."));
+  }
+  delay(50);
+
+  if (c4004.setFrameGenerateCount(7)) {
     Serial.println(F("Set check-to-active frames success."));
   } else {
     Serial.println(F("Set check-to-active frames failed."));
@@ -136,19 +155,18 @@ void setup()
     Serial.println(F("Set presence enable failed."));
   }
 
-  sFourSidedRange_t range;
-  range.mode        = eRangeFourSide;
-  range.xPositiveCm = 200;
-  range.xNegativeCm = -200;
-  range.yPositiveCm = 700;
-  range.yNegativeCm = 0;
+  DFRobot_C4004::sFourSidedRange_t range;
+  range.xMax = 200;
+  range.xMin = -200;
+  range.yMax = 700;
+  range.yMin = 0;
   if (c4004.setFourSidedRangeMode(range)) {
     Serial.println(F("Set boundary detection range success."));
   } else {
     Serial.println(F("Set boundary detection range failed."));
   }
 
-  sTagConfig_t tags[tagTotal] = {};
+  DFRobot_C4004::sTagConfig_t tags[tagTotal] = {};
 
   /**
  * Tag configuration note:
@@ -157,17 +175,17 @@ void setup()
  * code commented out.
  *
  * If you want this example to configure tags automatically, uncomment the
- * clearAllTags(), sTagConfig_t tags[], and setTagsFromConfig() code below.
+ * clearAllTags(), DFRobot_C4004::sTagConfig_t tags[], and setTagsFromConfig() code below.
  *
  * Field meaning:
  *   tagIndex : Tag index. It must be unique for each tag.
  *   tagType  : Tag function, such as PeopleCounting, ApproachAway, or Noise.
- *   scopeType: Tag shape. Use eTagRangeRectangle or eTagRangeCircle.
+ *   scopeType: Tag shape. Use DFRobot_C4004::eTagRangeRectangle or DFRobot_C4004::eTagRangeCircle.
  *   ioIndex  : IO linkage index. 0 means unused; 2-6 maps to IO2-IO6.
  *   centerX  : Tag center X coordinate, in cm.
  *   centerY  : Tag center Y coordinate, in cm.
- *   width    : Rectangle width, or circle radius, in cm.
- *   height   : Rectangle height, in cm. Not used for circle tags.
+ *   width    : Rectangle: size along X-axis (cm); Circle: radius (cm).
+ *   height   : Rectangle: size along Y-axis (cm); Circle: ignored.
  */
   if (c4004.clearAllTags()) {
     Serial.println(F("Clear all tags success."));
@@ -176,8 +194,8 @@ void setup()
   }
 
   tags[0].tagIndex  = tagGame;
-  tags[0].tagType   = eTagPeopleCounting;
-  tags[0].scopeType = eTagRangeCircle;
+  tags[0].tagType   = DFRobot_C4004::eTagPeopleCounting;
+  tags[0].scopeType = DFRobot_C4004::eTagRangeCircle;
   tags[0].ioIndex   = 0;
   tags[0].centerX   = -100;
   tags[0].centerY   = 550;
@@ -185,8 +203,8 @@ void setup()
   tags[0].height    = 0;
 
   tags[1].tagIndex  = tagSofa;
-  tags[1].tagType   = eTagPeopleCounting;
-  tags[1].scopeType = eTagRangeRectangle;
+  tags[1].tagType   = DFRobot_C4004::eTagPeopleCounting;
+  tags[1].scopeType = DFRobot_C4004::eTagRangeRectangle;
   tags[1].ioIndex   = 0;
   tags[1].centerX   = 100;
   tags[1].centerY   = 450;
@@ -194,8 +212,8 @@ void setup()
   tags[1].height    = 300;
 
   tags[2].tagIndex  = tagHomeDoor;
-  tags[2].tagType   = eTagBoundary;
-  tags[2].scopeType = eTagRangeRectangle;
+  tags[2].tagType   = DFRobot_C4004::eTagBoundary;
+  tags[2].scopeType = DFRobot_C4004::eTagRangeRectangle;
   tags[2].ioIndex   = 0;
   tags[2].centerX   = 100;
   tags[2].centerY   = 700;
@@ -203,8 +221,8 @@ void setup()
   tags[2].height    = 40;
 
   tags[3].tagIndex  = tagKitchenDoor;
-  tags[3].tagType   = eTagBoundary;
-  tags[3].scopeType = eTagRangeRectangle;
+  tags[3].tagType   = DFRobot_C4004::eTagBoundary;
+  tags[3].scopeType = DFRobot_C4004::eTagRangeRectangle;
   tags[3].ioIndex   = 0;
   tags[3].centerX   = -100;
   tags[3].centerY   = 700;
@@ -212,8 +230,8 @@ void setup()
   tags[3].height    = 40;
 
   tags[4].tagIndex  = tagDining;
-  tags[4].tagType   = eTagPeopleCounting;
-  tags[4].scopeType = eTagRangeRectangle;
+  tags[4].tagType   = DFRobot_C4004::eTagPeopleCounting;
+  tags[4].scopeType = DFRobot_C4004::eTagRangeRectangle;
   tags[4].ioIndex   = 0;
   tags[4].centerX   = 50;
   tags[4].centerY   = 150;
@@ -221,8 +239,8 @@ void setup()
   tags[4].height    = 150;
 
   tags[5].tagIndex  = tagCurtain;
-  tags[5].tagType   = eTagNoise;
-  tags[5].scopeType = eTagRangeRectangle;
+  tags[5].tagType   = DFRobot_C4004::eTagNoise;
+  tags[5].scopeType = DFRobot_C4004::eTagRangeRectangle;
   tags[5].ioIndex   = 0;
   tags[5].centerX   = -150;
   tags[5].centerY   = 300;
@@ -230,8 +248,8 @@ void setup()
   tags[5].height    = 300;
 
   tags[6].tagIndex  = tagPlant;
-  tags[6].tagType   = eTagNoise;
-  tags[6].scopeType = eTagRangeCircle;
+  tags[6].tagType   = DFRobot_C4004::eTagNoise;
+  tags[6].scopeType = DFRobot_C4004::eTagRangeCircle;
   tags[6].ioIndex   = 0;
   tags[6].centerX   = -50;
   tags[6].centerY   = 400;
@@ -259,12 +277,12 @@ void setup()
 
 void loop()
 {
-  eReportedEvent_t event = c4004.getReportedInfo(100);
+  DFRobot_C4004::eReportedEvent_t event = c4004.getReportedEvent(100);
 
   uint32_t nowMs = millis();
 
-  if (event == eEventTag) {
-    sTagInfo_t tagInfo;
+  if (event == DFRobot_C4004::eEventTag) {
+    DFRobot_C4004::sTagInfo_t tagInfo;
     if (c4004.getTagInfo(&tagInfo) && tagInfo.tagIndex < tagTotal) {
       tagCache[tagInfo.tagIndex].tagIndex  = tagInfo.tagIndex;
       tagCache[tagInfo.tagIndex].tagType   = tagInfo.tagType;
@@ -358,24 +376,24 @@ void loop()
       Serial.print(tagCache[i].centerY);
       Serial.print(F("\t"));
 
-      if (tagCache[i].tagType == eTagPeopleCounting) {
+      if (tagCache[i].tagType == DFRobot_C4004::eTagPeopleCounting) {
         Serial.print(tagCache[i].motionNum);
       } else {
         Serial.print(0);
       }
       Serial.print(F("\t"));
 
-      if (tagCache[i].tagType == eTagPeopleCounting) {
+      if (tagCache[i].tagType == DFRobot_C4004::eTagPeopleCounting) {
         Serial.print(tagCache[i].staticNum);
       } else {
         Serial.print(0);
       }
       Serial.print(F("\t"));
 
-      if (tagCache[i].tagType == eTagApproachAway) {
-        if (tagCache[i].motionDir == eApproachAwayDirection_t::eApproach) {
+      if (tagCache[i].tagType == DFRobot_C4004::eTagApproachAway) {
+        if (tagCache[i].motionDir == DFRobot_C4004::eApproach) {
           Serial.print(F("Approach"));
-        } else if (tagCache[i].motionDir == eApproachAwayDirection_t::eAway) {
+        } else if (tagCache[i].motionDir == DFRobot_C4004::eAway) {
           Serial.print(F("Away"));
         } else {
           Serial.print(F("None"));
@@ -385,10 +403,10 @@ void loop()
       }
       Serial.print(F("\t"));
 
-      if (tagCache[i].tagType == eTagBoundary) {
-        if (tagCache[i].enterExit == eBoundaryDirection_t::eEnter) {
+      if (tagCache[i].tagType == DFRobot_C4004::eTagBoundary) {
+        if (tagCache[i].enterExit == DFRobot_C4004::eEnter) {
           Serial.println(F("Enter"));
-        } else if (tagCache[i].enterExit == eBoundaryDirection_t::eExit) {
+        } else if (tagCache[i].enterExit == DFRobot_C4004::eExit) {
           Serial.println(F("Exit"));
         } else {
           Serial.println(F("None"));

@@ -1,7 +1,7 @@
 # DFRobot_C4004
 - [English](./README.md)
 
-DFRobot C4004 是一款 60GHz 4T4R 多区域存在感知毫米波雷达，适用于智能空间管理。它不仅能够上报人员占用状态，还能实时统计配置区域内的静止人数与运动人数，内置区域逻辑与 6 路 IO 联动，可快速实现自动化部署。
+DFRobot C4004 是一款 60GHz 4T4R 多区域存在感知毫米波雷达，适用于智能空间管理。它不仅能够上报人员占用状态，还能实时统计配置区域内的静止人数与运动人数，内置区域逻辑和 6 路 IO 联动，可快速实现自动化部署。
 
 ## 产品链接(www.dfrobot.com)
 
@@ -35,7 +35,7 @@ DFRobot C4004 是一款 60GHz 4T4R 多区域存在感知毫米波雷达，适用
 1. 打开 Arduino IDE，在 工具 -> 管理库 中搜索 `DFRobot_C4004` 并安装该库。
 2. 下载本库，将其复制到 Arduino `libraries` 文件夹中，然后打开 examples 文件夹运行示例。
 
-对于树莓派，使用 `python/raspberrypi/` 中的驱动，若未安装 `pyserial` 请先安装。
+对于树莓派，使用 `python/raspberrypi/` 中的驱动，若未安装 `pyserial` 请先安装：
 
 ```bash
 pip3 install pyserial
@@ -49,28 +49,28 @@ pip3 install pyserial
    * @fn begin
    * @brief 初始化 DFRobot C4004 传感器。
    * @return true: 初始化成功，false: 初始化失败。
-   */
+  */
   bool begin(void);
 
   /**
    * @fn isConnected
-   * @brief 检测 DFRobot C4004 传感器是否连接。
+   * @brief 检查 DFRobot C4004 传感器是否连接。
    * @return true: 已连接，false: 未连接。
-   */
+  */
   bool isConnected(void);
 
   /**
    * @fn reset
    * @brief 复位 DFRobot C4004 传感器。
    * @return true: 复位成功，false: 复位失败。
-   */
+  */
   bool reset(void);
 
   /**
    * @fn factoryReset
    * @brief 恢复 DFRobot C4004 传感器出厂设置。
    * @return true: 复位成功，false: 复位失败。
-   */
+  */
   bool factoryReset(void);
 
   /**
@@ -80,11 +80,11 @@ pip3 install pyserial
    * @n          eGetDataActive: 主动获取最新心跳状态。
    * @n          eGetDataReport: 从最近一次上报中获取最新心跳状态。
    * @return true: 检测到心跳，false: 未检测到心跳。
-   */
+  */
   bool getHeartbeat(eGetDataMode_t mode = eGetDataActive);
 
   /**
-   * @fn getReportedInfo
+   * @fn getReportedEvent
    * @brief 获取 DFRobot C4004 传感器最新上报的事件。
    * @param timeoutMs: 等待上报的最大时间，单位为毫秒，默认值为 50。
    * @return eReportedEvent_t: 上报的事件类型。
@@ -98,21 +98,21 @@ pip3 install pyserial
    * @n          eEventPeopleCount: 检测到人数统计事件。
    * @n          eEventUnknown: 检测到未知事件。
    * @n          eEventError: 发生错误。
-   */
-  eReportedEvent_t getReportedInfo(uint16_t timeoutMs = 50);
+  */
+  eReportedEvent_t getReportedEvent(uint16_t timeoutMs = 50);
 
   /**
    * @fn getHardwareVersion
    * @brief 获取 DFRobot C4004 传感器的硬件版本。
    * @return String: 硬件版本。
-   */
+  */
   String getHardwareVersion(void);
 
   /**
    * @fn getFirmwareVersion
    * @brief 获取 DFRobot C4004 传感器的固件版本。
    * @return String: 固件版本。
-   */
+  */
   String getFirmwareVersion(void);
 
   /**
@@ -123,7 +123,7 @@ pip3 install pyserial
    * @n          heightCm: DFRobot C4004 安装高度，单位为 cm。
    * @n          zAngle: DFRobot C4004 安装 Z 轴角度，单位为度。
    * @return true: 设置成功，false: 设置失败。
-   */
+  */
   bool setInstallInfo(sInstallInfo_t &info);
 
   /**
@@ -138,20 +138,20 @@ pip3 install pyserial
   bool getInstallInfo(sInstallInfo_t *info);
 
   /**
-   * @fn setInstallHigh
+   * @fn setInstallHeight
    * @brief 设置 DFRobot C4004 传感器的安装高度。
-   * @param hight: 安装高度，单位为 cm。
+   * @param height: 安装高度，单位为 cm。
    * @return true: 设置成功，false: 设置失败。
   */
-  bool setInstallHigh(int32_t hight);
+  bool setInstallHeight(int32_t height);
 
   /**
-   * @fn getInstallHigh
+   * @fn getInstallHeight
    * @brief 获取 DFRobot C4004 传感器的安装高度。
-   * @param hight: 接收安装高度的指针，单位为 cm。
+   * @param pHeight: 接收安装高度的指针，单位为 cm。
    * @return true: 获取成功，false: 获取失败。
   */
-  bool getInstallHigh(int *hight);
+  bool getInstallHeight(int *pHeight);
 
   /**
    * @fn setPresenceEnable
@@ -159,7 +159,7 @@ pip3 install pyserial
    * @param enable: 启用或禁用存在检测功能。
    * @n          true: 启用，false: 禁用。
    * @return true: 设置成功，false: 设置失败。
-   */
+  */
   bool setPresenceEnable(bool enable);
 
   /**
@@ -168,34 +168,33 @@ pip3 install pyserial
    * @param enable: 接收启用状态的指针。
    * @n          true: 已启用，false: 已禁用。
    * @return true: 获取成功，false: 获取失败。
-   */
+  */
   bool getPresenceEnable(bool *enable);
 
   /**
    * @fn getPresenceState
-   * @brief 获取当前的存在检测结果。
-   * @param mode: 数据获取方式。
+   * @brief 获取检测范围内当前是否有人存在。
+   * @param mode: 数据获取模式。
    * @n          eGetDataActive: 主动查询最新数据并更新缓存。
-   * @n          eGetDataReport: 直接返回最近一次上报缓存的数据。
+   * @n          eGetDataReport: 返回最近一次上报缓存的数据。
    * @return ePresenceState_t: 存在检测结果。
    * @n          eNoPresence: 未检测到存在。
    * @n          ePresence: 检测到存在。
-   * @n          ePresenceUnknown: 存在状态未知。
-   */
+  */
   ePresenceState_t getPresenceState(eGetDataMode_t mode = eGetDataActive);
 
   /**
    * @fn getMotionState
    * @brief 获取当前的人体运动状态。
-   * @param mode: 数据获取方式。
+   * @param mode: 数据获取模式。
    * @n          eGetDataActive: 主动查询最新数据并更新缓存。
-   * @n          eGetDataReport: 直接返回最近一次上报缓存的数据。
+   * @n          eGetDataReport: 返回最近一次上报缓存的数据。
    * @return eMotionState_t: 运动状态。
    * @n          eMotionNone: 无运动状态。
    * @n          eMotionStatic: 静止。
    * @n          eMotionActive: 活跃运动。
-   * @n          eMotionUnknown: 运动状态未知。
-   */
+   * @n          eMotionUnknown: 未知运动状态。
+  */
   eMotionState_t getMotionState(eGetDataMode_t mode = eGetDataActive);
 
   /**
@@ -204,7 +203,7 @@ pip3 install pyserial
    * @param enable: 启用或禁用轨迹跟踪功能。
    * @n          true: 启用，false: 禁用。
    * @return true: 设置成功，false: 设置失败。
-   */
+  */
   bool setTrajectoryTrackEnable(bool enable);
 
   /**
@@ -217,20 +216,22 @@ pip3 install pyserial
   bool getTrajectoryTrackEnable(bool *enable);
 
   /**
-   * @fn setCheckToActiveFrames
+   * @fn setFrameGenerateCount
    * @brief 设置检查状态切换到活跃状态的确认帧数。
-   * @param frames: 帧数，有效范围：1-7。
+   * @n 数值越大，抑制噪声的能力越强，同时也会影响触发距离。
+   * @param frames: 帧数，有效范围：1-7，默认值：7。
    * @return true: 设置成功，false: 设置失败。
-   */
-  bool setCheckToActiveFrames(uint8_t frames);
+  */
+  bool setFrameGenerateCount(uint8_t frames);
 
   /**
-   * @fn getCheckToActiveFrames
+   * @fn getFrameGenerateCount
    * @brief 查询检查状态切换到活跃状态的确认帧数。
+   * @n 数值越大，抑制噪声的能力越强，同时也会影响触发距离。
    * @param frames: 接收帧数的指针。
    * @return true: 查询成功，false: 查询失败。
-   */
-  bool getCheckToActiveFrames(uint8_t *frames);
+  */
+  bool getFrameGenerateCount(uint8_t *frames);
 
   /**
    * @fn getTargetList
@@ -241,37 +242,42 @@ pip3 install pyserial
    * @n          eGetDataActive: 读取前主动查询最新目标信息。
    * @n          eGetDataReport: 从缓存的上报数据中读取目标信息。
    * @return uint8_t: 读取到的目标数量。
-   */
+  */
   uint8_t getTargetList(sTargetInfo_t *targetBuf, uint8_t maxCount, eGetDataMode_t mode = eGetDataActive);
 
   /**
-   * @fn setTrajectoryLed
-   * @brief 启用或禁用 DFRobot C4004 传感器在轨迹跟踪时的 LED。
-   * @param enable: 启用或禁用标签检测功能。
-   */
-  bool setTrajectoryLed(bool enable);
-
-  /**
-   * @fn setMotionLed
-   * @brief 启用或禁用 DFRobot C4004 传感器在人体运动检测时的 LED。
-   * @param enable: 启用或禁用标签检测功能。
+   * @fn setTrkLED
+   * @brief 启用或禁用轨迹跟踪 LED 功能。
+   * @n 若启用，LED 仅在生成/学习轨迹检测范围时亮起，其他时间保持熄灭。
+   * @param enable: true 表示启用，false 表示禁用。
    * @return true: 设置成功，false: 设置失败。
-   */
-  bool setMotionLed(bool enable);
+  */
+  bool setTrkLED(bool enable);
 
   /**
-   * @fn getTrajectoryLed
-   * @brief 获取 DFRobot C4004 传感器在轨迹跟踪时的 LED 状态。
-   * @return true: LED 已启用，false: LED 已禁用。
-   */
-  bool getTrajectoryLed(void);
+   * @fn setOccLED
+   * @brief 启用或禁用占用 LED 功能。
+   * @n 若启用，当检测范围内有人（占用状态）时 LED 亮起。
+   * @param enable: true 表示启用，false 表示禁用。
+   * @return true: 设置成功，false: 设置失败。
+  */
+  bool setOccLED(bool enable);
 
   /**
-   * @fn getMotionLed
-   * @brief 获取 DFRobot C4004 传感器在人体运动检测时的 LED 状态。
-   * @return true: LED 已启用，false: LED 已禁用。
-   */
-  bool getMotionLed(void);
+   * @fn getTrkLED
+   * @brief 获取轨迹跟踪 LED 功能是否已启用。
+   * @n 若启用，LED 仅在生成/学习轨迹检测范围时亮起，其他时间保持熄灭。
+   * @return true: LED 功能已启用，false: LED 功能已禁用。
+  */
+  bool getTrkLED(void);
+
+  /**
+   * @fn getOccLED
+   * @brief 获取占用 LED 功能是否已启用。
+   * @n 若启用，当检测范围内有人（占用状态）时 LED 亮起。
+   * @return true: LED 功能已启用，false: LED 功能已禁用。
+  */
+  bool getOccLED(void);
 
   /**
    * getTags
@@ -281,9 +287,9 @@ pip3 install pyserial
    * @param mode: 数据获取模式，保留用于兼容。
    * @n          eGetDataActive: 从设备主动查询最新标签配置。
    * @n          eGetDataReport: 当前行为与 eGetDataActive 相同。
-   * @n          每个标签中的 ioIndex: IO 联动索引，0 表示不使用，2-6 表示绑定 IO2-IO6。
+   * @n          每个标签中的 ioIndex: 0 表示不使用，2-6 表示绑定 IO2-IO6。
    * @return uint8_t: 设备实际返回的标签数量。
-   */
+  */
   uint8_t getTags(sTagConfig_t *tags, uint8_t maxTags, eGetDataMode_t mode = eGetDataActive);
 
   /**
@@ -293,7 +299,7 @@ pip3 install pyserial
    * @n          tagIndex: 标签索引。
    * @n          tagType: 标签类型。
    * @n          scopeType: 标签范围类型。
-   * @n          ioIndex: IO 联动索引，0 表示不使用，2-6 表示绑定 IO2-IO6。
+   * @n          ioIndex: IO 联动索引。0 表示不使用，2-6 表示绑定 IO2-IO6。
    * @n          width: 标签宽度或圆形半径，单位为 cm。
    * @n          height: 标签高度，单位为 cm。
    * @return eTagSetStatus_t: 标签设置状态。
@@ -305,7 +311,7 @@ pip3 install pyserial
    * @note 此 API 忽略 sTagConfig_t 中的 centerX/centerY 字段。
    * @note 使用此 API 设置标签时，需确保轨迹数量为 1。
    * @note 最多设置 32 个标签。
-   */
+  */
   eTagSetStatus_t setTag(const sTagConfig_t &tag);
 
   /**
@@ -313,14 +319,14 @@ pip3 install pyserial
    * @brief 清除标签配置。
    * @param tagIndex: 标签索引（协议载荷中的 2 字节索引）。
    * @return true: 清除成功，false: 清除失败。
-   */
+  */
   bool clearTag(uint16_t tagIndex);
 
   /**
    * @fn clearAllTags
    * @brief 清除所有标签配置。
    * @return true: 清除成功，false: 清除失败。
-   */
+  */
   bool clearAllTags(void);
 
   /**
@@ -328,11 +334,11 @@ pip3 install pyserial
    * @brief 使用坐标模式从列表中批量设置标签配置。
    * @param tags: 标签配置列表的指针。
    * @param tagCount: 列表中的标签数量。
-   * @n          每个标签中的 ioIndex: IO 联动索引，0 表示不使用，2-6 表示绑定 IO2-IO6。
+   * @n          每个标签中的 ioIndex: 0 表示不使用，2-6 表示绑定 IO2-IO6。
    * @return true: 设置成功，false: 设置失败。
    * @note 可以以坐标形式设置标签，无需满足轨迹数量为 1 的要求。
    * @note 最多设置 32 个标签。
-   */
+  */
   bool setTagsFromConfig(const sTagConfig_t *tags, uint8_t tagCount);
 
   /**
@@ -340,21 +346,21 @@ pip3 install pyserial
    * @brief 获取从主动上报包（CTRL 0x07, CMD 0x1B）解码的最新标签事件。
    * @param tagInfo: 接收上报标签事件信息的指针。
    * @return true: 获取成功，false: 无有效上报标签事件或参数无效。
+   * @note 此 API 仅读取上报缓存。请先调用 getReportedEvent() 接收新的上报数据。
    * @note 标签事件上报包含 ioIndex。
-   * @note 此 API 仅读取上报缓存。请先调用 getReportedInfo() 接收新的上报数据。
-   */
+  */
   bool getTagInfo(sTagInfo_t *tagInfo);
 
   /**
    * @fn setFourSidedRangeMode
    * @brief 设置四边边界检测范围。
    * @param range: 边界范围设置。
-   * @n          xPositiveCm: X 轴正方向边界，单位为 cm。
-   * @n          xNegativeCm: X 轴负方向边界，单位为 cm。
-   * @n          yPositiveCm: Y 轴正方向边界，单位为 cm。
-   * @n          yNegativeCm: Y 轴负方向边界，单位为 cm。
+   * @n          xPositiveCm: X 轴正向边界，单位为 cm。
+   * @n          xNegativeCm: X 轴负向边界，单位为 cm。
+   * @n          yPositiveCm: Y 轴正向边界，单位为 cm。
+   * @n          yNegativeCm: Y 轴负向边界，单位为 cm。
    * @return true: 设置成功，false: 设置失败。
-   */
+  */
   bool setFourSidedRangeMode(sFourSidedRange_t &range);
 
   /**
@@ -362,15 +368,19 @@ pip3 install pyserial
    * @brief 查询并获取四边边界检测范围。
    * @param range: 接收边界范围设置的指针。
    * @return true: 获取成功，false: 获取失败。
-   */
+  */
   bool getFourSidedRangeMode(sFourSidedRange_t *range);
 
   /**
    * @fn setTrajectoryRangeMode
-   * @brief 开始轨迹范围学习，或使用已学习的轨迹范围模式。
-   * @param learning: 轨迹范围学习开关。
-   * @n          true: 开始学习轨迹范围，false: 使用轨迹范围模式但不学习。
-   */
+   * @brief 开始生成轨迹检测范围，或使用此前已生成的检测范围。
+   * @n 若开启生成/学习（true）：传感器在确认只有一个轨迹后，开始生成/学习检测范围。
+   * @n 若在学习过程中关闭（false）：传感器停止学习，保存自动生成的检测范围并启用。
+   * @n 若当前未启用轨迹检测范围模式，可调用 setTrajectoryRangeMode(false) 来启用并使用此前已生成/保存的检测范围。
+   * @param learning: 轨迹检测范围生成/学习开关。
+   * @n          true: 开始生成/学习检测范围。
+   * @n          false: 停止学习并保存/启用生成的范围，或使用此前已保存的范围。
+  */
   void setTrajectoryRangeMode(bool learning);
 
   /**
@@ -379,8 +389,8 @@ pip3 install pyserial
    * @param points: 接收轨迹模式点的指针。
    * @param pointCount: 接收点数量的指针。
    * @return true: 查询成功，false: 查询失败。
-   * @note points 缓冲区必须能够容纳至少 MAX_POINTS 个点。
-   */
+   * @note points 缓冲区必须能够容纳至少 C4004_MAX_POINTS 个点。
+  */
   bool getTrajectoryRangeMode(sPoint_t *points, uint16_t *pointCount);
 
   /**
@@ -390,8 +400,8 @@ pip3 install pyserial
    * @param pointCount: 点的数量。
    * @return true: 设置成功，false: 设置失败。
    * @note 点值使用符号位 int16 编码（bit15: 0=正数，1=负数）。
-   * @note pointCount 上限为 MAX_POINTS。
-   */
+   * @note pointCount 上限为 C4004_MAX_POINTS。
+  */
   bool setConfigFileModePoints(const sPoint_t *points, uint16_t pointCount);
 
   /**
@@ -400,108 +410,120 @@ pip3 install pyserial
    * @param points: 接收配置文件模式点的指针。
    * @param pointCount: 接收点数量的指针。
    * @return true: 查询成功，false: 查询失败。
-   * @note points 缓冲区必须能够容纳至少 MAX_POINTS 个点。
-   */
+   * @note points 缓冲区必须能够容纳至少 C4004_MAX_POINTS 个点。
+  */
   bool getConfigFileModePoints(sPoint_t *points, uint16_t *pointCount);
 
   /**
    * @fn getDetectionRangeMode
    * @brief 查询当前检测范围模式。
    * @return eDetectionRangeMode_t: 当前检测范围模式。
-   */
+  */
   eDetectionRangeMode_t getDetectionRangeMode(void);
 
   /**
-   * @fn getPeopleTime
-   * @brief 获取人数统计。
+   * @fn getPeopleCount
+   * @brief 获取实时人数。仅统计已确认为真实目标人的数量。
    * @param mode: 数据获取模式。
    * @n          eGetDataActive: 主动查询最新数据并更新缓存。
    * @n          eGetDataReport: 直接返回缓存数据。
-   * @return uint8_t: 人数统计（模块上报的最大计数值）。
-   */
-  uint8_t getPeopleTime(eGetDataMode_t mode = eGetDataActive);
+   * @return uint8_t: 过滤后的实时人数。
+  */
+  uint8_t getPeopleCount(eGetDataMode_t mode = eGetDataActive);
 
   /**
    * @fn setRealTimePeopleTime
    * @brief 设置人数统计上报间隔。
-   * @param time: 上报间隔，单位为秒。
+   * @param time: 上报间隔，单位秒。默认 1 s，有效范围 1-3600 秒。
    * @return true: 设置成功，false: 设置失败。
-   */
+  */
   bool setRealTimePeopleTime(uint32_t time);
 
   /**
    * @fn getRealTimePeopleTime
    * @brief 获取人数统计上报间隔。
-   * @param time: 接收上报间隔的指针，单位为秒。
+   * @param time: 接收上报间隔的指针，单位秒。
    * @return true: 获取成功，false: 获取失败。
-   */
+  */
   bool getRealTimePeopleTime(uint32_t *time);
 
   /**
    * @fn clearPeopleCount
-   * @brief 清除人数统计数据。
+   * @brief 清除传感器检测到的人数，并从 0 重新开始检测/跟踪。
+   * @n 当检测范围内仍有干扰物存在、传感器无法自行确认或清除时，
+   * @n 可调用本接口刷新人数统计状态。
    * @return true: 清除成功，false: 清除失败。
-   */
+  */
   bool clearPeopleCount(void);
 
   /**
    * @fn setTrackMeters
-   * @brief 设置轨迹生成距离阈值。
-   * @param distanceCm: 距离阈值，单位为 cm。
+   * @brief 设置轨迹运动距离阈值。
+   * @n 轨迹产生后，轨迹还需运动该距离才会确认为人。
+   * @n 用于调整实时人数统计接口的判断条件。
+   * @param distanceCm: 距离阈值，单位 cm。默认 0 cm，有效范围 0-1000 cm。
    * @return true: 设置成功，false: 设置失败。
-   */
+  */
   bool setTrackMeters(uint32_t distanceCm);
 
   /**
    * @fn getTrackMeters
-   * @brief 获取轨迹生成距离阈值。
-   * @param distanceCm: 接收距离阈值的指针，单位为 cm。
+   * @brief 获取轨迹运动距离阈值。
+   * @n 轨迹产生后，轨迹还需运动该距离才会确认为人。
+   * @n 用于调整实时人数统计接口的判断条件。
+   * @param distanceCm: 接收距离阈值的指针，单位 cm。
    * @return true: 获取成功，false: 获取失败。
-   */
+  */
   bool getTrackMeters(uint32_t *distanceCm);
 
   /**
    * @fn setTrackExistsTime
    * @brief 设置轨迹保持时间。
-   * @param time: 保持时间，单位为秒。
+   * @n 用于调整实时人数统计接口的判断条件。
+   * @param time: 保持时间，单位秒。默认 0 秒，有效范围 0-600 秒。
    * @return true: 设置成功，false: 设置失败。
-   */
+  */
   bool setTrackExistsTime(uint32_t time);
 
   /**
    * @fn getTrackExistsTime
    * @brief 获取轨迹保持时间。
-   * @param time: 接收保持时间的指针，单位为秒。
+   * @n 用于调整实时人数统计接口的判断条件。
+   * @param time: 接收保持时间的指针，单位秒。
    * @return true: 获取成功，false: 获取失败。
-   */
+  */
   bool getTrackExistsTime(uint32_t *time);
 
   /**
    * @fn setUnmannedTime
    * @brief 设置无人延迟时间。
-   * @param delayTime: 延迟时间，单位为秒。
+   * @n 判断目标点是否为真实目标人的周期时间。
+   * @n 若非真实目标人，等待该周期后自动清除该目标。
+   * @param delayTime: 周期时间，单位秒。默认 30 秒，有效范围 5-3600 秒。
    * @return true: 设置成功，false: 设置失败。
-   */
+  */
   bool setUnmannedTime(uint32_t delayTime);
 
   /**
    * @fn getUnmannedTime
    * @brief 获取无人延迟时间。
-   * @param delayTime: 接收延迟时间的指针，单位为秒。
+   * @n 判断目标点是否为真实目标人的周期时间。
+   * @n 若非真实目标人，等待该周期后自动清除该目标。
+   * @param delayTime: 接收周期时间的指针，单位秒。
    * @return true: 获取成功，false: 获取失败。
-   */
+  */
   bool getUnmannedTime(uint32_t *delayTime);
 ```
 
 ## 兼容性
 
-MCU                | 正常工作    | 工作异常    | 未测试     | 备注
------------------- | :----------: | :----------: | :---------: | :----:
-Arduino Uno        |      √       |              |             |
-Arduino MEGA2560   |      √       |              |             |
-Arduino Leonardo   |      √       |              |             |
-FireBeetle-ESP32   |      √       |              |             |
-Micro:bit          |              |              |      √      |
+| 主板        | 通过 | 未通过 | 未测试 | 备注 |
+| ----------- | :--: | :----: | :----: | ---- |
+| Arduino uno |  √   |        |        |      |
+| Mega2560    |  √   |        |        |      |
+| Leonardo    |  √   |        |        |      |
+| ESP32       |  √   |        |        |      |
+| micro:bit   |      |        |   √    |      |
 
 ## 历史
 
@@ -509,4 +531,4 @@ Micro:bit          |              |              |      √      |
 
 ## 致谢
 
-由 JiaLi(zhixin.liu@dfrobot.com) 编写，2026 年。（欢迎访问我们的[网站](https://www.dfrobot.com/)）
+Written by JiaLi(jia.li@dfrobot.com), 2026. (Welcome to our [website](https://www.dfrobot.com/))

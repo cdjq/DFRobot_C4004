@@ -3,9 +3,11 @@
 @file read_zone_state_by_gpio.py
 @brief Configure tag zones and read local GPIO presence states.
 @details GPIO 1 is the whole area output. GPIO 2-6 are divided zone outputs.
+@n Usage environment:
+@n - Please install the sensor at a height of 180 cm for use.
 @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
 @license The MIT License (MIT)
-@author JiaLi(zhixin.liu@dfrobot.com)
+@author JiaLi(jia.li@dfrobot.com)
 @version V1.0.0
 @date 2026-05-22
 @url https://github.com/DFRobot/DFRobot_C4004
@@ -41,19 +43,26 @@ def main():
   while not c4004.begin():
     print('DFRobot C4004 begin failed, retrying...')
     time.sleep(1)
+  print('DFRobot C4004 begin success.')
 
-  if c4004.set_check_to_active_frames(7):
+  # Side mount: default 180 cm, recommended 180±20 cm. Top mount: recommended 220-280 cm.
+  if c4004.set_install_height(180):
+    print('Set install height success.')
+  else:
+    print('Set install height failed.')
+  time.sleep(0.05)
+
+  if c4004.set_frame_generate_count(7):
     print('Set check-to-active frames success.')
   else:
     print('Set check-to-active frames failed.')
   time.sleep(0.05)
 
   range_info = FourSidedRange()
-  range_info.mode = c4004.RANGE_FOUR_SIDE
-  range_info.x_positive_cm = 200
-  range_info.x_negative_cm = -200
-  range_info.y_positive_cm = 700
-  range_info.y_negative_cm = 0
+  range_info.x_max = 200
+  range_info.x_min = -200
+  range_info.y_max = 700
+  range_info.y_min = 0
   if c4004.set_four_sided_range_mode(range_info):
     print('Set boundary detection range success.')
   else:
@@ -97,7 +106,9 @@ def main():
   tag2.center_y = 350
   tag2.width = 80
   tag2.height = 0
-  # Note: For circle tags, width is the radius and height is not used.
+  # Note: For rectangle tags, width is the size along the X-axis and height is
+  # the size along the Y-axis (unit: cm), relative to center_x/center_y.
+  # For circle tags, width is the radius and height is ignored.
   set_tags.append(tag2)
 
   tag3 = DFRobot_TagConfig()
@@ -127,10 +138,10 @@ def main():
   else:
     print('Set 5 tags from config failed.')
 
-  if c4004.set_motion_led(True):
-    print('Set motion LED success.')
+  if c4004.set_occ_led(True):
+    print('Set occupancy LED success.')
   else:
-    print('Set motion LED failed.')
+    print('Set occupancy LED failed.')
 
   if c4004.set_real_time_people_time(5):
     print('Set RealTimePeopleTime success.')
@@ -141,10 +152,10 @@ def main():
     last_print = 0
     while True:
       # When state or data changes and the corresponding report function is enabled,
-      # the module pushes the update immediately as an event via get_reported_info().
+      # the module pushes the update immediately as an event via get_reported_event().
       # Use the matching getter with GET_DATA_REPORT to read the cached value
       # updated by that report, without issuing an extra UART query.
-      c4004.get_reported_info(0.05)
+      c4004.get_reported_event(0.05)
       if time.time() - last_print > 1:
         last_print = time.time()
         print('=============================================')

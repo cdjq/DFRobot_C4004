@@ -4,7 +4,7 @@
 @brief Configure and read back major DFRobot C4004 parameters.
 @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
 @license The MIT License (MIT)
-@author JiaLi(zhixin.liu@dfrobot.com)
+@author JiaLi(jia.li@dfrobot.com)
 @version V1.0.0
 @date 2026-05-22
 @url https://github.com/DFRobot/DFRobot_C4004
@@ -36,17 +36,18 @@ def main():
   print('Current firmware version:', c4004.get_firmware_version())
 
   print('=================Set install info=================')
-  if c4004.set_install_high(180):
-    print('Set install high success!')
+  # Side mount: default 180 cm, recommended 180±20 cm. Top mount: recommended 220-280 cm.
+  if c4004.set_install_height(180):
+    print('Set install height success!')
   else:
-    print('Set install high failed!')
+    print('Set install height failed!')
   time.sleep(0.05)
 
-  device_high = c4004.get_install_high()
-  if device_high > 0:
-    print('Current install high(cm):', device_high)
+  device_height = c4004.get_install_height()
+  if device_height > 0:
+    print('Current install height(cm):', device_height)
   else:
-    print('Read current install high failed.')
+    print('Read current install height failed.')
 
   print('==================Feature Switch==================')
   if c4004.set_presence_enable(True):
@@ -73,39 +74,38 @@ def main():
   else:
     print('Read current trajectory tracking function enable failed.')
 
-  if c4004.set_check_to_active_frames(7):
+  if c4004.set_frame_generate_count(7):
     print('Set check-to-active frames success!')
   else:
     print('Set check-to-active frames failed!')
   time.sleep(0.05)
 
   check_to_active_frames = [0]
-  if c4004.get_check_to_active_frames(check_to_active_frames):
+  if c4004.get_frame_generate_count(check_to_active_frames):
     print('Current check-to-active frames:', check_to_active_frames[0])
   else:
     print('Read current check-to-active frames failed.')
 
-  if c4004.set_motion_led(True):
-    print('Set motion LED success!')
+  if c4004.set_occ_led(True):
+    print('Set occupancy LED success!')
   else:
-    print('Set motion LED failed!')
+    print('Set occupancy LED failed!')
   time.sleep(0.05)
 
-  if c4004.set_trajectory_led(True):
+  if c4004.set_trk_led(True):
     print('Set trajectory LED success!')
   else:
     print('Set trajectory LED failed!')
   time.sleep(0.05)
 
-  print('Current motion LED:', 'ON' if c4004.get_motion_led() else 'OFF')
-  print('Current trajectory LED:', 'ON' if c4004.get_trajectory_led() else 'OFF')
+  print('Current occupancy LED:', 'ON' if c4004.get_occ_led() else 'OFF')
+  print('Current trajectory LED:', 'ON' if c4004.get_trk_led() else 'OFF')
 
   range_info = FourSidedRange()
-  range_info.mode = c4004.RANGE_FOUR_SIDE
-  range_info.x_positive_cm = 200
-  range_info.x_negative_cm = -200
-  range_info.y_positive_cm = 700
-  range_info.y_negative_cm = 0
+  range_info.x_max = 200
+  range_info.x_min = -200
+  range_info.y_max = 700
+  range_info.y_min = 0
 
   print('====================Range Param===================')
   if c4004.set_four_sided_range_mode(range_info):
@@ -126,7 +126,7 @@ def main():
   if mode == c4004.RANGE_FOUR_SIDE:
     current_range = FourSidedRange()
     if c4004.get_four_sided_range_mode(current_range):
-      print('Current boundary x+/x-/y+/y- (cm): %d/%d/%d/%d' % (current_range.x_positive_cm, current_range.x_negative_cm, current_range.y_positive_cm, current_range.y_negative_cm))
+      print('Current boundary x+/x-/y+/y- (cm): %d/%d/%d/%d' % (current_range.x_max, current_range.x_min, current_range.y_max, current_range.y_min))
     else:
       print('Read current boundary range failed.')
   else:
@@ -147,12 +147,15 @@ def main():
   # else:
   #   print('Current trajectory range query failed.')
   #
-  # Set multi-point config by config-file mode points (mode 0x06)
+  # Set multi-point detection range by config-file mode (custom points).
+  # Points are connected in array order: #0 -> #1 -> ... -> #N-1 -> #0 (closed polygon).
+  # Example below (clockwise rectangle):
+  #   #0 (200, 0) -> #1 (200, 400) -> #2 (-200, 400) -> #3 (-200, 0) -> #0
   # cfg_points = [
-  #   Point(200, 0),
-  #   Point(200, 400),
-  #   Point(-200, 400),
-  #   Point(-200, 0)
+  #   Point(200, 0),     # #0
+  #   Point(200, 400),   # #1
+  #   Point(-200, 400),  # #2
+  #   Point(-200, 0)     # #3
   # ]
   # if c4004.set_config_file_mode_points(cfg_points):
   #   print('Set multi-point config points success!')
@@ -205,7 +208,7 @@ def main():
   print('Current TrackMeters(cm):', c4004.get_track_meters())
   print('Current TrackExistsTime(s):', c4004.get_track_exists_time())
   print('Current UnmannedTime(s):', c4004.get_unmanned_time())
-  print('Current people count(active):', c4004.get_people_time(c4004.GET_DATA_ACTIVE))
+  print('Current people count(active):', c4004.get_people_count(c4004.GET_DATA_ACTIVE))
 
   print('=======================Done=======================')
 

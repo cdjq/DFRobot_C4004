@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*
 '''!
 @file factory_reset_and_reboot.py
-@brief Restore factory settings and reboot the module.
+@brief Factory reset and reboot demo.
+@details Use this example when you need to restore the module to factory settings and reboot it
+@n (for example after a wrong configuration, or before starting a clean setup).
 @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
 @license The MIT License (MIT)
-@author JiaLi(zhixin.liu@dfrobot.com)
+@author JiaLi(jia.li@dfrobot.com)
 @version V1.0.0
 @date 2026-05-22
 @url https://github.com/DFRobot/DFRobot_C4004

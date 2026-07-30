@@ -6,9 +6,11 @@
   @n The kitchen-door tag is Boundary relative to the living-room range.
   @n Enter-living-room events decrement the kitchen people count, and
   @n exit-living-room events increment it.
+  @n Usage environment:
+  @n - Please install the sensor at a height of 180 cm for use.
   @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
   @license The MIT License (MIT)
-  @author JiaLi(zhixin.liu@dfrobot.com)
+  @author JiaLi(jia.li@dfrobot.com)
   @version V1.0.0
   @date 2026-05-22
   @url https://github.com/DFRobot/DFRobot_C4004
@@ -39,6 +41,7 @@ track_exists_time_s = 1
 
 living_room_center_x_cm = 0
 living_room_center_y_cm = 200
+# Rectangle size_x/size_y map to tag width/height: width along X-axis, height along Y-axis (cm).
 living_room_size_x_cm = 400
 living_room_size_y_cm = 400
 
@@ -120,29 +123,35 @@ def setup_sensor_and_tags():
     time.sleep(1)
   print('DFRobot C4004 begin success.')
 
+  # Side mount: default 180 cm, recommended 180±20 cm. Top mount: recommended 220-280 cm.
+  if c4004.set_install_height(180):
+    print('Set install height success.')
+  else:
+    print('Set install height failed.')
+  time.sleep(0.05)
+
   if c4004.set_presence_enable(True):
     print('Set presence enable success.')
   else:
     print('Set presence enable failed.')
 
-  if c4004.set_check_to_active_frames(check_to_active_frames_cfg):
+  if c4004.set_frame_generate_count(check_to_active_frames_cfg):
     print('Set check-to-active frames success.')
   else:
     print('Set check-to-active frames failed.')
   time.sleep(0.05)
 
   check_to_active_frames = [0]
-  if c4004.get_check_to_active_frames(check_to_active_frames):
+  if c4004.get_frame_generate_count(check_to_active_frames):
     print('Current check-to-active frames: %d' % check_to_active_frames[0])
   else:
     print('Read current check-to-active frames failed.')
 
   range_info = FourSidedRange()
-  range_info.mode = c4004.RANGE_FOUR_SIDE
-  range_info.x_positive_cm = 200
-  range_info.x_negative_cm = -200
-  range_info.y_positive_cm = 400
-  range_info.y_negative_cm = 0
+  range_info.x_max = 200
+  range_info.x_min = -200
+  range_info.y_max = 400
+  range_info.y_min = 0
   if c4004.set_four_sided_range_mode(range_info):
     print('Set boundary detection range success.')
   else:
@@ -232,7 +241,7 @@ def main():
   last_print_s = 0.0
   while True:
     now_s = time.time()
-    event = c4004.get_reported_info(0.05)
+    event = c4004.get_reported_event(0.05)
 
     if event == c4004.EVENT_TAG:
       process_tag_event()

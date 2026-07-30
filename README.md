@@ -1,5 +1,5 @@
 # DFRobot_C4004
-- [中文版](./README_CN.md)
+- [???](./README_CN.md)
 
 DFRobot C4004 is a 60GHz 4T4R multi-zone presence mmWave radar for smart space management. It can report not only occupancy, but also real-time counts of static people and moving people in configured areas, with built-in zone logic and 6-way IO linkage for fast automation deployment.
 
@@ -84,9 +84,9 @@ pip3 install pyserial
   bool getHeartbeat(eGetDataMode_t mode = eGetDataActive);
 
   /**
-   * @fn getReportedInfo
+   * @fn getReportedEvent
    * @brief Get the latest reported event from the DFRobot C4004 sensor.
-   * @param timeoutMs: Maximum waiting time for the report，in milliseconds，default is 50.
+   * @param timeoutMs: Maximum waiting time for the report?in milliseconds?default is 50.
    * @return eReportedEvent_t: Reported event type.
    * @n          eEventNone: No event detected.
    * @n          eEventTrajectory: Trajectory tracking event detected.
@@ -99,7 +99,7 @@ pip3 install pyserial
    * @n          eEventUnknown: Unknown event detected.
    * @n          eEventError: Error occurred.
   */
-  eReportedEvent_t getReportedInfo(uint16_t timeoutMs = 50);
+  eReportedEvent_t getReportedEvent(uint16_t timeoutMs = 50);
 
   /**
    * @fn getHardwareVersion
@@ -138,20 +138,20 @@ pip3 install pyserial
   bool getInstallInfo(sInstallInfo_t *info);
 
   /**
-   * @fn setInstallHigh
+   * @fn setInstallHeight
    * @brief Set the installation height of the DFRobot C4004 sensor.
-   * @param hight: Installation height, in cm.
+   * @param height: Installation height, in cm.
    * @return true: Set succeeded, false: Set failed.
   */
-  bool setInstallHigh(int32_t hight);
+  bool setInstallHeight(int32_t height);
 
   /**
-   * @fn getInstallHigh
+   * @fn getInstallHeight
    * @brief Get the installation height of the DFRobot C4004 sensor.
-   * @param hight: Pointer to receive installation height, in cm.
+   * @param height: Pointer to receive installation height, in cm.
    * @return true: Get succeeded, false: Get failed.
   */
-  bool getInstallHigh(int *hight);
+  bool getInstallHeight(int *pHeight);
 
   /**
    * @fn setPresenceEnable
@@ -173,15 +173,14 @@ pip3 install pyserial
 
   /**
    * @fn getPresenceState
-   * @brief Get the current presence detection result.
+   * @brief Get whether a person is currently present within the detection range.
    * @param mode: Data acquisition mode.
    * @n          eGetDataActive: Query latest data and update cache.
    * @n          eGetDataReport: Return cached data from the last report.
    * @return ePresenceState_t: Presence detection result.
    * @n          eNoPresence: No presence detected.
    * @n          ePresence: Presence detected.
-   * @n          ePresenceUnknown: Unknown presence state.
-   */
+  */
   ePresenceState_t getPresenceState(eGetDataMode_t mode = eGetDataActive);
 
   /**
@@ -217,20 +216,22 @@ pip3 install pyserial
   bool getTrajectoryTrackEnable(bool *enable);
 
   /**
-   * @fn setCheckToActiveFrames
+   * @fn setFrameGenerateCount
    * @brief Set the frame count used to confirm transition from check state to active state.
-   * @param frames: Frame count, valid range: 1-7.
+   * @n A larger value suppresses noise more strongly, and also affects the trigger distance.
+   * @param frames: Frame count, valid range: 1-7, default: 7.
    * @return true: Set succeeded, false: Set failed.
   */
-  bool setCheckToActiveFrames(uint8_t frames);
+  bool setFrameGenerateCount(uint8_t frames);
 
   /**
-   * @fn getCheckToActiveFrames
+   * @fn getFrameGenerateCount
    * @brief Query the frame count used to confirm transition from check state to active state.
+   * @n A larger value suppresses noise more strongly, and also affects the trigger distance.
    * @param frames: Pointer to receive frame count.
    * @return true: Query succeeded, false: Query failed.
   */
-  bool getCheckToActiveFrames(uint8_t *frames);
+  bool getFrameGenerateCount(uint8_t *frames);
 
   /**
    * @fn getTargetList
@@ -245,33 +246,38 @@ pip3 install pyserial
   uint8_t getTargetList(sTargetInfo_t *targetBuf, uint8_t maxCount, eGetDataMode_t mode = eGetDataActive);
 
   /**
-   * @fn setTrajectoryLed
-   * @brief Enable or disable the LED of the DFRobot C4004 sensor during trajectory tracking.
-   * @param enable: Enable or disable the tag detection function.
-  */
-  bool setTrajectoryLed(bool enable);
-
-  /**
-   * @fn setMotionLed
-   * @brief Enable or disable the LED of the DFRobot C4004 sensor during human motion detection.
-   * @param enable: Enable or disable the tag detection function.
+   * @fn setTrkLED
+   * @brief Enable or disable the trajectory tracking LED function.
+   * @n If enabled, the LED turns on only while learning/generating a trajectory range; it stays off at all other times.
+   * @param enable: true to enable, false to disable.
    * @return true: Set succeeded, false: Set failed.
   */
-  bool setMotionLed(bool enable);
+  bool setTrkLED(bool enable);
 
   /**
-   * @fn getTrajectoryLed
-   * @brief Get the LED status of the DFRobot C4004 sensor during trajectory tracking.
-   * @return true: LED is enabled, false: LED is disabled.
+   * @fn setOccLED
+   * @brief Enable or disable the occupancy LED function.
+   * @n If enabled, the LED turns on when the detection range is occupied (someone is present).
+   * @param enable: true to enable, false to disable.
+   * @return true: Set succeeded, false: Set failed.
   */
-  bool getTrajectoryLed(void);
+  bool setOccLED(bool enable);
 
   /**
-   * @fn getMotionLed
-   * @brief Get the LED status of the DFRobot C4004 sensor during human motion detection.
-   * @return true: LED is enabled, false: LED is disabled.
+   * @fn getTrkLED
+   * @brief Get whether the trajectory tracking LED function is enabled.
+   * @n When enabled, the LED turns on only while learning/generating a trajectory range; it stays off at all other times.
+   * @return true: LED function is enabled, false: LED function is disabled.
   */
-  bool getMotionLed(void);
+  bool getTrkLED(void);
+
+  /**
+   * @fn getOccLED
+   * @brief Get whether the occupancy LED function is enabled.
+   * @n When enabled, the LED turns on if the detection range is occupied (someone is present).
+   * @return true: LED function is enabled, false: LED function is disabled.
+  */
+  bool getOccLED(void);
 
   /**
    * getTags
@@ -340,7 +346,7 @@ pip3 install pyserial
    * @brief Get the last tag event decoded from active report packet (CTRL 0x07, CMD 0x1B).
    * @param tagInfo: Pointer to receive reported tag event information.
    * @return true: Get succeeded, false: No valid reported tag event or invalid parameter.
-   * @note This API reads report cache only. Call getReportedInfo() first to receive new report data.
+   * @note This API reads report cache only. Call getReportedEvent() first to receive new report data.
    * @note Tag event reports include ioIndex.
   */
   bool getTagInfo(sTagInfo_t *tagInfo);
@@ -367,9 +373,16 @@ pip3 install pyserial
 
   /**
    * @fn setTrajectoryRangeMode
-   * @brief Start trajectory-range learning or use the learned trajectory range.
-   * @param learning: Trajectory-range learning switch.
-   * @n          true: Start learning trajectory range, false: Use trajectory range mode without learning.
+   * @brief Start generating a trajectory detection range, or use a previously generated one.
+   * @n If generation/learning is enabled (true): after the sensor confirms there is only one trajectory,
+   * @n it starts generating/learning the detection range.
+   * @n If you disable learning (false) while generation is in progress: the sensor stops learning,
+   * @n saves the auto-generated detection range, and enables it.
+   * @n If trajectory-range mode is not currently enabled, call setTrajectoryRangeMode(false) to
+   * @n enable and use the previously generated/saved detection range.
+   * @param learning: Trajectory-range generation/learning switch.
+   * @n          true: Start generating/learning the detection range.
+   * @n          false: Stop learning and save/enable the generated range, or use a previously saved range.
   */
   void setTrajectoryRangeMode(bool learning);
 
@@ -379,7 +392,7 @@ pip3 install pyserial
    * @param points: Pointer to receive trajectory-mode points.
    * @param pointCount: Pointer to receive point count.
    * @return true: Query succeeded, false: Query failed.
-   * @note The points buffer must be able to hold at least MAX_POINTS points.
+   * @note The points buffer must be able to hold at least C4004_MAX_POINTS points.
   */
   bool getTrajectoryRangeMode(sPoint_t *points, uint16_t *pointCount);
 
@@ -390,7 +403,7 @@ pip3 install pyserial
    * @param pointCount: Number of points.
    * @return true: Set succeeded, false: Set failed.
    * @note Point values use sign-bit int16 encoding (bit15: 0=positive, 1=negative).
-   * @note pointCount is limited to MAX_POINTS.
+   * @note pointCount is limited to C4004_MAX_POINTS.
   */
   bool setConfigFileModePoints(const sPoint_t *points, uint16_t pointCount);
 
@@ -400,7 +413,7 @@ pip3 install pyserial
    * @param points: Pointer to receive config-file-mode points.
    * @param pointCount: Pointer to receive point count.
    * @return true: Query succeeded, false: Query failed.
-   * @note The points buffer must be able to hold at least MAX_POINTS points.
+   * @note The points buffer must be able to hold at least C4004_MAX_POINTS points.
   */
   bool getConfigFileModePoints(sPoint_t *points, uint16_t *pointCount);
 
@@ -412,49 +425,55 @@ pip3 install pyserial
   eDetectionRangeMode_t getDetectionRangeMode(void);
 
   /**
-   * @fn getPeopleTime
-   * @brief Get people count.
+   * @fn getPeopleCount
+   * @brief Get the real-time people count. Only confirmed real person targets are counted.
    * @param mode: Data acquisition mode.
    * @n          eGetDataActive: Query latest data and update cache.
    * @n          eGetDataReport: Return cached data directly.
-   * @return uint8_t: People count (maximum count reported by module).
+   * @return uint8_t: Real-time people count after filtering.
   */
-  uint8_t getPeopleTime(eGetDataMode_t mode = eGetDataActive);
+  uint8_t getPeopleCount(eGetDataMode_t mode = eGetDataActive);
 
   /**
    * @fn setRealTimePeopleTime
-   * @brief Set people count report interval.
-   * @param time: Report interval, in seconds.
+   * @brief Set the people-count report interval.
+   * @param time: Report interval in seconds. Default: 1 s. Valid range: 1-3600 seconds.
    * @return true: Set succeeded, false: Set failed.
   */
   bool setRealTimePeopleTime(uint32_t time);
 
   /**
    * @fn getRealTimePeopleTime
-   * @brief Get people count report interval.
-   * @param time: Pointer to receive report interval, in seconds.
+   * @brief Get the people-count report interval.
+   * @param time: Pointer to receive the report interval in seconds.
    * @return true: Get succeeded, false: Get failed.
   */
   bool getRealTimePeopleTime(uint32_t *time);
 
   /**
    * @fn clearPeopleCount
-   * @brief Clear people count statistics.
+   * @brief Clear the people count detected by the sensor and restart detection/tracking from 0.
+   * @n Use this when an interference object remains in the detection range and the sensor
+   * @n cannot confirm or clear it by itself; call this API to refresh the people-count state.
    * @return true: Clear succeeded, false: Clear failed.
   */
   bool clearPeopleCount(void);
 
   /**
    * @fn setTrackMeters
-   * @brief Set trajectory generation distance threshold.
-   * @param distanceCm: Distance threshold, in cm.
+   * @brief Set trajectory movement distance threshold.
+   * @n After a trajectory is generated, the distance the track must move before it is confirmed as a person.
+   * @n Adjusts the judgment conditions of the real-time people-count interface.
+   * @param distanceCm: Distance threshold, in cm. Default is 0 cm, valid range: 0-1000 cm.
    * @return true: Set succeeded, false: Set failed.
   */
   bool setTrackMeters(uint32_t distanceCm);
 
   /**
    * @fn getTrackMeters
-   * @brief Get trajectory generation distance threshold.
+   * @brief Get trajectory movement distance threshold.
+   * @n After a trajectory is generated, the distance the track must move before it is confirmed as a person.
+   * @n Adjusts the judgment conditions of the real-time people-count interface.
    * @param distanceCm: Pointer to receive distance threshold, in cm.
    * @return true: Get succeeded, false: Get failed.
   */
@@ -463,7 +482,8 @@ pip3 install pyserial
   /**
    * @fn setTrackExistsTime
    * @brief Set trajectory hold time.
-   * @param time: Hold time, in seconds.
+   * @n Adjusts the judgment conditions of the real-time people-count interface.
+   * @param time: Hold time, in seconds. Default is 0 seconds, valid range: 0-600 seconds.
    * @return true: Set succeeded, false: Set failed.
   */
   bool setTrackExistsTime(uint32_t time);
@@ -471,6 +491,7 @@ pip3 install pyserial
   /**
    * @fn getTrackExistsTime
    * @brief Get trajectory hold time.
+   * @n Adjusts the judgment conditions of the real-time people-count interface.
    * @param time: Pointer to receive hold time, in seconds.
    * @return true: Get succeeded, false: Get failed.
   */
@@ -478,16 +499,20 @@ pip3 install pyserial
 
   /**
    * @fn setUnmannedTime
-   * @brief Set no-person delay time.
-   * @param delayTime: Delay time, in seconds.
+   * @brief Set unmanned delay time.
+   * @n Period used to judge whether a point is a real person target.
+   * @n If it is not a real person target, the target is automatically cleared after this period.
+   * @param delayTime: Period time, in seconds. Default is 30 seconds, valid range: 5-3600 seconds.
    * @return true: Set succeeded, false: Set failed.
   */
   bool setUnmannedTime(uint32_t delayTime);
 
   /**
    * @fn getUnmannedTime
-   * @brief Get no-person delay time.
-   * @param delayTime: Pointer to receive delay time, in seconds.
+   * @brief Get unmanned delay time.
+   * @n Period used to judge whether a point is a real person target.
+   * @n If it is not a real person target, the target is automatically cleared after this period.
+   * @param delayTime: Pointer to receive period time, in seconds.
    * @return true: Get succeeded, false: Get failed.
   */
   bool getUnmannedTime(uint32_t *delayTime);
@@ -495,13 +520,13 @@ pip3 install pyserial
 
 ## Compatibility
 
-MCU                | Work Well    | Work Wrong   | Untested    | Remarks
------------------- | :----------: | :----------: | :---------: | :----:
-Arduino Uno        |      √       |              |             |
-Arduino MEGA2560   |      √       |              |             |
-Arduino Leonardo   |      √       |              |             |
-FireBeetle-ESP32   |      √       |              |             |
-Micro:bit          |              |              |      √      |
+| 主板        | 通过 | 未通过 | 未测试 | 备注 |
+| ----------- | :--: | :----: | :----: | ---- |
+| Arduino uno |  √   |        |        |      |
+| Mega2560    |  √   |        |        |      |
+| Leonardo    |  √   |        |        |      |
+| ESP32       |  √   |        |        |      |
+| micro:bit   |      |        |   √    |      |
 
 ## History
 
@@ -509,4 +534,4 @@ Micro:bit          |              |              |      √      |
 
 ## Credits
 
-Written by JiaLi(zhixin.liu@dfrobot.com), 2026. (Welcome to our [website](https://www.dfrobot.com/))
+Written by JiaLi(jia.li@dfrobot.com), 2026. (Welcome to our [website](https://www.dfrobot.com/))

@@ -6,9 +6,11 @@
   @n tags in code. It keeps the last event result for each tag, prints a summary table
   @n every 3 seconds or when a tag event arrives, and drives outputs based on
   @n game-area and sofa-area people counting results.
+  @n Usage environment:
+  @n - Please install the sensor at a height of 180 cm for use.
   @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
   @license The MIT License (MIT)
-  @author JiaLi(zhixin.liu@dfrobot.com)
+  @author JiaLi(jia.li@dfrobot.com)
   @version V1.0.0
   @date 2026-05-22
   @url https://github.com/DFRobot/DFRobot_C4004
@@ -171,7 +173,14 @@ def setup_sensor_and_tags():
     time.sleep(1)
   print('DFRobot C4004 begin success.')
 
-  if c4004.set_check_to_active_frames(7):
+  # Side mount: default 180 cm, recommended 180±20 cm. Top mount: recommended 220-280 cm.
+  if c4004.set_install_height(180):
+    print('Set install height success.')
+  else:
+    print('Set install height failed.')
+  time.sleep(0.05)
+
+  if c4004.set_frame_generate_count(7):
     print('Set check-to-active frames success.')
   else:
     print('Set check-to-active frames failed.')
@@ -183,11 +192,10 @@ def setup_sensor_and_tags():
     print('Set presence enable failed.')
 
   range_info = FourSidedRange()
-  range_info.mode = c4004.RANGE_FOUR_SIDE
-  range_info.x_positive_cm = 200
-  range_info.x_negative_cm = -200
-  range_info.y_positive_cm = 700
-  range_info.y_negative_cm = 0
+  range_info.x_max = 200
+  range_info.x_min = -200
+  range_info.y_max = 700
+  range_info.y_min = 0
   if c4004.set_four_sided_range_mode(range_info):
     print('Set boundary detection range success.')
   else:
@@ -210,8 +218,8 @@ def setup_sensor_and_tags():
   #   io_index  : IO linkage index. 0 means unused; 2-6 maps to IO2-IO6.
   #   center_x  : Tag center X coordinate, in cm.
   #   center_y  : Tag center Y coordinate, in cm.
-  #   width     : Rectangle width, or circle radius, in cm.
-  #   height    : Rectangle height, in cm. Not used for circle tags.
+  #   width     : Rectangle: size along X-axis (cm); Circle: radius (cm).
+  #   height    : Rectangle: size along Y-axis (cm); Circle: ignored.
 
   if c4004.clear_all_tags():
     print('Clear all tags success.')
@@ -366,7 +374,7 @@ def main():
     while True:
       now_s = time.time()
 
-      event = c4004.get_reported_info(0.1)
+      event = c4004.get_reported_event(0.1)
 
       if event == c4004.EVENT_TAG:
         info = c4004.get_tag_info()

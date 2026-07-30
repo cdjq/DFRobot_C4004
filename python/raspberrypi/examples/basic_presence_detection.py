@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*
 '''!
 @file basic_presence_detection.py
-@brief Enable presence detection and print presence, motion and people-count reports.
+@brief Quickly check whether someone is in range, still or moving, and how many people are counted.
+@details Use this example to quickly verify that the sensor can detect whether someone is in the
+@n detection range, whether they are static or moving, and how many people are counted.
+@n Run in a terminal to view live status prints.
+@n Usage environment:
+@n - Please install the sensor at a height of 180 cm for use.
 @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
 @license The MIT License (MIT)
-@author JiaLi(zhixin.liu@dfrobot.com)
+@author JiaLi(jia.li@dfrobot.com)
 @version V1.0.0
 @date 2026-05-22
 @url https://github.com/DFRobot/DFRobot_C4004
@@ -32,28 +37,34 @@ def main():
     time.sleep(1)
   print('DFRobot C4004 begin success.')
 
-  if c4004.set_check_to_active_frames(7):
+  # Side mount: default 180 cm, recommended 180±20 cm. Top mount: recommended 220-280 cm.
+  if c4004.set_install_height(180):
+    print('Set install height success.')
+  else:
+    print('Set install height failed.')
+  time.sleep(0.05)
+
+  if c4004.set_frame_generate_count(7):
     print('Set check-to-active frames success.')
   else:
     print('Set check-to-active frames failed.')
   time.sleep(0.05)
 
-  if c4004.set_motion_led(True):
-    print('Set motion LED success.')
+  if c4004.set_occ_led(True):
+    print('Set occupancy LED success.')
   else:
-    print('Set motion LED failed.')
+    print('Set occupancy LED failed.')
 
-  if c4004.set_trajectory_led(True):
+  if c4004.set_trk_led(True):
     print('Set trajectory LED success.')
   else:
     print('Set trajectory LED failed.')
 
   range_info = FourSidedRange()
-  range_info.mode = c4004.RANGE_FOUR_SIDE
-  range_info.x_positive_cm = 200
-  range_info.x_negative_cm = -200
-  range_info.y_positive_cm = 700
-  range_info.y_negative_cm = 0
+  range_info.x_max = 200
+  range_info.x_min = -200
+  range_info.y_max = 700
+  range_info.y_min = 0
   if c4004.set_four_sided_range_mode(range_info):
     print('Set boundary detection range success.')
   else:
@@ -78,15 +89,17 @@ def main():
 
   last_query = 0
   while True:
+    # timeout=0.03: wait up to 30 ms for one UART report frame from the sensor.
+    # Returns EVENT_NONE if no complete frame arrives within that time.
     # When state or data changes and the corresponding report function is enabled,
-    # the module pushes the update immediately as an event via get_reported_info().
+    # the module pushes the update immediately as an event via get_reported_event().
     # Use the matching getter with GET_DATA_REPORT to read the cached value
     # updated by that report, without issuing an extra UART query.
-    event = c4004.get_reported_info(0.05)
+    event = c4004.get_reported_event(0.03)
     if event == c4004.EVENT_PRESENCE:
       presence = c4004.get_presence_state(c4004.GET_DATA_REPORT)
       if presence == c4004.NO_PRESENCE:
-        print('Presence state: None')
+        print('Presence state: No Person Detected')
       elif presence == c4004.PRESENCE:
         print('Presence state: Presence')
     elif event == c4004.EVENT_MOTION:
@@ -96,24 +109,25 @@ def main():
       elif motion == c4004.MOTION_ACTIVE:
         print('Motion state: Motion')
       else:
-        print('Motion state: None')
+        print('Motion state: No Target Detected')
     elif event == c4004.EVENT_PEOPLE_COUNT:
-      count = c4004.get_people_time(c4004.GET_DATA_REPORT)
+      count = c4004.get_people_count(c4004.GET_DATA_REPORT)
       print('People count:', count)
 
-    if time.time() - last_query > 2:
+    # Every 3 s, actively poll and print people count / presence / motion (not event-driven).
+    if time.time() - last_query > 3:
       last_query = time.time()
-      print('People count:', c4004.get_people_time(c4004.GET_DATA_REPORT))
+      print('People count:', c4004.get_people_count(c4004.GET_DATA_REPORT))
 
       query_presence = c4004.get_presence_state(c4004.GET_DATA_ACTIVE)
       if query_presence == c4004.NO_PRESENCE:
-        print('Presence state: None')
+        print('Presence state: No Person Detected')
       elif query_presence == c4004.PRESENCE:
         print('Presence state: Presence')
 
       query_motion = c4004.get_motion_state(c4004.GET_DATA_ACTIVE)
       if query_motion == c4004.MOTION_NONE:
-        print('Motion state: None')
+        print('Motion state: No Target Detected')
       elif query_motion == c4004.MOTION_STATIC:
         print('Motion state: Static')
       elif query_motion == c4004.MOTION_ACTIVE:

@@ -3,13 +3,22 @@
  * @brief Configure and read back major DFRobot C4004 parameters.
  * @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
  * @license The MIT License (MIT)
- * @author JiaLi(zhixin.liu@dfrobot.com)
+ * @author JiaLi(jia.li@dfrobot.com)
  * @version V1.0.0
  * @date 2026-05-22
  * @url https://github.com/DFRobot/DFRobot_C4004
  */
 
 #include "DFRobot_C4004.h"
+
+/* ---------------------------------------------------------------------------------------------------------------------
+ *    board   |             MCU                | Leonardo/Mega2560/M0 |    UNO    | ESP8266 | ESP32 |  microbit  |   M0  |
+ *     VCC    |              5V                |         5V           |     5V    |    5V   |   5V  |     X      |   5V  |
+ *     GND    |              GND               |        GND           |    GND    |   GND   |  GND  |     X      |  GND  |
+ *     RX     |              TX                |     Serial1 TX1      |     5     |   5     |  D3   |     X      |  TX1  |
+ *     TX     |              RX                |     Serial1 RX1      |     4     |   4     |  D2   |     X      |  RX1  |
+ * ----------------------------------------------------------------------------------------------------------------------*/
+/* Baud rate is fixed at 115200. SoftSerial mode cannot guarantee stable data communication! */
 
 #if defined(ESP8266) || defined(ARDUINO_AVR_UNO)
 SoftwareSerial mySerial(4, 5);
@@ -37,19 +46,20 @@ void setup()
   Serial.println(c4004.getFirmwareVersion());
 
   Serial.println(F("=================Set install info================="));
-  if (c4004.setInstallHigh(180)) {
-    Serial.println(F("Set install high success!"));
+  // Side mount: default 180 cm, recommended 180±20 cm. Top mount: recommended 220-280 cm.
+  if (c4004.setInstallHeight(180)) {
+    Serial.println(F("Set install height success!"));
   } else {
-    Serial.println(F("Set install high failed!"));
+    Serial.println(F("Set install height failed!"));
   }
   delay(50);
 
-  int deviceHigh = 0;
-  if (c4004.getInstallHigh(&deviceHigh)) {
-    Serial.print(F("Current install high(cm): "));
-    Serial.println(deviceHigh);
+  int deviceHeight = 0;
+  if (c4004.getInstallHeight(&deviceHeight)) {
+    Serial.print(F("Current install height(cm): "));
+    Serial.println(deviceHeight);
   } else {
-    Serial.println(F("Read current install high failed."));
+    Serial.println(F("Read current install height failed."));
   }
 
   Serial.println(F("==================Feature Switch=================="));
@@ -83,7 +93,7 @@ void setup()
     Serial.println(F("Read current trajectory tracking function enable failed."));
   }
 
-  if (c4004.setCheckToActiveFrames(7)) {
+  if (c4004.setFrameGenerateCount(7)) {
     Serial.println(F("Set check-to-active frames success!"));
   } else {
     Serial.println(F("Set check-to-active frames failed!"));
@@ -91,40 +101,39 @@ void setup()
   delay(50);
 
   uint8_t checkToActiveFrames = 0;
-  if (c4004.getCheckToActiveFrames(&checkToActiveFrames)) {
+  if (c4004.getFrameGenerateCount(&checkToActiveFrames)) {
     Serial.print(F("Current check-to-active frames: "));
     Serial.println(checkToActiveFrames);
   } else {
     Serial.println(F("Read current check-to-active frames failed."));
   }
 
-  if (c4004.setMotionLed(true)) {
-    Serial.println(F("Set motion LED success!"));
+  if (c4004.setOccLED(true)) {
+    Serial.println(F("Set occupancy LED success!"));
   } else {
-    Serial.println(F("Set motion LED failed!"));
+    Serial.println(F("Set occupancy LED failed!"));
   }
   delay(50);
 
-  if (c4004.setTrajectoryLed(true)) {
+  if (c4004.setTrkLED(true)) {
     Serial.println(F("Set trajectory LED success!"));
   } else {
     Serial.println(F("Set trajectory LED failed!"));
   }
   delay(50);
 
-  Serial.print(F("Current motion LED: "));
-  Serial.println(c4004.getMotionLed() ? F("ON") : F("OFF"));
+  Serial.print(F("Current occupancy LED: "));
+  Serial.println(c4004.getOccLED() ? F("ON") : F("OFF"));
   Serial.print(F("Current trajectory LED: "));
-  Serial.println(c4004.getTrajectoryLed() ? F("ON") : F("OFF"));
+  Serial.println(c4004.getTrkLED() ? F("ON") : F("OFF"));
 
   Serial.println(F("====================Range Param==================="));
   /* Set the four-side boundary detection range */
-  sFourSidedRange_t range;
-  range.mode        = eRangeFourSide;
-  range.xPositiveCm = 200;
-  range.xNegativeCm = -200;
-  range.yPositiveCm = 700;
-  range.yNegativeCm = 0;
+  DFRobot_C4004::sFourSidedRange_t range;
+  range.xMax = 200;
+  range.xMin = -200;
+  range.yMax = 700;
+  range.yMin = 0;
 
   // Set the boundary detection range
   if (c4004.setFourSidedRangeMode(range)) {
@@ -134,27 +143,27 @@ void setup()
   }
   delay(50);
 
-  eDetectionRangeMode_t mode = c4004.getDetectionRangeMode();
+  DFRobot_C4004::eDetectionRangeMode_t mode = c4004.getDetectionRangeMode();
   Serial.print(F("Current detection mode: "));
-  if (mode == eRangeFourSide) {
+  if (mode == DFRobot_C4004::eRangeFourSide) {
     Serial.println(F("Four-side boundary"));
-  } else if (mode == eRangeTrajectory) {
+  } else if (mode == DFRobot_C4004::eRangeTrajectory) {
     Serial.println(F("Trajectory"));
   } else {
     Serial.println(F("Other"));
   }
 
-  if (mode == eRangeFourSide) {
-    sFourSidedRange_t currentRange;
+  if (mode == DFRobot_C4004::eRangeFourSide) {
+    DFRobot_C4004::sFourSidedRange_t currentRange;
     if (c4004.getFourSidedRangeMode(&currentRange)) {
       Serial.print(F("Current boundary x+/x-/y+/y- (cm): "));
-      Serial.print(currentRange.xPositiveCm);
+      Serial.print(currentRange.xMax);
       Serial.print(F("/"));
-      Serial.print(currentRange.xNegativeCm);
+      Serial.print(currentRange.xMin);
       Serial.print(F("/"));
-      Serial.print(currentRange.yPositiveCm);
+      Serial.print(currentRange.yMax);
       Serial.print(F("/"));
-      Serial.println(currentRange.yNegativeCm);
+      Serial.println(currentRange.yMin);
     } else {
       Serial.println(F("Read current boundary range failed."));
     }
@@ -169,7 +178,7 @@ void setup()
   // c4004.setTrajectoryRangeMode(false);
   // delay(50);
 
-  // sPoint_t points[MAX_POINTS];
+  // DFRobot_C4004::sPoint_t points[C4004_MAX_POINTS];
   // uint16_t pointCount = 0;
   // if (c4004.getTrajectoryRangeMode(points, &pointCount)) {
   //   Serial.println(F("Current trajectory range query success."));
@@ -187,12 +196,17 @@ void setup()
   //   Serial.println(F("Current trajectory range query failed."));
   // }
 
-  /* Set multi-point config by config-file mode points */
-  // sPoint_t cfgPoints[4];
-  // cfgPoints[0].x = 200;  cfgPoints[0].y = 0;
-  // cfgPoints[1].x = 200;  cfgPoints[1].y = 400;
-  // cfgPoints[2].x = -200; cfgPoints[2].y = 400;
-  // cfgPoints[3].x = -200; cfgPoints[3].y = 0;
+  /*
+   * Set multi-point detection range by config-file mode (custom points).
+   * Points are connected in array order: #0 -> #1 -> ... -> #N-1 -> #0 (closed polygon).
+   * Example below (clockwise rectangle):
+   *   #0 (200, 0) -> #1 (200, 400) -> #2 (-200, 400) -> #3 (-200, 0) -> #0
+   */
+  // DFRobot_C4004::sPoint_t cfgPoints[4];
+  // cfgPoints[0].x = 200;  cfgPoints[0].y = 0;    // #0
+  // cfgPoints[1].x = 200;  cfgPoints[1].y = 400;  // #1
+  // cfgPoints[2].x = -200; cfgPoints[2].y = 400;  // #2
+  // cfgPoints[3].x = -200; cfgPoints[3].y = 0;    // #3
   // if (c4004.setConfigFileModePoints(cfgPoints, 4)) {
   //   Serial.println(F("Set multi-point config points success!"));
   // } else {
@@ -200,7 +214,7 @@ void setup()
   // }
   // delay(50);
 
-  // sPoint_t points[MAX_POINTS];
+  // DFRobot_C4004::sPoint_t points[C4004_MAX_POINTS];
   // uint16_t pointCount = 0;
   // if (c4004.getConfigFileModePoints(points, &pointCount)) {
   //   Serial.println(F("Current multi-point config query success."));
@@ -284,7 +298,7 @@ void setup()
   }
 
   Serial.print(F("Current people count(active): "));
-  Serial.println(c4004.getPeopleTime(eGetDataActive));
+  Serial.println(c4004.getPeopleCount(DFRobot_C4004::eGetDataActive));
 
   Serial.println(F("=======================Done======================="));
 }

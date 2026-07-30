@@ -17,26 +17,26 @@ isConnected	KEYWORD2
 reset	KEYWORD2
 factoryReset	KEYWORD2
 getHeartbeat	KEYWORD2
-getReportedInfo	KEYWORD2
+getReportedEvent	KEYWORD2
 getHardwareVersion	KEYWORD2
 getFirmwareVersion	KEYWORD2
 setInstallInfo	KEYWORD2
 getInstallInfo	KEYWORD2
-setInstallHigh	KEYWORD2
-getInstallHigh	KEYWORD2
+setInstallHeight	KEYWORD2
+getInstallHeight	KEYWORD2
 setPresenceEnable	KEYWORD2
 getPresenceEnable	KEYWORD2
 getPresenceState	KEYWORD2
 getMotionState	KEYWORD2
 setTrajectoryTrackEnable	KEYWORD2
 getTrajectoryTrackEnable	KEYWORD2
-setCheckToActiveFrames	KEYWORD2
-getCheckToActiveFrames	KEYWORD2
+setFrameGenerateCount	KEYWORD2
+getFrameGenerateCount	KEYWORD2
 getTargetList	KEYWORD2
-setTrajectoryLed	KEYWORD2
-setMotionLed	KEYWORD2
-getTrajectoryLed	KEYWORD2
-getMotionLed	KEYWORD2
+setTrkLED	KEYWORD2
+setOccLED	KEYWORD2
+getTrkLED	KEYWORD2
+getOccLED	KEYWORD2
 getTags	KEYWORD2
 setTag	KEYWORD2
 clearTag	KEYWORD2
@@ -50,7 +50,7 @@ getTrajectoryRangeMode	KEYWORD2
 setConfigFileModePoints	KEYWORD2
 getConfigFileModePoints	KEYWORD2
 getDetectionRangeMode	KEYWORD2
-getPeopleTime	KEYWORD2
+getPeopleCount	KEYWORD2
 setRealTimePeopleTime	KEYWORD2
 getRealTimePeopleTime	KEYWORD2
 clearPeopleCount	KEYWORD2
@@ -65,9 +65,9 @@ getUnmannedTime	KEYWORD2
 # Constants (LITERAL1)
 #######################################
 
-MAX_TARGETS	LITERAL1
-MAX_TAGS	LITERAL1
-MAX_POINTS	LITERAL1
+C4004_MAX_TARGETS	LITERAL1
+C4004_MAX_POINTS	LITERAL1
+C4004_MAX_PAYLOAD	LITERAL1
 
 eEventNone	LITERAL1
 eEventTrajectory	LITERAL1
@@ -83,23 +83,20 @@ eEventError	LITERAL1
 eGetDataActive	LITERAL1
 eGetDataReport	LITERAL1
 
-eInstallModeUnknown	LITERAL1
-eInstallModeSide	LITERAL1
-eInstallModeTop	LITERAL1
+eUnknown	LITERAL1
+eSide	LITERAL1
+eTop	LITERAL1
 
 eNoPresence	LITERAL1
 ePresence	LITERAL1
-ePresenceUnknown	LITERAL1
 
 eMotionNone	LITERAL1
 eMotionStatic	LITERAL1
 eMotionActive	LITERAL1
-eMotionUnknown	LITERAL1
 
 eStatic	LITERAL1
 eMotion	LITERAL1
 eUncertain	LITERAL1
-eUnknown	LITERAL1
 
 eTagNone	LITERAL1
 eTagBoundary	LITERAL1
@@ -109,9 +106,11 @@ eTagNoise	LITERAL1
 
 eEnter	LITERAL1
 eExit	LITERAL1
+eBoundaryNone	LITERAL1
 
 eApproach	LITERAL1
 eAway	LITERAL1
+eApproachAwayNone	LITERAL1
 
 eTagRangeCircle	LITERAL1
 eTagRangeRectangle	LITERAL1
@@ -129,15 +128,7 @@ eTrajRangeErrMode	LITERAL1
 eTrajRangeErrRes	LITERAL1
 eTrajRangeErrData	LITERAL1
 
-eRangeSideDefault	LITERAL1
-eRangeSideLeftEdge	LITERAL1
-eRangeSideRightEdge	LITERAL1
-eRangeHotelCorridor	LITERAL1
 eRangeFourSide	LITERAL1
 eRangeTrajectory	LITERAL1
 eRangeConfigFile	LITERAL1
-eRangeNoBoundary	LITERAL1
-eRangeTopDefault	LITERAL1
-eRangeTopLeftEdge	LITERAL1
-eRangeTopRightEdge	LITERAL1
 eRangeUnknown	LITERAL1

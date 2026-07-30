@@ -1,10 +1,21 @@
 # -*- coding: utf-8 -*
 '''!
-@file learning_trajectory_range.py
-@brief Example for learning trajectory range.
+@file generate_trajectory_range.py
+@brief Generate/learn a trajectory-based detection range and apply it.
+@details Interactive demo: learn a custom detection polygon by walking a path,
+@n then switch to trajectory-range mode and query the learned points.
+
+@n ========== Usage environment ==========
+@n - Use this example when you need a custom detection boundary learned from a real walk path
+@n   (instead of only a four-sided rectangle).
+@n - Please install the sensor at a height of 180 cm for use.
+@n - Keep the sensor FOV open and free of strong multipath interference.
+@n - During learning, keep exactly ONE person in the FOV (the demo waits for this condition).
+@n - Run in a terminal; send single-character commands (1/2/3/4/s/e/q) then Enter.
+
 @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
 @license The MIT License (MIT)
-@author JiaLi(zhixin.liu@dfrobot.com)
+@author JiaLi(jia.li@dfrobot.com)
 @version V1.0.0
 @date 2026-05-22
 @url https://github.com/DFRobot/DFRobot_C4004
@@ -32,11 +43,20 @@ people_query_interval = 1.0
 def print_menu():
   print('')
   print(' ================Trajectory Range Menu=============')
+  print('Standard workflow:')
+  print('  1) Wait for begin success and init, then this menu.')
+  print("  2) Send '1' to start learning.")
+  print("  3) Keep only one person in view until confirm 5/5 (or send 'q' to cancel).")
+  print("  4) Send 's' to start trajectory learning.")
+  print('  5) Walk along the intended boundary path.')
+  print("  6) Send 'e' to stop learning (or 'q'); points are queried.")
+  print("  7) Send '2' later to use trajectory-range mode again.")
+  print("  8) Send '3' to query points; send '4' to reprint menu.")
+  print(' --------------------------------------------------')
   print('|1: Learn trajectory range                         |')
   print('|2: Use trajectory range mode                      |')
   print('|3: Query trajectory range points                  |')
   print('|4: Print this menu                                |')
-  print('|During learning: send e to stop, q to cancel      |')
   print(' ==================================================')
 
 
@@ -60,18 +80,17 @@ def wait_command():
     cmd = read_command(0.02)
     if cmd:
       return cmd
-    c4004.get_reported_info(0.02)
+    c4004.get_reported_event(0.02)
 
 
 def setup_params():
   print(' ====================Init Params===================')
 
   range_info = FourSidedRange()
-  range_info.mode = c4004.RANGE_FOUR_SIDE
-  range_info.x_positive_cm = 500
-  range_info.x_negative_cm = -500
-  range_info.y_positive_cm = 800
-  range_info.y_negative_cm = 0
+  range_info.x_max = 500
+  range_info.x_min = -500
+  range_info.y_max = 800
+  range_info.y_min = 0
 
   if c4004.set_four_sided_range_mode(range_info):
     print('Set four sided range success!')
@@ -97,13 +116,13 @@ def setup_params():
     print('Failed to enable trajectory tracking.')
   time.sleep(0.05)
 
-  if c4004.set_motion_led(True):
-    print('Turned on motion LED.')
+  if c4004.set_occ_led(True):
+    print('Turned on occupancy LED.')
   else:
-    print('Failed to turn on motion LED.')
+    print('Failed to turn on occupancy LED.')
   time.sleep(0.05)
 
-  if c4004.set_trajectory_led(True):
+  if c4004.set_trk_led(True):
     print('Turned on trajectory LED.')
   else:
     print('Failed to turn on trajectory LED.')
@@ -141,7 +160,7 @@ def wait_for_single_person():
       cmd = read_command(0.01)
       if cmd in ('q', 'Q'):
         return False
-      c4004.get_reported_info(0.01)
+      c4004.get_reported_event(0.01)
 
   return True
 
@@ -181,7 +200,7 @@ def learn_trajectory_range():
     cmd = read_command(0.05)
     if cmd in ('e', 'E', 'q', 'Q'):
       break
-    c4004.get_reported_info(0.05)
+    c4004.get_reported_event(0.05)
 
   print('Set trajectory range mode (learning off).')
   c4004.set_trajectory_range_mode(False)
@@ -206,6 +225,10 @@ def query_trajectory_range():
   print(' ==============Query Trajectory Range==============')
   if not c4004.get_trajectory_range_mode(points, point_count):
     print('Query trajectory range failed.')
+    print('Possible causes:')
+    print("  1) Trajectory range mode not enabled. Send '2' in the menu to enable it.")
+    print('  2) Hardware wiring issue or hardware damage.')
+    print('  3) Large data volume; SoftSerial is prone to packet loss.')
     return
 
   print('Trajectory point count:', point_count[0])
@@ -218,24 +241,33 @@ def main():
     time.sleep(1)
   print('DFRobot C4004 begin success.')
 
-  if c4004.set_check_to_active_frames(7):
+  # Side mount: default 180 cm, recommended 180±20 cm. Top mount: recommended 220-280 cm.
+  if c4004.set_install_height(180):
+    print('Set install height success.')
+  else:
+    print('Set install height failed.')
+  time.sleep(0.05)
+
+  if c4004.set_frame_generate_count(7):
     print('Set check-to-active frames success.')
   else:
     print('Set check-to-active frames failed.')
   time.sleep(0.05)
 
   setup_params()
+  print('')
+  print('Usage: keep ONE person in FOV while learning; send commands then Enter.')
   print_menu()
 
   while True:
     # When state or data changes and the corresponding report function is enabled,
-    # the module pushes the update immediately as an event via get_reported_info().
+    # the module pushes the update immediately as an event via get_reported_event().
     # Use the matching getter with GET_DATA_REPORT to read the cached value
     # updated by that report, without issuing an extra UART query.
     cmd = read_command(0.01)
 
     if not cmd:
-      c4004.get_reported_info(0.01)
+      c4004.get_reported_event(0.01)
       continue
 
     if cmd == '1':

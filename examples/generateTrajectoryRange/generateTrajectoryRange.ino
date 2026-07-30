@@ -1,15 +1,34 @@
 /*!
- * @file learningTrajectoryRange.ino
- * @brief Example for learning trajectory range.
+ * @file generateTrajectoryRange.ino
+ * @brief Generate/learn a trajectory-based detection range and apply it.
+ * @details Interactive Serial demo: learn a custom detection polygon by walking a path,
+ * @n then switch to trajectory-range mode and query the learned points.
+ * @n Usage environment:
+ * @n - Use this example when you need a custom detection boundary learned from a real walk path
+ * @n   (instead of only a four-sided rectangle).
+ * @n - Please install the sensor at a height of 180 cm for use.
+ * @n - Keep the sensor FOV open and free of strong multipath interference.
+ * @n - During learning, keep exactly ONE person in the FOV (the demo waits for this condition).
+ * @n - Open Serial Monitor at 115200 baud; send single-character commands (1/2/3/4/s/e/q).
+ *
  * @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
  * @license The MIT License (MIT)
- * @author JiaLi(zhixin.liu@dfrobot.com)
+ * @author JiaLi(jia.li@dfrobot.com)
  * @version V1.0.0
  * @date 2026-05-22
  * @url https://github.com/DFRobot/DFRobot_C4004
  */
 
 #include "DFRobot_C4004.h"
+
+/* ---------------------------------------------------------------------------------------------------------------------
+ *    board   |             MCU                | Leonardo/Mega2560/M0 |    UNO    | ESP8266 | ESP32 |  microbit  |   M0  |
+ *     VCC    |              5V                |         5V           |     5V    |    5V   |   5V  |     X      |   5V  |
+ *     GND    |              GND               |        GND           |    GND    |   GND   |  GND  |     X      |  GND  |
+ *     RX     |              TX                |     Serial1 TX1      |     5     |   5     |  D3   |     X      |  TX1  |
+ *     TX     |              RX                |     Serial1 RX1      |     4     |   4     |  D2   |     X      |  RX1  |
+ * ----------------------------------------------------------------------------------------------------------------------*/
+/* Baud rate is fixed at 115200. SoftSerial mode cannot guarantee stable data communication! */
 
 #if defined(ESP8266) || defined(ARDUINO_AVR_UNO)
 SoftwareSerial mySerial(4, 5);
@@ -28,7 +47,7 @@ void learnTrajectoryRange(void);
 bool waitForSinglePerson(void);
 void setUseTrajectoryRangeMode(void);
 void queryTrajectoryRange(void);
-void printTrajectoryPoints(const sPoint_t *points, uint16_t pointCount);
+void printTrajectoryPoints(const DFRobot_C4004::sPoint_t *points, uint16_t pointCount);
 char readCommand(void);
 char waitCommand(void);
 
@@ -43,7 +62,15 @@ void setup()
 
   Serial.println(F("DFRobot C4004 begin success."));
 
-  if (c4004.setCheckToActiveFrames(7)) {
+  // Side mount: default 180 cm, recommended 180±20 cm. Top mount: recommended 220-280 cm.
+  if (c4004.setInstallHeight(180)) {
+    Serial.println(F("Set install height success."));
+  } else {
+    Serial.println(F("Set install height failed."));
+  }
+  delay(50);
+
+  if (c4004.setFrameGenerateCount(7)) {
     Serial.println(F("Set check-to-active frames success."));
   } else {
     Serial.println(F("Set check-to-active frames failed."));
@@ -52,12 +79,11 @@ void setup()
 
   Serial.println(F(" ====================Init Params==================="));
 
-  sFourSidedRange_t range;
-  range.mode        = eRangeFourSide;
-  range.xPositiveCm = 500;
-  range.xNegativeCm = -500;
-  range.yPositiveCm = 800;
-  range.yNegativeCm = 0;
+  DFRobot_C4004::sFourSidedRange_t range;
+  range.xMax = 500;
+  range.xMin = -500;
+  range.yMax = 800;
+  range.yMin = 0;
 
   if (c4004.setFourSidedRangeMode(range)) {
     Serial.println(F("Set four sided range success!"));
@@ -87,20 +113,22 @@ void setup()
   }
   delay(50);
 
-  if (c4004.setMotionLed(true)) {
-    Serial.println(F("Turned on motion LED."));
+  if (c4004.setOccLED(true)) {
+    Serial.println(F("Turned on occupancy LED."));
   } else {
-    Serial.println(F("Failed to turn on motion LED."));
+    Serial.println(F("Failed to turn on occupancy LED."));
   }
   delay(50);
 
-  if (c4004.setTrajectoryLed(true)) {
+  if (c4004.setTrkLED(true)) {
     Serial.println(F("Turned on trajectory LED."));
   } else {
     Serial.println(F("Failed to turn on trajectory LED."));
   }
   delay(50);
 
+  Serial.println();
+  Serial.println(F("Usage: open Serial Monitor @115200, keep ONE person in FOV while learning."));
   printMenu();
 }
 
@@ -108,14 +136,14 @@ void loop()
 {
   /*
    * When state or data changes and the corresponding report function is enabled,
-   * the module pushes the update immediately as an event via getReportedInfo().
-   * Use the matching getter with eGetDataReport to read the cached value
+   * the module pushes the update immediately as an event via getReportedEvent().
+   * Use the matching getter with DFRobot_C4004::eGetDataReport to read the cached value
    * updated by that report, without issuing an extra UART query.
    */
   char cmd = readCommand();
 
   if (cmd == 0) {
-    c4004.getReportedInfo(10);
+    c4004.getReportedEvent(10);
     return;
   }
   switch (cmd) {
@@ -144,11 +172,20 @@ void printMenu(void)
 {
   Serial.println();
   Serial.println(F(" ================Trajectory Range Menu============="));
+  Serial.println(F("Standard workflow:"));
+  Serial.println(F("  1) Wait for begin success and init, then this menu."));
+  Serial.println(F("  2) Send '1' to start learning."));
+  Serial.println(F("  3) Keep only one person in view until confirm 5/5 (or send 'q' to cancel)."));
+  Serial.println(F("  4) Send 's' to start trajectory learning."));
+  Serial.println(F("  5) Walk along the intended boundary path."));
+  Serial.println(F("  6) Send 'e' to stop learning (or 'q'); points are queried."));
+  Serial.println(F("  7) Send '2' later to use trajectory-range mode again."));
+  Serial.println(F("  8) Send '3' to query points; send '4' to reprint menu."));
+  Serial.println(F(" --------------------------------------------------"));
   Serial.println(F("|1: Learn trajectory range                         |"));
   Serial.println(F("|2: Use trajectory range mode                      |"));
   Serial.println(F("|3: Query trajectory range points                  |"));
   Serial.println(F("|4: Print this menu                                |"));
-  Serial.println(F("|During learning: send e to stop, q to cancel      |"));
   Serial.println(F(" =================================================="));
 }
 
@@ -197,7 +234,7 @@ void learnTrajectoryRange(void)
       break;
     }
 
-    c4004.getReportedInfo(50);
+    c4004.getReportedEvent(50);
   }
 
   Serial.println(F("Set trajectory range mode (learning off)."));
@@ -214,7 +251,7 @@ bool waitForSinglePerson(void)
 
   while (confirmCount < singlePersonConfirmTimes) {
     uint32_t startTime   = millis();
-    uint8_t  targetCount = c4004.getTargetList(NULL, 0, eGetDataActive);
+    uint8_t  targetCount = c4004.getTargetList(NULL, 0, DFRobot_C4004::eGetDataActive);
 
     Serial.print(F("Active target count: "));
     Serial.print(targetCount);
@@ -236,7 +273,7 @@ bool waitForSinglePerson(void)
       if (cmd == 'q' || cmd == 'Q') {
         return false;
       }
-      c4004.getReportedInfo(10);
+      c4004.getReportedEvent(10);
     }
   }
 
@@ -253,7 +290,7 @@ void setUseTrajectoryRangeMode(void)
 
 void queryTrajectoryRange(void)
 {
-  sPoint_t points[MAX_POINTS];
+  DFRobot_C4004::sPoint_t points[C4004_MAX_POINTS];
   uint16_t pointCount = 0;
 
   Serial.println();
@@ -261,6 +298,10 @@ void queryTrajectoryRange(void)
 
   if (!c4004.getTrajectoryRangeMode(points, &pointCount)) {
     Serial.println(F("Query trajectory range failed."));
+    Serial.println(F("Possible causes:"));
+    Serial.println(F("  1) Trajectory range mode not enabled. Send '2' in the menu to enable it."));
+    Serial.println(F("  2) Hardware wiring issue or hardware damage."));
+    Serial.println(F("  3) Large data volume; SoftSerial is prone to packet loss."));
     return;
   }
 
@@ -269,7 +310,7 @@ void queryTrajectoryRange(void)
   printTrajectoryPoints(points, pointCount);
 }
 
-void printTrajectoryPoints(const sPoint_t *points, uint16_t pointCount)
+void printTrajectoryPoints(const DFRobot_C4004::sPoint_t *points, uint16_t pointCount)
 {
   const uint8_t pointsPerLine = 4;
 
@@ -315,6 +356,6 @@ char waitCommand(void)
       return cmd;
     }
 
-    c4004.getReportedInfo(20);
+    c4004.getReportedEvent(20);
   }
 }

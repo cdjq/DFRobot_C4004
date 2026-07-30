@@ -6,15 +6,26 @@
  * @n 2) While rule 1 is active, new people entering room keeps light OFF.
  * @n 3) If bed area has no static person, keep light ON when room has people.
  * @n 4) After room transitions from occupied to empty, wait 5s then turn light OFF.
+ * @n Usage environment:
+ * @n - Please install the sensor at a height of 180 cm for use.
  * @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
  * @license The MIT License (MIT)
- * @author JiaLi(zhixin.liu@dfrobot.com)
+ * @author JiaLi(jia.li@dfrobot.com)
  * @version V1.0.0
  * @date 2026-05-22
  * @url https://github.com/DFRobot/DFRobot_C4004
  */
 
 #include "DFRobot_C4004.h"
+
+/* ---------------------------------------------------------------------------------------------------------------------
+ *    board   |             MCU                | Leonardo/Mega2560/M0 |    UNO    | ESP8266 | ESP32 |  microbit  |   M0  |
+ *     VCC    |              5V                |         5V           |     5V    |    5V   |   5V  |     X      |   5V  |
+ *     GND    |              GND               |        GND           |    GND    |   GND   |  GND  |     X      |  GND  |
+ *     RX     |              TX                |     Serial1 TX1      |     5     |   5     |  D3   |     X      |  TX1  |
+ *     TX     |              RX                |     Serial1 RX1      |     4     |   4     |  D2   |     X      |  RX1  |
+ * ----------------------------------------------------------------------------------------------------------------------*/
+/* Baud rate is fixed at 115200. SoftSerial mode cannot guarantee stable data communication! */
 
 #if defined(ESP8266) || defined(ARDUINO_AVR_UNO)
 SoftwareSerial mySerial(4, 5);
@@ -59,7 +70,15 @@ void setup()
   }
   Serial.println(F("DFRobot C4004 begin success."));
 
-  if (c4004.setCheckToActiveFrames(7)) {
+  // Side mount: default 180 cm, recommended 180±20 cm. Top mount: recommended 220-280 cm.
+  if (c4004.setInstallHeight(180)) {
+    Serial.println(F("Set install height success."));
+  } else {
+    Serial.println(F("Set install height failed."));
+  }
+  delay(50);
+
+  if (c4004.setFrameGenerateCount(7)) {
     Serial.println(F("Set check-to-active frames success."));
   } else {
     Serial.println(F("Set check-to-active frames failed."));
@@ -72,12 +91,11 @@ void setup()
     Serial.println(F("Set presence enable failed."));
   }
 
-  sFourSidedRange_t range;
-  range.mode        = eRangeFourSide;
-  range.xPositiveCm = 200;
-  range.xNegativeCm = -200;
-  range.yPositiveCm = 700;
-  range.yNegativeCm = 0;
+  DFRobot_C4004::sFourSidedRange_t range;
+  range.xMax = 200;
+  range.xMin = -200;
+  range.yMax = 700;
+  range.yMin = 0;
   if (c4004.setFourSidedRangeMode(range)) {
     Serial.println(F("Set boundary detection range success."));
   } else {
@@ -90,11 +108,17 @@ void setup()
     Serial.println(F("Clear all tags failed."));
   }
 
-  sTagConfig_t setTags[3] = {};
+  DFRobot_C4004::sTagConfig_t setTags[3] = {};
+
+  /**
+   * Note: For rectangle tags, width is the size along the X-axis and height is
+   * the size along the Y-axis (unit: cm), relative to centerX/centerY.
+   * For circle tags, width is the radius and height is ignored.
+  */
 
   setTags[0].tagIndex  = bedTagIndex;
-  setTags[0].tagType   = eTagPeopleCounting;
-  setTags[0].scopeType = eTagRangeRectangle;
+  setTags[0].tagType   = DFRobot_C4004::eTagPeopleCounting;
+  setTags[0].scopeType = DFRobot_C4004::eTagRangeRectangle;
   setTags[0].ioIndex   = 0;
   setTags[0].centerX   = -50;
   setTags[0].centerY   = 300;
@@ -102,8 +126,8 @@ void setup()
   setTags[0].height    = 250;
 
   setTags[1].tagIndex  = bedroomTagIndex;
-  setTags[1].tagType   = eTagPeopleCounting;
-  setTags[1].scopeType = eTagRangeRectangle;
+  setTags[1].tagType   = DFRobot_C4004::eTagPeopleCounting;
+  setTags[1].scopeType = DFRobot_C4004::eTagRangeRectangle;
   setTags[1].ioIndex   = 0;
   setTags[1].centerX   = 0;
   setTags[1].centerY   = 350;
@@ -111,8 +135,8 @@ void setup()
   setTags[1].height    = 700;
 
   setTags[2].tagIndex  = bedroomDoorTagIndex;
-  setTags[2].tagType   = eTagApproachAway;
-  setTags[2].scopeType = eTagRangeRectangle;
+  setTags[2].tagType   = DFRobot_C4004::eTagApproachAway;
+  setTags[2].scopeType = DFRobot_C4004::eTagRangeRectangle;
   setTags[2].ioIndex   = 0;
   setTags[2].centerX   = 100;
   setTags[2].centerY   = 700;
@@ -137,10 +161,10 @@ void setup()
 void updatePeopleCountsFromTagReport()
 {
   for (uint8_t i = 0; i < 4; i++) {
-    eReportedEvent_t event = c4004.getReportedInfo(5);
-    if (event == eEventTag) {
-      sTagInfo_t tagInfo;
-      if (c4004.getTagInfo(&tagInfo) && tagInfo.tagType == eTagPeopleCounting) {
+    DFRobot_C4004::eReportedEvent_t event = c4004.getReportedEvent(5);
+    if (event == DFRobot_C4004::eEventTag) {
+      DFRobot_C4004::sTagInfo_t tagInfo;
+      if (c4004.getTagInfo(&tagInfo) && tagInfo.tagType == DFRobot_C4004::eTagPeopleCounting) {
         if (tagInfo.tagIndex == bedTagIndex) {
           bedMotionCount = tagInfo.motionNum;
           bedStaticCount = tagInfo.staticNum;
