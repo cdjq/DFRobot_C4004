@@ -31,6 +31,15 @@ except ImportError:
   rpi_gpio = None
 
 c4004 = DFRobot_C4004('/dev/ttyAMA0', 115200)
+# C4004 IO -> Raspberry Pi GPIO (BCM numbering). Also connect VCC/GND/UART as in README.
+#   C4004 IO | Pi BCM pin | Description
+#     IO1    |     6      | Whole detection area presence output
+#     IO2    |    13      | Zone tag0 presence output
+#     IO3    |    19      | Zone tag1 presence output
+#     IO4    |    26      | Zone tag2 presence output
+#     IO5    |    20      | Zone tag3 presence output
+#     IO6    |    21      | Zone tag4 presence output
+# Level: HIGH = presence, LOW = none.
 zone_pins = [6, 13, 19, 26, 20, 21]
 
 
