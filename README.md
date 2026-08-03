@@ -1,5 +1,5 @@
 # DFRobot_C4004
-- [???](./README_CN.md)
+- [中文版](./README_CN.md)
 
 DFRobot C4004 is a 60GHz 4T4R multi-zone presence mmWave radar for smart space management. It can report not only occupancy, but also real-time counts of static people and moving people in configured areas, with built-in zone logic and 6-way IO linkage for fast automation deployment.
 
