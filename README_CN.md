@@ -47,35 +47,35 @@ pip3 install pyserial
 
   /**
    * @fn begin
-   * @brief 初始化 DFRobot C4004 传感器。
+   * @brief 初始化传感器模块。
    * @return true: 初始化成功，false: 初始化失败。
   */
   bool begin(void);
 
   /**
    * @fn isConnected
-   * @brief 检查 DFRobot C4004 传感器是否连接。
+   * @brief 检查传感器是否连接。
    * @return true: 已连接，false: 未连接。
   */
   bool isConnected(void);
 
   /**
    * @fn reset
-   * @brief 复位 DFRobot C4004 传感器。
+   * @brief 复位传感器。
    * @return true: 复位成功，false: 复位失败。
   */
   bool reset(void);
 
   /**
    * @fn factoryReset
-   * @brief 恢复 DFRobot C4004 传感器出厂设置。
+   * @brief 恢复传感器出厂设置。
    * @return true: 复位成功，false: 复位失败。
   */
   bool factoryReset(void);
 
   /**
    * @fn getHeartbeat
-   * @brief 获取 DFRobot C4004 传感器的心跳状态。
+   * @brief 获取传感器的心跳状态。
    * @param mode: 数据获取模式。
    * @n          eGetDataActive: 主动获取最新心跳状态。
    * @n          eGetDataReport: 从最近一次上报中获取最新心跳状态。
@@ -85,7 +85,7 @@ pip3 install pyserial
 
   /**
    * @fn getReportedEvent
-   * @brief 获取 DFRobot C4004 传感器最新上报的事件。
+   * @brief 获取传感器最新上报的事件。
    * @param timeoutMs: 等待上报的最大时间，单位为毫秒，默认值为 50。
    * @return eReportedEvent_t: 上报的事件类型。
    * @n          eEventNone: 未检测到事件。
@@ -103,43 +103,43 @@ pip3 install pyserial
 
   /**
    * @fn getHardwareVersion
-   * @brief 获取 DFRobot C4004 传感器的硬件版本。
+   * @brief 获取传感器的硬件版本。
    * @return String: 硬件版本。
   */
   String getHardwareVersion(void);
 
   /**
    * @fn getFirmwareVersion
-   * @brief 获取 DFRobot C4004 传感器的固件版本。
+   * @brief 获取传感器的固件版本。
    * @return String: 固件版本。
   */
   String getFirmwareVersion(void);
 
   /**
    * @fn setInstallInfo
-   * @brief 设置 DFRobot C4004 传感器的安装信息。
+   * @brief 设置传感器的安装信息。
    * @param info: 安装信息。
-   * @n          mode: DFRobot C4004 安装模式。
-   * @n          heightCm: DFRobot C4004 安装高度，单位为 cm。
-   * @n          zAngle: DFRobot C4004 安装 Z 轴角度，单位为度。
+   * @n          mode: 安装模式。
+   * @n          heightCm: 安装高度，单位为 cm。
+   * @n          zAngle: 安装 Z 轴角度，单位为度。
    * @return true: 设置成功，false: 设置失败。
   */
   bool setInstallInfo(sInstallInfo_t &info);
 
   /**
    * @fn getInstallInfo
-   * @brief 获取 DFRobot C4004 传感器的安装信息。
+   * @brief 获取传感器的安装信息。
    * @param info: 安装信息。
-   * @n          mode: DFRobot C4004 安装模式。
-   * @n          heightCm: DFRobot C4004 安装高度，单位为 cm。
-   * @n          zAngle: DFRobot C4004 安装 Z 轴角度，单位为度。
+   * @n          mode: 安装模式。
+   * @n          heightCm: 安装高度，单位为 cm。
+   * @n          zAngle: 安装 Z 轴角度，单位为度。
    * @return true: 获取成功，false: 获取失败。
   */
   bool getInstallInfo(sInstallInfo_t *info);
 
   /**
    * @fn setInstallHeight
-   * @brief 设置 DFRobot C4004 传感器的安装高度。
+   * @brief 设置传感器的安装高度。
    * @param height: 安装高度，单位为 cm。
    * @return true: 设置成功，false: 设置失败。
   */
@@ -147,7 +147,7 @@ pip3 install pyserial
 
   /**
    * @fn getInstallHeight
-   * @brief 获取 DFRobot C4004 传感器的安装高度。
+   * @brief 获取传感器的安装高度。
    * @param pHeight: 接收安装高度的指针，单位为 cm。
    * @return true: 获取成功，false: 获取失败。
   */
@@ -235,7 +235,7 @@ pip3 install pyserial
 
   /**
    * @fn getTargetList
-   * @brief 获取 DFRobot C4004 传感器的目标信息列表。
+   * @brief 获取传感器的目标信息列表。
    * @param targetBuf: 接收目标信息列表的指针。
    * @param maxCount: 可读取的最大目标数量。
    * @param mode: 数据获取模式。
@@ -385,7 +385,7 @@ pip3 install pyserial
 
   /**
    * @fn getTrajectoryRangeMode
-   * @brief 查询并获取轨迹模式（模式 0x05）下的范围点。
+   * @brief 查询并获取轨迹模式下的范围点。
    * @param points: 接收轨迹模式点的指针。
    * @param pointCount: 接收点数量的指针。
    * @return true: 查询成功，false: 查询失败。
@@ -395,7 +395,7 @@ pip3 install pyserial
 
   /**
    * @fn setConfigFileModePoints
-   * @brief 使用配置文件模式（模式 0x06）设置检测范围点。
+   * @brief 使用配置文件模式设置检测范围点。
    * @param points: 配置文件模式点的指针。
    * @param pointCount: 点的数量。
    * @return true: 设置成功，false: 设置失败。
@@ -406,7 +406,7 @@ pip3 install pyserial
 
   /**
    * @fn getConfigFileModePoints
-   * @brief 查询并获取配置文件模式（模式 0x06）下的范围点。
+   * @brief 查询并获取配置文件模式下的范围点。
    * @param points: 接收配置文件模式点的指针。
    * @param pointCount: 接收点数量的指针。
    * @return true: 查询成功，false: 查询失败。

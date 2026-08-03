@@ -47,35 +47,35 @@ pip3 install pyserial
 
   /**
    * @fn begin
-   * @brief Initialize the DFRobot C4004 sensor.
+   * @brief Initialize the sensor module.
    * @return true: Initialization succeeded, false: Initialization failed.
   */
   bool begin(void);
 
   /**
    * @fn isConnected
-   * @brief Check if the DFRobot C4004 sensor is connected.
+   * @brief Check if the sensor is connected.
    * @return true: Connected, false: Not connected.
   */
   bool isConnected(void);
 
   /**
    * @fn reset
-   * @brief Reset the DFRobot C4004 sensor.
+   * @brief Reset the sensor.
    * @return true: Reset succeeded, false: Reset failed.
   */
   bool reset(void);
 
   /**
    * @fn factoryReset
-   * @brief Factory reset the DFRobot C4004 sensor.
+   * @brief Factory reset the sensor.
    * @return true: Reset succeeded, false: Reset failed.
   */
   bool factoryReset(void);
 
   /**
    * @fn getHeartbeat
-   * @brief Get the heartbeat status of the DFRobot C4004 sensor.
+   * @brief Get the heartbeat status of the sensor.
    * @param mode: Data acquisition mode.
    * @n          eGetDataActive: Actively obtain the latest heartbeat status.
    * @n          eGetDataReport: Obtain the latest heartbeat status from the last report.
@@ -85,7 +85,7 @@ pip3 install pyserial
 
   /**
    * @fn getReportedEvent
-   * @brief Get the latest reported event from the DFRobot C4004 sensor.
+   * @brief Get the latest reported event from the sensor.
    * @param timeoutMs: Maximum waiting time for the report?in milliseconds?default is 50.
    * @return eReportedEvent_t: Reported event type.
    * @n          eEventNone: No event detected.
@@ -103,43 +103,43 @@ pip3 install pyserial
 
   /**
    * @fn getHardwareVersion
-   * @brief Get the hardware version of the DFRobot C4004 sensor.
+   * @brief Get the hardware version of the sensor.
    * @return String: Hardware version.
   */
   String getHardwareVersion(void);
 
   /**
    * @fn getFirmwareVersion
-   * @brief Get the firmware version of the DFRobot C4004 sensor.
+   * @brief Get the firmware version of the sensor.
    * @return String: Firmware version.
   */
   String getFirmwareVersion(void);
 
   /**
    * @fn setInstallInfo
-   * @brief Set the installation information of the DFRobot C4004 sensor.
+   * @brief Set the installation information of the sensor.
    * @param info: Installation information.
-   * @n          mode: DFRobot C4004 mounting mode.
-   * @n          heightCm: DFRobot C4004 installation height, in cm.
-   * @n          zAngle: DFRobot C4004 installation z-axis angle, in degrees.
+   * @n          mode: Mounting mode.
+   * @n          heightCm: Installation height, in cm.
+   * @n          zAngle: Installation z-axis angle, in degrees.
    * @return true: Set succeeded, false: Set failed.
   */
   bool setInstallInfo(sInstallInfo_t &info);
 
   /**
    * @fn getInstallInfo
-   * @brief Get the installation information of the DFRobot C4004 sensor.
+   * @brief Get the installation information of the sensor.
    * @param info: Installation information.
-   * @n          mode: DFRobot C4004 mounting mode.
-   * @n          heightCm: DFRobot C4004 installation height, in cm.
-   * @n          zAngle: DFRobot C4004 installation z-axis angle, in degrees.
+   * @n          mode: Mounting mode.
+   * @n          heightCm: Installation height, in cm.
+   * @n          zAngle: Installation z-axis angle, in degrees.
    * @return true: Get succeeded, false: Get failed.
   */
   bool getInstallInfo(sInstallInfo_t *info);
 
   /**
    * @fn setInstallHeight
-   * @brief Set the installation height of the DFRobot C4004 sensor.
+   * @brief Set the installation height of the sensor.
    * @param height: Installation height, in cm.
    * @return true: Set succeeded, false: Set failed.
   */
@@ -147,7 +147,7 @@ pip3 install pyserial
 
   /**
    * @fn getInstallHeight
-   * @brief Get the installation height of the DFRobot C4004 sensor.
+   * @brief Get the installation height of the sensor.
    * @param height: Pointer to receive installation height, in cm.
    * @return true: Get succeeded, false: Get failed.
   */
@@ -235,7 +235,7 @@ pip3 install pyserial
 
   /**
    * @fn getTargetList
-   * @brief Get the list of target information of the DFRobot C4004 sensor.
+   * @brief Get the list of target information of the sensor.
    * @param targetBuf: Pointer to receive the target information list.
    * @param maxCount: Maximum number of targets to be read.
    * @param mode: Data acquisition mode.
@@ -388,7 +388,7 @@ pip3 install pyserial
 
   /**
    * @fn getTrajectoryRangeMode
-   * @brief Query and get range points in trajectory mode (mode 0x05).
+   * @brief Query and get range points in trajectory mode.
    * @param points: Pointer to receive trajectory-mode points.
    * @param pointCount: Pointer to receive point count.
    * @return true: Query succeeded, false: Query failed.
@@ -398,7 +398,7 @@ pip3 install pyserial
 
   /**
    * @fn setConfigFileModePoints
-   * @brief Set detection range points using config-file mode (mode 0x06).
+   * @brief Set detection range points using config-file mode.
    * @param points: Pointer to the config-file-mode points.
    * @param pointCount: Number of points.
    * @return true: Set succeeded, false: Set failed.
@@ -409,7 +409,7 @@ pip3 install pyserial
 
   /**
    * @fn getConfigFileModePoints
-   * @brief Query and get range points in config-file mode (mode 0x06).
+   * @brief Query and get range points in config-file mode.
    * @param points: Pointer to receive config-file-mode points.
    * @param pointCount: Pointer to receive point count.
    * @return true: Query succeeded, false: Query failed.

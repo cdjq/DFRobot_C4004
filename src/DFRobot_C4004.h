@@ -1,6 +1,6 @@
 /*!
  * @file DFRobot_C4004.h
- * @brief Arduino driver for the DFRobot C4004 sensor.
+ * @brief Arduino driver for the sensor module.
  * @details Provides common configuration, query, and report parsing APIs.
  * @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
  * @license The MIT License (MIT)
@@ -167,7 +167,7 @@ public:
 
   /**
    * @enum eInstallMode_t
-   * @brief DFRobot C4004 mounting mode.
+   * @brief Sensor mounting mode.
    * @n Mounting is defined by zAngle: 0° = side, 90° = top (same underlying algorithm).
    */
   typedef enum {
@@ -273,7 +273,7 @@ public:
 
   /**
    * @enum eDetectionRangeMode_t
-   * @brief Detection boundary mode defined by the DFRobot C4004 protocol.
+   * @brief Detection boundary mode defined by the protocol.
    */
   typedef enum {
     eRangeFourSide   = 0x04,    ///> Four-side detection boundary mode
@@ -397,35 +397,35 @@ public:
 
   /**
    * @fn begin
-   * @brief Initialize the DFRobot C4004 sensor.
+   * @brief Initialize the sensor module.
    * @return true: Initialization succeeded, false: Initialization failed.
   */
   bool begin(void);
 
   /**
    * @fn isConnected
-   * @brief Check if the DFRobot C4004 sensor is connected.
+   * @brief Check if the sensor is connected.
    * @return true: Connected, false: Not connected.
   */
   bool isConnected(void);
 
   /**
    * @fn reset
-   * @brief Reset the DFRobot C4004 sensor.
+   * @brief Reset the sensor.
    * @return true: Reset succeeded, false: Reset failed.
   */
   bool reset(void);
 
   /**
    * @fn factoryReset
-   * @brief Factory reset the DFRobot C4004 sensor.
+   * @brief Factory reset the sensor.
    * @return true: Reset succeeded, false: Reset failed.
   */
   bool factoryReset(void);
 
   /**
    * @fn getHeartbeat
-   * @brief Get the heartbeat status of the DFRobot C4004 sensor.
+   * @brief Get the heartbeat status of the sensor.
    * @param mode: Data acquisition mode.
    * @n          eGetDataActive: Actively obtain the latest heartbeat status.
    * @n          eGetDataReport: Obtain the latest heartbeat status from the last report.
@@ -435,7 +435,7 @@ public:
 
   /**
    * @fn getReportedEvent
-   * @brief Wait for and decode one report frame pushed by the DFRobot C4004 sensor.
+   * @brief Wait for and decode one report frame pushed by the sensor.
    * @param timeoutMs: Max time to wait for one complete UART report frame, in milliseconds (default: 50).
    * @n          The call blocks at most timeoutMs. If no complete frame arrives in time, returns eEventNone.
    * @n          If a frame arrives earlier, it returns as soon as the frame is decoded (may be shorter than timeoutMs).
@@ -455,21 +455,21 @@ public:
 
   /**
    * @fn getHardwareVersion
-   * @brief Get the hardware version of the DFRobot C4004 sensor.
+   * @brief Get the hardware version of the sensor.
    * @return String: Hardware version.
   */
   String getHardwareVersion(void);
 
   /**
    * @fn getFirmwareVersion
-   * @brief Get the firmware version of the DFRobot C4004 sensor.
+   * @brief Get the firmware version of the sensor.
    * @return String: Firmware version.
   */
   String getFirmwareVersion(void);
 
   /**
    * @fn setInstallInfo
-   * @brief Set the installation information of the DFRobot C4004 sensor.
+   * @brief Set the installation information of the sensor.
    * @param info: Installation information.
    * @n          mode: Mounting mode, eSide or eTop. 
    * @n          heightCm: Installation height in cm.
@@ -485,7 +485,7 @@ public:
 
   /**
    * @fn getInstallInfo
-   * @brief Get the installation information of the DFRobot C4004 sensor.
+   * @brief Get the installation information of the sensor.
    * @param pInfo: Installation information.
    * @n          mode: Mounting mode, eSide or eTop.
    * @n          heightCm: Installation height in cm.
@@ -498,7 +498,7 @@ public:
 
   /**
    * @fn setInstallHeight
-   * @brief Set the installation height of the DFRobot C4004 sensor.
+   * @brief Set the installation height of the sensor.
    * @param height: Installation height in cm.
    * @n            - Side (zAngle 0°): default 180 cm, recommended 180±20 cm.
    * @n            - Top (zAngle 90°): recommended 220-280 cm (2.2-2.8 m).
@@ -509,7 +509,7 @@ public:
 
   /**
    * @fn getInstallHeight
-   * @brief Get the installation height of the DFRobot C4004 sensor.
+   * @brief Get the installation height of the sensor.
    * @param pHeight: Pointer to receive installation height in cm.
    * @return true: Get succeeded, false: Get failed.
   */
@@ -596,7 +596,7 @@ public:
 
   /**
    * @fn getTargetList
-   * @brief Get the list of target information of the DFRobot C4004 sensor.
+   * @brief Get the list of target information of the sensor.
    * @param pTargetBuf: Pointer to receive the target information list.
    * @param maxCount: Maximum number of targets to be read.
    * @param mode: Data acquisition mode.
@@ -753,7 +753,7 @@ public:
 
   /**
    * @fn getTrajectoryRangeMode
-   * @brief Query and get range points in trajectory mode (mode 0x05).
+   * @brief Query and get range points in trajectory mode.
    * @param pPoints: Pointer to receive trajectory-mode points.
    * @param pPointCount: Pointer to receive point count.
    * @return true: Query succeeded, false: Query failed.
@@ -763,7 +763,7 @@ public:
 
   /**
    * @fn setConfigFileModePoints
-   * @brief Set detection range points using config-file mode (mode 0x06).
+   * @brief Set detection range points using config-file mode.
    * @param pPoints: Pointer to the config-file-mode points.
    * @param pointCount: Number of points.
    * @return true: Set succeeded, false: Set failed.
@@ -774,7 +774,7 @@ public:
 
   /**
    * @fn getConfigFileModePoints
-   * @brief Query and get range points in config-file mode (mode 0x06).
+   * @brief Query and get range points in config-file mode.
    * @param pPoints: Pointer to receive config-file-mode points.
    * @param pPointCount: Pointer to receive point count.
    * @return true: Query succeeded, false: Query failed.

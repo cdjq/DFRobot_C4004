@@ -27,7 +27,7 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
 ```python
   def begin(self):
     '''!
-      @brief Initialize the DFRobot C4004 sensor.
+      @brief Initialize the sensor module.
       @n Opens the serial port (if needed) and waits for initialization finished.
       @return True: Initialization succeeded, False: Initialization failed.
     '''
@@ -45,25 +45,25 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
 
   def is_connected(self):
     '''!
-      @brief Check if the DFRobot C4004 sensor is connected.
+      @brief Check if the sensor is connected.
       @return True: Connected, False: Not connected.
     '''
 
   def reset(self):
     '''!
-      @brief Reset the DFRobot C4004 sensor.
+      @brief Reset the sensor.
       @return True: Reset succeeded, False: Reset failed.
     '''
 
   def factory_reset(self):
     '''!
-      @brief Factory reset the DFRobot C4004 sensor.
+      @brief Factory reset the sensor.
       @return True: Reset succeeded, False: Reset failed.
     '''
 
   def get_heartbeat(self, mode=GET_DATA_ACTIVE):
     '''!
-      @brief Get the heartbeat status of the DFRobot C4004 sensor.
+      @brief Get the heartbeat status of the sensor.
       @param mode: Data acquisition mode.
       @n          GET_DATA_ACTIVE: Actively obtain the latest heartbeat status.
       @n          GET_DATA_REPORT: Obtain the latest heartbeat status from the last report.
@@ -72,7 +72,7 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
 
   def get_reported_event(self, timeout=0.05):
     '''!
-      @brief Wait for and decode one report frame pushed by the DFRobot C4004 sensor.
+      @brief Wait for and decode one report frame pushed by the sensor.
       @param timeout: Max time to wait for one complete UART report frame, in seconds (default: 0.05).
       @n          The call blocks at most timeout. If no complete frame arrives in time, returns EVENT_NONE.
       @n          If a frame arrives earlier, it returns as soon as the frame is decoded (may be shorter than timeout).
@@ -91,19 +91,19 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
 
   def get_hardware_version(self):
     '''!
-      @brief Get the hardware version of the DFRobot C4004 sensor.
+      @brief Get the hardware version of the sensor.
       @return Hardware version string.
     '''
 
   def get_firmware_version(self):
     '''!
-      @brief Get the firmware version of the DFRobot C4004 sensor.
+      @brief Get the firmware version of the sensor.
       @return Firmware version string.
     '''
 
   def set_install_info(self, info):
     '''!
-      @brief Set the installation information of the DFRobot C4004 sensor.
+      @brief Set the installation information of the sensor.
       @param info: Installation information.
       @n          mode: Mounting mode, INSTALL_MODE_SIDE or INSTALL_MODE_TOP.
       @n          height_cm: Installation height in cm.
@@ -118,7 +118,7 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
 
   def get_install_info(self, info):
     '''!
-      @brief Get the installation information of the DFRobot C4004 sensor.
+      @brief Get the installation information of the sensor.
       @param info: Installation information.
       @n          mode: Mounting mode, INSTALL_MODE_SIDE or INSTALL_MODE_TOP.
       @n          height_cm: Installation height in cm.
@@ -130,7 +130,7 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
 
   def set_install_height(self, height):
     '''!
-      @brief Set the installation height of the DFRobot C4004 sensor.
+      @brief Set the installation height of the sensor.
       @param height: Installation height in cm.
       @n            - Side (z_angle 0°): default 180 cm, recommended 180±20 cm.
       @n            - Top (z_angle 90°): recommended 220-280 cm (2.2-2.8 m).
@@ -140,7 +140,7 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
 
   def get_install_height(self):
     '''!
-      @brief Get the installation height of the DFRobot C4004 sensor.
+      @brief Get the installation height of the sensor.
       @return Installation height in cm. Returns 0 on failure.
     '''
 
@@ -220,7 +220,7 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
 
   def get_target_list(self, mode=GET_DATA_ACTIVE):
     '''!
-      @brief Get the list of target information of the DFRobot C4004 sensor.
+      @brief Get the list of target information of the sensor.
       @param mode: Data acquisition mode.
       @n          GET_DATA_ACTIVE: Query latest target information before reading.
       @n          GET_DATA_REPORT: Read target information from cached report data.
@@ -358,7 +358,7 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
 
   def get_trajectory_range_mode(self, points, point_count):
     '''!
-      @brief Query and get range points in trajectory mode (mode 0x05).
+      @brief Query and get range points in trajectory mode.
       @param points: Buffer/list to receive trajectory-mode points.
       @param point_count: Output container for point count (list/dict/object with value).
       @return True: Query succeeded, False: Query failed.
@@ -367,7 +367,7 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
 
   def set_config_file_mode_points(self, points):
     '''!
-      @brief Set detection range points using config-file mode (mode 0x06).
+      @brief Set detection range points using config-file mode.
       @param points: Iterable of DFRobot_Point objects.
       @return True: Set succeeded, False: Set failed.
       @note Point values use sign-bit int16 encoding (bit15: 0=positive, 1=negative).
@@ -376,7 +376,7 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
 
   def get_config_file_mode_points(self, points, point_count):
     '''!
-      @brief Query and get range points in config-file mode (mode 0x06).
+      @brief Query and get range points in config-file mode.
       @param points: Buffer/list to receive config-file-mode points.
       @param point_count: Output container for point count (list/dict/object with value).
       @return True: Query succeeded, False: Query failed.

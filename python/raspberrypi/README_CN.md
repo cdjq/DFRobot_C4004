@@ -27,7 +27,7 @@ RX         | TXD
 ```python
   def begin(self):
     '''!
-      @brief 初始化 DFRobot C4004 传感器。
+      @brief 初始化传感器模块。
       @n 打开串口（如需要）并等待初始化完成。
       @return True: 初始化成功，False: 初始化失败。
     '''
@@ -45,25 +45,25 @@ RX         | TXD
 
   def is_connected(self):
     '''!
-      @brief 检查 DFRobot C4004 传感器是否已连接。
+      @brief 检查传感器是否已连接。
       @return True: 已连接，False: 未连接。
     '''
 
   def reset(self):
     '''!
-      @brief 复位 DFRobot C4004 传感器。
+      @brief 复位传感器。
       @return True: 复位成功，False: 复位失败。
     '''
 
   def factory_reset(self):
     '''!
-      @brief 恢复 DFRobot C4004 传感器出厂设置。
+      @brief 恢复传感器出厂设置。
       @return True: 复位成功，False: 复位失败。
     '''
 
   def get_heartbeat(self, mode=GET_DATA_ACTIVE):
     '''!
-      @brief 获取 DFRobot C4004 传感器的心跳状态。
+      @brief 获取传感器的心跳状态。
       @param mode: 数据获取模式。
       @n          GET_DATA_ACTIVE: 主动获取最新心跳状态。
       @n          GET_DATA_REPORT: 从最近一次上报中获取最新心跳状态。
@@ -72,7 +72,7 @@ RX         | TXD
 
   def get_reported_event(self, timeout=0.05):
     '''!
-      @brief 等待并解析 DFRobot C4004 传感器主动上报的一帧数据。
+      @brief 等待并解析传感器主动上报的一帧数据。
       @param timeout: 等待完整 UART 上报帧的最长时间，单位秒（默认：0.05）。
       @n          调用最多阻塞 timeout。若超时仍无完整帧，返回 EVENT_NONE。
       @n          若帧更早到达，解码完成后立即返回（可能短于 timeout）。
@@ -91,19 +91,19 @@ RX         | TXD
 
   def get_hardware_version(self):
     '''!
-      @brief 获取 DFRobot C4004 传感器的硬件版本。
+      @brief 获取传感器的硬件版本。
       @return 硬件版本字符串。
     '''
 
   def get_firmware_version(self):
     '''!
-      @brief 获取 DFRobot C4004 传感器的固件版本。
+      @brief 获取传感器的固件版本。
       @return 固件版本字符串。
     '''
 
   def set_install_info(self, info):
     '''!
-      @brief 设置 DFRobot C4004 传感器的安装信息。
+      @brief 设置传感器的安装信息。
       @param info: 安装信息。
       @n          mode: 安装模式，INSTALL_MODE_SIDE 或 INSTALL_MODE_TOP。
       @n          height_cm: 安装高度，单位 cm。
@@ -118,7 +118,7 @@ RX         | TXD
 
   def get_install_info(self, info):
     '''!
-      @brief 获取 DFRobot C4004 传感器的安装信息。
+      @brief 获取传感器的安装信息。
       @param info: 安装信息。
       @n          mode: 安装模式，INSTALL_MODE_SIDE 或 INSTALL_MODE_TOP。
       @n          height_cm: 安装高度，单位 cm。
@@ -130,7 +130,7 @@ RX         | TXD
 
   def set_install_height(self, height):
     '''!
-      @brief 设置 DFRobot C4004 传感器的安装高度。
+      @brief 设置传感器的安装高度。
       @param height: 安装高度，单位 cm。
       @n            - 侧装（z_angle 0°）：默认 180 cm，建议 180±20 cm。
       @n            - 顶装（z_angle 90°）：建议 220-280 cm（2.2-2.8 m）。
@@ -140,7 +140,7 @@ RX         | TXD
 
   def get_install_height(self):
     '''!
-      @brief 获取 DFRobot C4004 传感器的安装高度。
+      @brief 获取传感器的安装高度。
       @return 安装高度（cm）。失败时返回 0。
     '''
 
@@ -220,7 +220,7 @@ RX         | TXD
 
   def get_target_list(self, mode=GET_DATA_ACTIVE):
     '''!
-      @brief 获取 DFRobot C4004 传感器的目标信息列表。
+      @brief 获取传感器的目标信息列表。
       @param mode: 数据获取模式。
       @n          GET_DATA_ACTIVE: 读取前查询最新目标信息。
       @n          GET_DATA_REPORT: 从上报缓存读取目标信息。
@@ -358,7 +358,7 @@ RX         | TXD
 
   def get_trajectory_range_mode(self, points, point_count):
     '''!
-      @brief 查询并获取轨迹模式（模式 0x05）下的范围点。
+      @brief 查询并获取轨迹模式下的范围点。
       @param points: 用于接收轨迹模式点位的缓冲区/列表。
       @param point_count: 用于接收点数的输出容器（list/dict/带 value 的对象）。
       @return True: 查询成功，False: 查询失败。
@@ -367,7 +367,7 @@ RX         | TXD
 
   def set_config_file_mode_points(self, points):
     '''!
-      @brief 使用配置文件模式（模式 0x06）设置探测范围点。
+      @brief 使用配置文件模式设置探测范围点。
       @param points: DFRobot_Point 对象的可迭代对象。
       @return True: 设置成功，False: 设置失败。
       @note 点值使用符号位 int16 编码（bit15: 0=正数，1=负数）。
@@ -376,7 +376,7 @@ RX         | TXD
 
   def get_config_file_mode_points(self, points, point_count):
     '''!
-      @brief 查询并获取配置文件模式（模式 0x06）下的范围点。
+      @brief 查询并获取配置文件模式下的范围点。
       @param points: 用于接收配置文件模式点位的缓冲区/列表。
       @param point_count: 用于接收点数的输出容器（list/dict/带 value 的对象）。
       @return True: 查询成功，False: 查询失败。

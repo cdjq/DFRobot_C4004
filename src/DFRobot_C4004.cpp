@@ -1,6 +1,6 @@
 /*!
  * @file DFRobot_C4004.cpp
- * @brief Implementation of the DFRobot C4004 sensor driver.
+ * @brief Implementation of the sensor module driver.
  * @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
  * @license The MIT License (MIT)
  * @author JiaLi(jia.li@dfrobot.com)
