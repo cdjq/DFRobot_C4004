@@ -50,16 +50,16 @@ getTrajectoryRangeMode	KEYWORD2
 setConfigFileModePoints	KEYWORD2
 getConfigFileModePoints	KEYWORD2
 getDetectionRangeMode	KEYWORD2
-getPeopleCount	KEYWORD2
-setRealTimePeopleTime	KEYWORD2
-getRealTimePeopleTime	KEYWORD2
-clearPeopleCount	KEYWORD2
-setTrackMeters	KEYWORD2
-getTrackMeters	KEYWORD2
-setTrackExistsTime	KEYWORD2
-getTrackExistsTime	KEYWORD2
-setUnmannedTime	KEYWORD2
-getUnmannedTime	KEYWORD2
+getLiveCount	KEYWORD2
+setRealTimeReportInterval	KEYWORD2
+getRealTimeReportInterval	KEYWORD2
+clearLiveCount	KEYWORD2
+setTrajectoryGenerationDistance	KEYWORD2
+getTrajectoryGenerationDistance	KEYWORD2
+setTrajectoryLifetime	KEYWORD2
+getTrajectoryLifetime	KEYWORD2
+setUnoccupiedTime	KEYWORD2
+getUnoccupiedTime	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
@@ -112,8 +112,8 @@ eApproach	LITERAL1
 eAway	LITERAL1
 eApproachAwayNone	LITERAL1
 
-eTagRangeCircle	LITERAL1
-eTagRangeRectangle	LITERAL1
+eCircle	LITERAL1
+eRectangle	LITERAL1
 
 eTagSetCommError	LITERAL1
 eTagSetSuccess	LITERAL1

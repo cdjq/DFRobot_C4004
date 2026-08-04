@@ -26,7 +26,7 @@ DFRobot C4004 是一款 60GHz 4T4R 多区域存在感知毫米波雷达，适用
 * 支持目标轨迹跟踪和目标信息上报。
 * 支持标签区域配置、标签清除、批量标签配置和标签事件上报。
 * 支持四边检测边界和轨迹检测范围模式设置。
-* 支持人数统计查询/上报、上报间隔、轨迹距离、保持时间和无人延迟设置。
+* 支持实时人数(Live Count)查询/上报、实时上报间隔、轨迹生成距离、轨迹存活时间和无人占用时间设置。
 
 ## 安装
 
@@ -422,97 +422,97 @@ pip3 install pyserial
   eDetectionRangeMode_t getDetectionRangeMode(void);
 
   /**
-   * @fn getPeopleCount
-   * @brief 获取实时人数。仅统计已确认为真实目标人的数量。
+   * @fn getLiveCount
+   * @brief 获取实时人数(Live Count)。仅统计已确认为真实目标人的数量。
    * @param mode: 数据获取模式。
    * @n          eGetDataActive: 主动查询最新数据并更新缓存。
    * @n          eGetDataReport: 直接返回缓存数据。
-   * @return uint8_t: 过滤后的实时人数。
+   * @return uint8_t: 过滤后的实时人数(Live Count)。
   */
-  uint8_t getPeopleCount(eGetDataMode_t mode = eGetDataActive);
+  uint8_t getLiveCount(eGetDataMode_t mode = eGetDataActive);
 
   /**
-   * @fn setRealTimePeopleTime
-   * @brief 设置人数统计上报间隔。
+   * @fn setRealTimeReportInterval
+   * @brief 设置实时上报间隔。
    * @param time: 上报间隔，单位秒。默认 1 s，有效范围 1-3600 秒。
    * @return true: 设置成功，false: 设置失败。
   */
-  bool setRealTimePeopleTime(uint32_t time);
+  bool setRealTimeReportInterval(uint32_t time);
 
   /**
-   * @fn getRealTimePeopleTime
-   * @brief 获取人数统计上报间隔。
+   * @fn getRealTimeReportInterval
+   * @brief 获取实时上报间隔。
    * @param time: 接收上报间隔的指针，单位秒。
    * @return true: 获取成功，false: 获取失败。
   */
-  bool getRealTimePeopleTime(uint32_t *time);
+  bool getRealTimeReportInterval(uint32_t *time);
 
   /**
-   * @fn clearPeopleCount
-   * @brief 清除传感器检测到的人数，并从 0 重新开始检测/跟踪。
+   * @fn clearLiveCount
+   * @brief 清除传感器检测到的实时人数(Live Count)，并从 0 重新开始检测/跟踪。
    * @n 当检测范围内仍有干扰物存在、传感器无法自行确认或清除时，
-   * @n 可调用本接口刷新人数统计状态。
+   * @n 可调用本接口刷新实时人数(Live Count)状态。
    * @return true: 清除成功，false: 清除失败。
   */
-  bool clearPeopleCount(void);
+  bool clearLiveCount(void);
 
   /**
-   * @fn setTrackMeters
-   * @brief 设置轨迹运动距离阈值。
+   * @fn setTrajectoryGenerationDistance
+   * @brief 设置轨迹生成距离。
    * @n 轨迹产生后，轨迹还需运动该距离才会确认为人。
-   * @n 用于调整实时人数统计接口的判断条件。
-   * @param distanceCm: 距离阈值，单位 cm。默认 0 cm，有效范围 0-1000 cm。
+   * @n 用于调整实时人数(Live Count)接口的判断条件。
+   * @param distanceCm: 轨迹生成距离，单位 cm。默认 0 cm，有效范围 0-1000 cm。
    * @return true: 设置成功，false: 设置失败。
   */
-  bool setTrackMeters(uint32_t distanceCm);
+  bool setTrajectoryGenerationDistance(uint32_t distanceCm);
 
   /**
-   * @fn getTrackMeters
-   * @brief 获取轨迹运动距离阈值。
+   * @fn getTrajectoryGenerationDistance
+   * @brief 获取轨迹生成距离。
    * @n 轨迹产生后，轨迹还需运动该距离才会确认为人。
-   * @n 用于调整实时人数统计接口的判断条件。
-   * @param distanceCm: 接收距离阈值的指针，单位 cm。
+   * @n 用于调整实时人数(Live Count)接口的判断条件。
+   * @param distanceCm: 接收轨迹生成距离的指针，单位 cm。
    * @return true: 获取成功，false: 获取失败。
   */
-  bool getTrackMeters(uint32_t *distanceCm);
+  bool getTrajectoryGenerationDistance(uint32_t *distanceCm);
 
   /**
-   * @fn setTrackExistsTime
-   * @brief 设置轨迹保持时间。
-   * @n 用于调整实时人数统计接口的判断条件。
-   * @param time: 保持时间，单位秒。默认 0 秒，有效范围 0-600 秒。
+   * @fn setTrajectoryLifetime
+   * @brief 设置轨迹存活时间。
+   * @n 用于调整实时人数(Live Count)接口的判断条件。
+   * @param time: 轨迹存活时间，单位秒。默认 0 秒，有效范围 0-600 秒。
    * @return true: 设置成功，false: 设置失败。
   */
-  bool setTrackExistsTime(uint32_t time);
+  bool setTrajectoryLifetime(uint32_t time);
 
   /**
-   * @fn getTrackExistsTime
-   * @brief 获取轨迹保持时间。
-   * @n 用于调整实时人数统计接口的判断条件。
-   * @param time: 接收保持时间的指针，单位秒。
+   * @fn getTrajectoryLifetime
+   * @brief 获取轨迹存活时间。
+   * @n 用于调整实时人数(Live Count)接口的判断条件。
+   * @param time: 接收轨迹存活时间的指针，单位秒。
    * @return true: 获取成功，false: 获取失败。
   */
-  bool getTrackExistsTime(uint32_t *time);
+  bool getTrajectoryLifetime(uint32_t *time);
 
   /**
-   * @fn setUnmannedTime
-   * @brief 设置无人延迟时间。
+   * @fn setUnoccupiedTime
+   * @brief 设置无人占用时间。
    * @n 判断目标点是否为真实目标人的周期时间。
    * @n 若非真实目标人，等待该周期后自动清除该目标。
-   * @param delayTime: 周期时间，单位秒。默认 30 秒，有效范围 5-3600 秒。
+   * @param delayTime: 无人占用时间，单位秒。默认 30 秒，有效范围 5-3600 秒。
    * @return true: 设置成功，false: 设置失败。
   */
-  bool setUnmannedTime(uint32_t delayTime);
+  bool setUnoccupiedTime(uint32_t delayTime);
 
   /**
-   * @fn getUnmannedTime
-   * @brief 获取无人延迟时间。
+   * @fn getUnoccupiedTime
+   * @brief 获取无人占用时间。
    * @n 判断目标点是否为真实目标人的周期时间。
    * @n 若非真实目标人，等待该周期后自动清除该目标。
-   * @param delayTime: 接收周期时间的指针，单位秒。
+   * @param delayTime: 接收无人占用时间的指针，单位秒。
    * @return true: 获取成功，false: 获取失败。
   */
-  bool getUnmannedTime(uint32_t *delayTime);
+  bool getUnoccupiedTime(uint32_t *delayTime);
 ```
 
 ## 兼容性

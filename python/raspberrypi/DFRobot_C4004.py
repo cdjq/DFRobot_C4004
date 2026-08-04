@@ -272,8 +272,8 @@ class DFRobot_C4004(object):
   APPROACH = 0x00                # Approach direction, approaching the tag area
   AWAY = 0x01                    # Away direction, leaving the tag area
 
-  TAG_RANGE_CIRCLE = 0x00        # Circle range
-  TAG_RANGE_RECTANGLE = 0x01     # Rectangle range
+  CIRCLE = 0x00                  # Circle range
+  RECTANGLE = 0x01               # Rectangle range
 
   TAG_SET_COMM_ERROR = 0x00      # Communication failed or response mismatch
   TAG_SET_SUCCESS = 0x01         # Tag set succeeded
@@ -766,7 +766,7 @@ class DFRobot_C4004(object):
     '''
     if not (self.TAG_NONE <= tag.tag_type <= self.TAG_NOISE):
       return False
-    if not (self.TAG_RANGE_CIRCLE <= tag.scope_type <= self.TAG_RANGE_RECTANGLE):
+    if not (self.CIRCLE <= tag.scope_type <= self.RECTANGLE):
       return False
     if tag.io_index == 1 or tag.io_index < 0 or tag.io_index > 6:
       return False
@@ -1086,13 +1086,13 @@ class DFRobot_C4004(object):
       return True
     return False
 
-  def get_people_count(self, mode=GET_DATA_ACTIVE):
+  def get_live_count(self, mode=GET_DATA_ACTIVE):
     '''!
-    @brief Get the real-time people count. Only confirmed real person targets are counted.
+    @brief Get the live count. Only confirmed real person targets are counted.
     @param mode: Data acquisition mode.
     @n          GET_DATA_ACTIVE: Query latest data and update cache.
     @n          GET_DATA_REPORT: Return cached data directly.
-    @return Real-time people count after filtering.
+    @return Live count after filtering.
     '''
     if isinstance(mode, bool):
       mode = self.GET_DATA_ACTIVE if mode else self.GET_DATA_REPORT
@@ -1100,82 +1100,82 @@ class DFRobot_C4004(object):
       self._request_frame(self.CTRL_PEOPLE_COUNT, self.CMD_PEOPLE_COUNT_QUERY_COUNT, [self.QUERY_DATA])
     return self._people_count
 
-  def set_real_time_people_time(self, interval):
+  def set_real_time_report_interval(self, interval):
     '''!
-    @brief Set the people-count report interval.
-    @param interval: Report interval in seconds. Default: 1 s. Valid range: 1-3600 seconds.
+    @brief Set the real-time report interval.
+    @param interval: Real-time report interval in seconds. Default: 1 s. Valid range: 1-3600 seconds.
     @return True: Set succeeded, False: Set failed.
     '''
     return self._set_u32(self.CTRL_PEOPLE_COUNT, self.CMD_PEOPLE_COUNT_SET_REPORT_INTERVAL, interval)
 
-  def get_real_time_people_time(self):
+  def get_real_time_report_interval(self):
     '''!
-    @brief Get the people-count report interval.
-    @return Report interval in seconds. Returns 0 on failure.
+    @brief Get the real-time report interval.
+    @return Real-time report interval in seconds. Returns 0 on failure.
     '''
     return self._query_u32(self.CTRL_PEOPLE_COUNT, self.CMD_PEOPLE_COUNT_QUERY_REPORT_INTERVAL)
 
-  def clear_people_count(self):
+  def clear_live_count(self):
     '''!
-    @brief Clear the people count detected by the sensor and restart detection/tracking from 0.
+    @brief Clear the live count detected by the sensor and restart detection/tracking from 0.
     @n Use this when an interference object remains in the detection range and the sensor
-    @n cannot confirm or clear it by itself; call this API to refresh the people-count state.
+    @n cannot confirm or clear it by itself; call this API to refresh the live-count state.
     @return True: Clear succeeded, False: Clear failed.
     '''
     return self._request_frame(self.CTRL_PEOPLE_COUNT, self.CMD_PEOPLE_COUNT_CLEAR_COUNT, [self.QUERY_DATA]) is not None
 
-  def set_track_meters(self, distance_cm):
+  def set_trajectory_generation_distance(self, distance_cm):
     '''!
-    @brief Set trajectory movement distance threshold.
+    @brief Set the trajectory generation distance.
     @n After a trajectory is generated, the distance the track must move before it is confirmed as a person.
-    @n Adjusts the judgment conditions of the real-time people-count interface.
-    @param distance_cm: Distance threshold, in cm. Default is 0 cm, valid range: 0-1000 cm.
+    @n Adjusts the judgment conditions of the live-count interface.
+    @param distance_cm: Trajectory generation distance, in cm. Default is 0 cm, valid range: 0-1000 cm.
     @return True: Set succeeded, False: Set failed.
     '''
     return self._set_u32(self.CTRL_PEOPLE_COUNT, self.CMD_PEOPLE_COUNT_SET_TRAJECTORY_DISTANCE, distance_cm)
 
-  def get_track_meters(self):
+  def get_trajectory_generation_distance(self):
     '''!
-    @brief Get trajectory movement distance threshold.
+    @brief Get the trajectory generation distance.
     @n After a trajectory is generated, the distance the track must move before it is confirmed as a person.
-    @n Adjusts the judgment conditions of the real-time people-count interface.
-    @return Distance threshold in cm. Returns 0 on failure.
+    @n Adjusts the judgment conditions of the live-count interface.
+    @return Trajectory generation distance in cm. Returns 0 on failure.
     '''
     return self._query_u32(self.CTRL_PEOPLE_COUNT, self.CMD_PEOPLE_COUNT_QUERY_TRAJECTORY_DISTANCE)
 
-  def set_track_exists_time(self, time):
+  def set_trajectory_lifetime(self, time):
     '''!
-    @brief Set trajectory hold time.
-    @n Adjusts the judgment conditions of the real-time people-count interface.
-    @param time: Hold time, in seconds. Default is 0 seconds, valid range: 0-600 seconds.
+    @brief Set the trajectory lifetime.
+    @n Adjusts the judgment conditions of the live-count interface.
+    @param time: Trajectory lifetime, in seconds. Default is 0 seconds, valid range: 0-600 seconds.
     @return True: Set succeeded, False: Set failed.
     '''
     return self._set_u32(self.CTRL_PEOPLE_COUNT, self.CMD_PEOPLE_COUNT_SET_TRAJECTORY_HOLD_TIME, time)
 
-  def get_track_exists_time(self):
+  def get_trajectory_lifetime(self):
     '''!
-    @brief Get trajectory hold time.
-    @n Adjusts the judgment conditions of the real-time people-count interface.
-    @return Hold time in seconds. Returns 0 on failure.
+    @brief Get the trajectory lifetime.
+    @n Adjusts the judgment conditions of the live-count interface.
+    @return Trajectory lifetime in seconds. Returns 0 on failure.
     '''
     return self._query_u32(self.CTRL_PEOPLE_COUNT, self.CMD_PEOPLE_COUNT_QUERY_TRAJECTORY_HOLD_TIME)
 
-  def set_unmanned_time(self, delay_time):
+  def set_unoccupied_time(self, delay_time):
     '''!
-    @brief Set unmanned delay time.
+    @brief Set the unoccupied time.
     @n Period used to judge whether a point is a real person target.
     @n If it is not a real person target, the target is automatically cleared after this period.
-    @param delay_time: Period time, in seconds. Default is 30 seconds, valid range: 5-3600 seconds.
+    @param delay_time: Unoccupied time, in seconds. Default is 30 seconds, valid range: 5-3600 seconds.
     @return True: Set succeeded, False: Set failed.
     '''
     return self._set_u32(self.CTRL_PEOPLE_COUNT, self.CMD_PEOPLE_COUNT_SET_NO_PERSON_DELAY, delay_time)
 
-  def get_unmanned_time(self):
+  def get_unoccupied_time(self):
     '''!
-    @brief Get unmanned delay time.
+    @brief Get the unoccupied time.
     @n Period used to judge whether a point is a real person target.
     @n If it is not a real person target, the target is automatically cleared after this period.
-    @return Period time in seconds. Returns 0 on failure.
+    @return Unoccupied time in seconds. Returns 0 on failure.
     '''
     return self._query_u32(self.CTRL_PEOPLE_COUNT, self.CMD_PEOPLE_COUNT_QUERY_NO_PERSON_DELAY)
 

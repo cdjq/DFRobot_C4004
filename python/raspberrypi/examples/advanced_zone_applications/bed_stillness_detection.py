@@ -119,7 +119,7 @@ def setup_sensor_and_tags():
   # Field meaning:
   #   tag_index : Tag index. It must be unique for each tag.
   #   tag_type  : Tag function, such as PeopleCounting or ApproachAway.
-  #   scope_type: Tag shape. Use TAG_RANGE_RECTANGLE or TAG_RANGE_CIRCLE.
+  #   scope_type: Tag shape. Use RECTANGLE or CIRCLE.
   #   io_index  : IO linkage index. 0 means unused; 2-6 maps to IO2-IO6.
   #   center_x  : Tag center X coordinate, in cm.
   #   center_y  : Tag center Y coordinate, in cm.
@@ -136,7 +136,7 @@ def setup_sensor_and_tags():
   bed = DFRobot_TagConfig()
   bed.tag_index = bed_tag_index
   bed.tag_type = c4004.TAG_PEOPLE_COUNTING
-  bed.scope_type = c4004.TAG_RANGE_RECTANGLE
+  bed.scope_type = c4004.RECTANGLE
   bed.io_index = 0
   bed.center_x = -50
   bed.center_y = 300
@@ -147,7 +147,7 @@ def setup_sensor_and_tags():
   bedroom = DFRobot_TagConfig()
   bedroom.tag_index = bedroom_tag_index
   bedroom.tag_type = c4004.TAG_PEOPLE_COUNTING
-  bedroom.scope_type = c4004.TAG_RANGE_RECTANGLE
+  bedroom.scope_type = c4004.RECTANGLE
   bedroom.io_index = 0
   bedroom.center_x = 0
   bedroom.center_y = 350
@@ -158,7 +158,7 @@ def setup_sensor_and_tags():
   door = DFRobot_TagConfig()
   door.tag_index = bedroom_door_tag_index
   door.tag_type = c4004.TAG_APPROACH_AWAY
-  door.scope_type = c4004.TAG_RANGE_RECTANGLE
+  door.scope_type = c4004.RECTANGLE
   door.io_index = 0
   door.center_x = 100
   door.center_y = 700

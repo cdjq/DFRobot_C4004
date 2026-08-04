@@ -70,10 +70,10 @@ def main():
   else:
     print('Set boundary detection range failed.')
 
-  if c4004.set_real_time_people_time(2):
-    print('Set RealTimePeopleTime success.')
+  if c4004.set_real_time_report_interval(2):
+    print('Set RealTimeReportInterval success.')
   else:
-    print('Set RealTimePeopleTime failed.')
+    print('Set RealTimeReportInterval failed.')
 
   if c4004.set_presence_enable(True):
     print('Set presence enable success.')
@@ -82,7 +82,7 @@ def main():
 
   clear_count_on_boot = False
   if clear_count_on_boot:
-    if c4004.clear_people_count():
+    if c4004.clear_live_count():
       print('Clear people count success.')
     else:
       print('Clear people count failed.')
@@ -111,13 +111,13 @@ def main():
       else:
         print('Motion state: No Target Detected')
     elif event == c4004.EVENT_PEOPLE_COUNT:
-      count = c4004.get_people_count(c4004.GET_DATA_REPORT)
-      print('People count:', count)
+      count = c4004.get_live_count(c4004.GET_DATA_REPORT)
+      print('Live Count:', count)
 
     # Every 3 s, actively poll and print people count / presence / motion (not event-driven).
     if time.time() - last_query > 3:
       last_query = time.time()
-      print('People count:', c4004.get_people_count(c4004.GET_DATA_REPORT))
+      print('Live Count:', c4004.get_live_count(c4004.GET_DATA_REPORT))
 
       query_presence = c4004.get_presence_state(c4004.GET_DATA_ACTIVE)
       if query_presence == c4004.NO_PRESENCE:

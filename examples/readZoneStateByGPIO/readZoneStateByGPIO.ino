@@ -97,7 +97,7 @@ void setup()
   // Set tag 0, bind to IO2, type is PeopleCounting, range is Rectangle, center is (0, 100), width/height is (120, 120)
   setTags[0].tagIndex  = 0;
   setTags[0].tagType   = DFRobot_C4004::eTagPeopleCounting;
-  setTags[0].scopeType = DFRobot_C4004::eTagRangeRectangle;
+  setTags[0].scopeType = DFRobot_C4004::eRectangle;
   setTags[0].ioIndex   = 2;
   setTags[0].centerX   = 0;
   setTags[0].centerY   = 100;
@@ -107,7 +107,7 @@ void setup()
   // Set tag 1, bind to IO3, type is PeopleCounting, range is Rectangle, center is (100, 220), width/height is (120, 120)
   setTags[1].tagIndex  = 1;
   setTags[1].tagType   = DFRobot_C4004::eTagPeopleCounting;
-  setTags[1].scopeType = DFRobot_C4004::eTagRangeRectangle;
+  setTags[1].scopeType = DFRobot_C4004::eRectangle;
   setTags[1].ioIndex   = 3;
   setTags[1].centerX   = 100;
   setTags[1].centerY   = 220;
@@ -117,7 +117,7 @@ void setup()
   // Set tag 2, bind to IO4, type is PeopleCounting, range is Circle, center is (-80, 350), radius is 80
   setTags[2].tagIndex  = 2;
   setTags[2].tagType   = DFRobot_C4004::eTagPeopleCounting;
-  setTags[2].scopeType = DFRobot_C4004::eTagRangeCircle;
+  setTags[2].scopeType = DFRobot_C4004::eCircle;
   setTags[2].ioIndex   = 4;
   setTags[2].centerX   = -80;
   setTags[2].centerY   = 350;
@@ -132,7 +132,7 @@ void setup()
   // Set tag 3, bind to IO5, type is PeopleCounting, range is Rectangle, center is (0, 500), width/height is (160, 160)
   setTags[3].tagIndex  = 3;
   setTags[3].tagType   = DFRobot_C4004::eTagPeopleCounting;
-  setTags[3].scopeType = DFRobot_C4004::eTagRangeRectangle;
+  setTags[3].scopeType = DFRobot_C4004::eRectangle;
   setTags[3].ioIndex   = 5;
   setTags[3].centerX   = 0;
   setTags[3].centerY   = 500;
@@ -142,7 +142,7 @@ void setup()
   // Set tag 4, bind to IO6, type is PeopleCounting, range is Rectangle, center is (-100, 620), width/height is (100, 120)
   setTags[4].tagIndex  = 4;
   setTags[4].tagType   = DFRobot_C4004::eTagPeopleCounting;
-  setTags[4].scopeType = DFRobot_C4004::eTagRangeRectangle;
+  setTags[4].scopeType = DFRobot_C4004::eRectangle;
   setTags[4].ioIndex   = 6;
   setTags[4].centerX   = -100;
   setTags[4].centerY   = 620;
@@ -161,10 +161,10 @@ void setup()
     Serial.println(F("Set occupancy LED failed."));
   }
 
-  if (c4004.setRealTimePeopleTime(5)) {
-    Serial.println(F("Set RealTimePeopleTime success."));
+  if (c4004.setRealTimeReportInterval(5)) {
+    Serial.println(F("Set RealTimeReportInterval success."));
   } else {
-    Serial.println(F("Set RealTimePeopleTime failed."));
+    Serial.println(F("Set RealTimeReportInterval failed."));
   }
 }
 

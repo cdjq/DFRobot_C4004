@@ -81,10 +81,10 @@ void setup()
     Serial.println(F("Set boundary detection range failed."));
   }
 
-  if (c4004.setRealTimePeopleTime(2)) {
-    Serial.println(F("Set RealTimePeopleTime success."));
+  if (c4004.setRealTimeReportInterval(2)) {
+    Serial.println(F("Set RealTimeReportInterval success."));
   } else {
-    Serial.println(F("Set RealTimePeopleTime failed."));
+    Serial.println(F("Set RealTimeReportInterval failed."));
   }
 
   if (c4004.setPresenceEnable(true)) {
@@ -96,7 +96,7 @@ void setup()
   // Set to true if you want to clear the current people counter on boot.
   bool clearCountOnBoot = false;
   if (clearCountOnBoot) {
-    if (c4004.clearPeopleCount()) {
+    if (c4004.clearLiveCount()) {
       Serial.println(F("Clear people count success."));
     } else {
       Serial.println(F("Clear people count failed."));
@@ -135,8 +135,8 @@ void loop()
       Serial.println(F("No Target Detected"));
     }
   } else if (event == DFRobot_C4004::eEventPeopleCount) {
-    uint8_t count = c4004.getPeopleCount(DFRobot_C4004::eGetDataReport);
-    Serial.print(F("People count: "));
+    uint8_t count = c4004.getLiveCount(DFRobot_C4004::eGetDataReport);
+    Serial.print(F("Live Count: "));
     Serial.println(count);
   }
 
@@ -144,9 +144,9 @@ void loop()
   // Every 3000 ms, actively poll and print people count / presence / motion (not event-driven).
   if (millis() - lastQuery > 3000) {
     lastQuery = millis();
-    Serial.print(F("People count: "));
-    //Serial.println(c4004.getPeopleCount(DFRobot_C4004::eGetDataActive)); // Query active data
-    Serial.println(c4004.getPeopleCount(DFRobot_C4004::eGetDataReport));    // Query report data
+    Serial.print(F("Live Count: "));
+    //Serial.println(c4004.getLiveCount(DFRobot_C4004::eGetDataActive)); // Query active data
+    Serial.println(c4004.getLiveCount(DFRobot_C4004::eGetDataReport));    // Query report data
 
     DFRobot_C4004::ePresenceState_t queryPresence = c4004.getPresenceState(DFRobot_C4004::eGetDataActive);
     Serial.print(F("Presence state: "));

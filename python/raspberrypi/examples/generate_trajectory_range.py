@@ -104,7 +104,7 @@ def setup_params():
     print('Failed to disable presence report.')
   time.sleep(0.05)
 
-  if c4004.set_real_time_people_time(0):
+  if c4004.set_real_time_report_interval(0):
     print('Disabled people count report.')
   else:
     print('Failed to disable people count report.')

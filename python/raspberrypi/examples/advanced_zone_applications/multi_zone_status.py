@@ -214,7 +214,7 @@ def setup_sensor_and_tags():
   # Field meaning:
   #   tag_index : Tag index. It must be unique for each tag.
   #   tag_type  : Tag function, such as PeopleCounting, ApproachAway, or Noise.
-  #   scope_type: Tag shape. Use TAG_RANGE_RECTANGLE or TAG_RANGE_CIRCLE.
+  #   scope_type: Tag shape. Use RECTANGLE or CIRCLE.
   #   io_index  : IO linkage index. 0 means unused; 2-6 maps to IO2-IO6.
   #   center_x  : Tag center X coordinate, in cm.
   #   center_y  : Tag center Y coordinate, in cm.
@@ -231,7 +231,7 @@ def setup_sensor_and_tags():
   tag = DFRobot_TagConfig()
   tag.tag_index = tag_game
   tag.tag_type = c4004.TAG_PEOPLE_COUNTING
-  tag.scope_type = c4004.TAG_RANGE_CIRCLE
+  tag.scope_type = c4004.CIRCLE
   tag.io_index = 0
   tag.center_x = -100
   tag.center_y = 550
@@ -242,7 +242,7 @@ def setup_sensor_and_tags():
   tag = DFRobot_TagConfig()
   tag.tag_index = tag_sofa
   tag.tag_type = c4004.TAG_PEOPLE_COUNTING
-  tag.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag.scope_type = c4004.RECTANGLE
   tag.io_index = 0
   tag.center_x = 100
   tag.center_y = 450
@@ -253,7 +253,7 @@ def setup_sensor_and_tags():
   tag = DFRobot_TagConfig()
   tag.tag_index = tag_home_door
   tag.tag_type = c4004.TAG_BOUNDARY
-  tag.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag.scope_type = c4004.RECTANGLE
   tag.io_index = 0
   tag.center_x = 100
   tag.center_y = 700
@@ -264,7 +264,7 @@ def setup_sensor_and_tags():
   tag = DFRobot_TagConfig()
   tag.tag_index = tag_kitchen_door
   tag.tag_type = c4004.TAG_BOUNDARY
-  tag.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag.scope_type = c4004.RECTANGLE
   tag.io_index = 0
   tag.center_x = -100
   tag.center_y = 700
@@ -275,7 +275,7 @@ def setup_sensor_and_tags():
   tag = DFRobot_TagConfig()
   tag.tag_index = tag_dining
   tag.tag_type = c4004.TAG_PEOPLE_COUNTING
-  tag.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag.scope_type = c4004.RECTANGLE
   tag.io_index = 0
   tag.center_x = 50
   tag.center_y = 150
@@ -286,7 +286,7 @@ def setup_sensor_and_tags():
   tag = DFRobot_TagConfig()
   tag.tag_index = tag_curtain
   tag.tag_type = c4004.TAG_NOISE
-  tag.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag.scope_type = c4004.RECTANGLE
   tag.io_index = 0
   tag.center_x = -150
   tag.center_y = 300
@@ -297,7 +297,7 @@ def setup_sensor_and_tags():
   tag = DFRobot_TagConfig()
   tag.tag_index = tag_plant
   tag.tag_type = c4004.TAG_NOISE
-  tag.scope_type = c4004.TAG_RANGE_CIRCLE
+  tag.scope_type = c4004.CIRCLE
   tag.io_index = 0
   tag.center_x = -50
   tag.center_y = 400

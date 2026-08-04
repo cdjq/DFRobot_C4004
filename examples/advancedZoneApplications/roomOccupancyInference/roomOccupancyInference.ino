@@ -183,7 +183,7 @@ void setup()
 
   tags[0].tagIndex  = tagLivingRoom;
   tags[0].tagType   = DFRobot_C4004::eTagPeopleCounting;
-  tags[0].scopeType = DFRobot_C4004::eTagRangeRectangle;
+  tags[0].scopeType = DFRobot_C4004::eRectangle;
   tags[0].ioIndex   = 0;
   tags[0].centerX   = livingRoomCenterXCm;
   tags[0].centerY   = livingRoomCenterYCm;
@@ -192,7 +192,7 @@ void setup()
 
   tags[1].tagIndex  = tagKitchen;
   tags[1].tagType   = DFRobot_C4004::eTagPeopleCounting;
-  tags[1].scopeType = DFRobot_C4004::eTagRangeRectangle;
+  tags[1].scopeType = DFRobot_C4004::eRectangle;
   tags[1].ioIndex   = 0;
   tags[1].centerX   = kitchenCenterXCm;
   tags[1].centerY   = kitchenCenterYCm;
@@ -201,7 +201,7 @@ void setup()
 
   tags[2].tagIndex  = tagKitchenDoor;
   tags[2].tagType   = DFRobot_C4004::eTagBoundary;
-  tags[2].scopeType = DFRobot_C4004::eTagRangeRectangle;
+  tags[2].scopeType = DFRobot_C4004::eRectangle;
   tags[2].ioIndex   = 0;
   tags[2].centerX   = doorCenterXCm;
   tags[2].centerY   = doorCenterYCm;
@@ -220,16 +220,16 @@ void setup()
     Serial.println(F("Set trajectory track enable failed."));
   }
 
-  if (c4004.setTrackExistsTime(trackExistsTimeS)) {
-    Serial.println(F("Set TrackExistsTime success."));
+  if (c4004.setTrajectoryLifetime(trackExistsTimeS)) {
+    Serial.println(F("Set TrajectoryLifetime success."));
   } else {
-    Serial.println(F("Set TrackExistsTime failed."));
+    Serial.println(F("Set TrajectoryLifetime failed."));
   }
 
-  if (c4004.setUnmannedTime(noPersonDelayS)) {
-    Serial.println(F("Set UnmannedTime success."));
+  if (c4004.setUnoccupiedTime(noPersonDelayS)) {
+    Serial.println(F("Set UnoccupiedTime success."));
   } else {
-    Serial.println(F("Set UnmannedTime failed."));
+    Serial.println(F("Set UnoccupiedTime failed."));
   }
 
   Serial.println(F("============================================================"));

@@ -118,7 +118,7 @@ void setup()
 
   setTags[0].tagIndex  = bedTagIndex;
   setTags[0].tagType   = DFRobot_C4004::eTagPeopleCounting;
-  setTags[0].scopeType = DFRobot_C4004::eTagRangeRectangle;
+  setTags[0].scopeType = DFRobot_C4004::eRectangle;
   setTags[0].ioIndex   = 0;
   setTags[0].centerX   = -50;
   setTags[0].centerY   = 300;
@@ -127,7 +127,7 @@ void setup()
 
   setTags[1].tagIndex  = bedroomTagIndex;
   setTags[1].tagType   = DFRobot_C4004::eTagPeopleCounting;
-  setTags[1].scopeType = DFRobot_C4004::eTagRangeRectangle;
+  setTags[1].scopeType = DFRobot_C4004::eRectangle;
   setTags[1].ioIndex   = 0;
   setTags[1].centerX   = 0;
   setTags[1].centerY   = 350;
@@ -136,7 +136,7 @@ void setup()
 
   setTags[2].tagIndex  = bedroomDoorTagIndex;
   setTags[2].tagType   = DFRobot_C4004::eTagApproachAway;
-  setTags[2].scopeType = DFRobot_C4004::eTagRangeRectangle;
+  setTags[2].scopeType = DFRobot_C4004::eRectangle;
   setTags[2].ioIndex   = 0;
   setTags[2].centerX   = 100;
   setTags[2].centerY   = 700;

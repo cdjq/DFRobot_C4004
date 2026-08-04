@@ -233,72 +233,72 @@ void setup()
   // }
 
   Serial.println(F("================People Count Param================"));
-  if (c4004.setRealTimePeopleTime(5)) {
-    Serial.println(F("Set RealTimePeopleTime success!"));
+  if (c4004.setRealTimeReportInterval(5)) {
+    Serial.println(F("Set RealTimeReportInterval success!"));
   } else {
-    Serial.println(F("Set RealTimePeopleTime failed!"));
+    Serial.println(F("Set RealTimeReportInterval failed!"));
   }
   delay(50);
 
-  if (c4004.setTrackMeters(50)) {
-    Serial.println(F("Set TrackMeters success!"));
+  if (c4004.setTrajectoryGenerationDistance(50)) {
+    Serial.println(F("Set TrajectoryGenerationDistance success!"));
   } else {
-    Serial.println(F("Set TrackMeters failed!"));
+    Serial.println(F("Set TrajectoryGenerationDistance failed!"));
   }
   delay(50);
 
-  if (c4004.setTrackExistsTime(10)) {
-    Serial.println(F("Set TrackExistsTime success!"));
+  if (c4004.setTrajectoryLifetime(10)) {
+    Serial.println(F("Set TrajectoryLifetime success!"));
   } else {
-    Serial.println(F("Set TrackExistsTime failed!"));
+    Serial.println(F("Set TrajectoryLifetime failed!"));
   }
   delay(50);
 
-  if (c4004.setUnmannedTime(30)) {
-    Serial.println(F("Set UnmannedTime success!"));
+  if (c4004.setUnoccupiedTime(30)) {
+    Serial.println(F("Set UnoccupiedTime success!"));
   } else {
-    Serial.println(F("Set UnmannedTime failed!"));
+    Serial.println(F("Set UnoccupiedTime failed!"));
   }
   delay(50);
 
-  if (c4004.clearPeopleCount()) {
+  if (c4004.clearLiveCount()) {
     Serial.println(F("Clear people count success!"));
   } else {
     Serial.println(F("Clear people count failed!"));
   }
   delay(50);
 
-  Serial.print(F("Current RealTimePeopleTime(s): "));
+  Serial.print(F("Current RealTimeReportInterval(s): "));
   uint32_t peopleInterval = 0;
-  if (c4004.getRealTimePeopleTime(&peopleInterval)) {
+  if (c4004.getRealTimeReportInterval(&peopleInterval)) {
     Serial.println(peopleInterval);
   } else {
-    Serial.println(F("Read current RealTimePeopleTime failed."));
+    Serial.println(F("Read current RealTimeReportInterval failed."));
   }
-  Serial.print(F("Current TrackMeters(cm): "));
+  Serial.print(F("Current TrajectoryGenerationDistance(cm): "));
   uint32_t trajectoryDistance = 0;
-  if (c4004.getTrackMeters(&trajectoryDistance)) {
+  if (c4004.getTrajectoryGenerationDistance(&trajectoryDistance)) {
     Serial.println(trajectoryDistance);
   } else {
-    Serial.println(F("Read current TrackMeters failed."));
+    Serial.println(F("Read current TrajectoryGenerationDistance failed."));
   }
-  Serial.print(F("Current TrackExistsTime(s): "));
+  Serial.print(F("Current TrajectoryLifetime(s): "));
   uint32_t time = 0;
-  if (c4004.getTrackExistsTime(&time)) {
+  if (c4004.getTrajectoryLifetime(&time)) {
     Serial.println(time);
   } else {
-    Serial.println(F("Read current TrackExistsTime failed."));
+    Serial.println(F("Read current TrajectoryLifetime failed."));
   }
-  Serial.print(F("Current UnmannedTime(s): "));
+  Serial.print(F("Current UnoccupiedTime(s): "));
   uint32_t noPersonDelay = 0;
-  if (c4004.getUnmannedTime(&noPersonDelay)) {
+  if (c4004.getUnoccupiedTime(&noPersonDelay)) {
     Serial.println(noPersonDelay);
   } else {
-    Serial.println(F("Read current UnmannedTime failed."));
+    Serial.println(F("Read current UnoccupiedTime failed."));
   }
 
   Serial.print(F("Current people count(active): "));
-  Serial.println(c4004.getPeopleCount(DFRobot_C4004::eGetDataActive));
+  Serial.println(c4004.getLiveCount(DFRobot_C4004::eGetDataActive));
 
   Serial.println(F("=======================Done======================="));
 }

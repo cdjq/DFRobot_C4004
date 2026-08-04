@@ -389,80 +389,80 @@ RX         | TXD
       @return 当前探测范围模式。
     '''
 
-  def get_people_count(self, mode=GET_DATA_ACTIVE):
+  def get_live_count(self, mode=GET_DATA_ACTIVE):
     '''!
-      @brief 获取实时人数。仅统计已确认为真实目标人的数量。
+      @brief 获取实时人数(Live Count)。仅统计已确认为真实目标人的数量。
       @param mode: 数据获取模式。
       @n          GET_DATA_ACTIVE: 查询最新数据并更新缓存。
       @n          GET_DATA_REPORT: 直接返回缓存数据。
-      @return 过滤后的实时人数。
+      @return 过滤后的实时人数(Live Count)。
     '''
 
-  def set_real_time_people_time(self, interval):
+  def set_real_time_report_interval(self, interval):
     '''!
-      @brief 设置人数统计上报间隔。
+      @brief 设置实时上报间隔。
       @param interval: 上报间隔，单位秒。默认：1 s。有效范围：1-3600 秒。
       @return True: 设置成功，False: 设置失败。
     '''
 
-  def get_real_time_people_time(self):
+  def get_real_time_report_interval(self):
     '''!
-      @brief 获取人数统计上报间隔。
+      @brief 获取实时上报间隔。
       @return 上报间隔（秒）。失败时返回 0。
     '''
 
-  def clear_people_count(self):
+  def clear_live_count(self):
     '''!
-      @brief 清除传感器检测到的人数，并从 0 重新开始检测/跟踪。
+      @brief 清除传感器检测到的实时人数(Live Count)，并从 0 重新开始检测/跟踪。
       @n 当探测范围内仍有干扰物、传感器
-      @n 无法自行确认或清除时，可调用本接口刷新人数状态。
+      @n 无法自行确认或清除时，可调用本接口刷新实时人数(Live Count)状态。
       @return True: 清除成功，False: 清除失败。
     '''
 
-  def set_track_meters(self, distance_cm):
+  def set_trajectory_generation_distance(self, distance_cm):
     '''!
-      @brief 设置轨迹运动距离阈值。
+      @brief 设置轨迹生成距离。
       @n 轨迹产生后，轨迹还需运动该距离才会确认为人。
-      @n 用于调整实时人数统计接口的判断条件。
+      @n 用于调整实时人数(Live Count)接口的判断条件。
       @param distance_cm: 距离阈值，单位 cm。默认 0 cm，有效范围：0-1000 cm。
       @return True: 设置成功，False: 设置失败。
     '''
 
-  def get_track_meters(self):
+  def get_trajectory_generation_distance(self):
     '''!
-      @brief 获取轨迹运动距离阈值。
+      @brief 获取轨迹生成距离。
       @n 轨迹产生后，轨迹还需运动该距离才会确认为人。
-      @n 用于调整实时人数统计接口的判断条件。
+      @n 用于调整实时人数(Live Count)接口的判断条件。
       @return 距离阈值（cm）。失败时返回 0。
     '''
 
-  def set_track_exists_time(self, time):
+  def set_trajectory_lifetime(self, time):
     '''!
-      @brief 设置轨迹保持时间。
-      @n 用于调整实时人数统计接口的判断条件。
+      @brief 设置轨迹存活时间。
+      @n 用于调整实时人数(Live Count)接口的判断条件。
       @param time: 保持时间，单位秒。默认 0 秒，有效范围：0-600 秒。
       @return True: 设置成功，False: 设置失败。
     '''
 
-  def get_track_exists_time(self):
+  def get_trajectory_lifetime(self):
     '''!
-      @brief 获取轨迹保持时间。
-      @n 用于调整实时人数统计接口的判断条件。
+      @brief 获取轨迹存活时间。
+      @n 用于调整实时人数(Live Count)接口的判断条件。
       @return 保持时间（秒）。失败时返回 0。
     '''
 
-  def set_unmanned_time(self, delay_time):
+  def set_unoccupied_time(self, delay_time):
     '''!
-      @brief 设置无人延迟时间。
+      @brief 设置无人占用时间。
       @n 判断目标点是否为真实目标人的周期时间。
       @n 若非真实目标人，等待该周期后自动清除。
       @param delay_time: 周期时间，单位秒。默认 30 秒，有效范围：5-3600 秒。
       @return True: 设置成功，False: 设置失败。
     '''
 
-  def get_unmanned_time(self):
+  def get_unoccupied_time(self):
     '''!
-      @brief 获取无人延迟时间。
+      @brief 获取无人占用时间。
       @n 判断目标点是否为真实目标人的周期时间。
       @n 若非真实目标人，等待该周期后自动清除。
       @return 周期时间（秒）。失败时返回 0。

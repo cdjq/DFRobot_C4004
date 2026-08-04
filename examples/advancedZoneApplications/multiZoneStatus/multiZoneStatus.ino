@@ -180,7 +180,7 @@ void setup()
  * Field meaning:
  *   tagIndex : Tag index. It must be unique for each tag.
  *   tagType  : Tag function, such as PeopleCounting, ApproachAway, or Noise.
- *   scopeType: Tag shape. Use DFRobot_C4004::eTagRangeRectangle or DFRobot_C4004::eTagRangeCircle.
+ *   scopeType: Tag shape. Use DFRobot_C4004::eRectangle or DFRobot_C4004::eCircle.
  *   ioIndex  : IO linkage index. 0 means unused; 2-6 maps to IO2-IO6.
  *   centerX  : Tag center X coordinate, in cm.
  *   centerY  : Tag center Y coordinate, in cm.
@@ -195,7 +195,7 @@ void setup()
 
   tags[0].tagIndex  = tagGame;
   tags[0].tagType   = DFRobot_C4004::eTagPeopleCounting;
-  tags[0].scopeType = DFRobot_C4004::eTagRangeCircle;
+  tags[0].scopeType = DFRobot_C4004::eCircle;
   tags[0].ioIndex   = 0;
   tags[0].centerX   = -100;
   tags[0].centerY   = 550;
@@ -204,7 +204,7 @@ void setup()
 
   tags[1].tagIndex  = tagSofa;
   tags[1].tagType   = DFRobot_C4004::eTagPeopleCounting;
-  tags[1].scopeType = DFRobot_C4004::eTagRangeRectangle;
+  tags[1].scopeType = DFRobot_C4004::eRectangle;
   tags[1].ioIndex   = 0;
   tags[1].centerX   = 100;
   tags[1].centerY   = 450;
@@ -213,7 +213,7 @@ void setup()
 
   tags[2].tagIndex  = tagHomeDoor;
   tags[2].tagType   = DFRobot_C4004::eTagBoundary;
-  tags[2].scopeType = DFRobot_C4004::eTagRangeRectangle;
+  tags[2].scopeType = DFRobot_C4004::eRectangle;
   tags[2].ioIndex   = 0;
   tags[2].centerX   = 100;
   tags[2].centerY   = 700;
@@ -222,7 +222,7 @@ void setup()
 
   tags[3].tagIndex  = tagKitchenDoor;
   tags[3].tagType   = DFRobot_C4004::eTagBoundary;
-  tags[3].scopeType = DFRobot_C4004::eTagRangeRectangle;
+  tags[3].scopeType = DFRobot_C4004::eRectangle;
   tags[3].ioIndex   = 0;
   tags[3].centerX   = -100;
   tags[3].centerY   = 700;
@@ -231,7 +231,7 @@ void setup()
 
   tags[4].tagIndex  = tagDining;
   tags[4].tagType   = DFRobot_C4004::eTagPeopleCounting;
-  tags[4].scopeType = DFRobot_C4004::eTagRangeRectangle;
+  tags[4].scopeType = DFRobot_C4004::eRectangle;
   tags[4].ioIndex   = 0;
   tags[4].centerX   = 50;
   tags[4].centerY   = 150;
@@ -240,7 +240,7 @@ void setup()
 
   tags[5].tagIndex  = tagCurtain;
   tags[5].tagType   = DFRobot_C4004::eTagNoise;
-  tags[5].scopeType = DFRobot_C4004::eTagRangeRectangle;
+  tags[5].scopeType = DFRobot_C4004::eRectangle;
   tags[5].ioIndex   = 0;
   tags[5].centerX   = -150;
   tags[5].centerY   = 300;
@@ -249,7 +249,7 @@ void setup()
 
   tags[6].tagIndex  = tagPlant;
   tags[6].tagType   = DFRobot_C4004::eTagNoise;
-  tags[6].scopeType = DFRobot_C4004::eTagRangeCircle;
+  tags[6].scopeType = DFRobot_C4004::eCircle;
   tags[6].ioIndex   = 0;
   tags[6].centerX   = -50;
   tags[6].centerY   = 400;

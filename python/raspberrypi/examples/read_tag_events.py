@@ -96,7 +96,7 @@ def print_tag_list(title, tags):
   print('---- ---------------- ---------- --  -------  -------  -----  ------')
   for tag in tags:
     type_text = tag_type_to_string(tag.tag_type)
-    range_text = 'Circle' if tag.scope_type == c4004.TAG_RANGE_CIRCLE else 'Rectangle'
+    range_text = 'Circle' if tag.scope_type == c4004.CIRCLE else 'Rectangle'
     print(
       '%3d  %-16s %-10s %2d  %7d  %7d  %5d  %6d'
       % (
@@ -164,7 +164,7 @@ def main():
   tag0 = DFRobot_TagConfig()
   tag0.tag_index = 0
   tag0.tag_type = c4004.TAG_NONE
-  tag0.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag0.scope_type = c4004.RECTANGLE
   tag0.io_index = 0
   tag0.center_x = 0
   tag0.center_y = 100
@@ -176,7 +176,7 @@ def main():
   tag1 = DFRobot_TagConfig()
   tag1.tag_index = 1
   tag1.tag_type = c4004.TAG_BOUNDARY
-  tag1.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag1.scope_type = c4004.RECTANGLE
   tag1.io_index = 0
   tag1.center_x = 100
   tag1.center_y = 220
@@ -188,7 +188,7 @@ def main():
   tag2 = DFRobot_TagConfig()
   tag2.tag_index = 2
   tag2.tag_type = c4004.TAG_APPROACH_AWAY
-  tag2.scope_type = c4004.TAG_RANGE_CIRCLE
+  tag2.scope_type = c4004.CIRCLE
   tag2.io_index = 0
   tag2.center_x = -80
   tag2.center_y = 350
@@ -200,7 +200,7 @@ def main():
   tag3 = DFRobot_TagConfig()
   tag3.tag_index = 3
   tag3.tag_type = c4004.TAG_PEOPLE_COUNTING
-  tag3.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag3.scope_type = c4004.RECTANGLE
   tag3.io_index = 0
   tag3.center_x = 0
   tag3.center_y = 500
@@ -212,7 +212,7 @@ def main():
   tag4 = DFRobot_TagConfig()
   tag4.tag_index = 4
   tag4.tag_type = c4004.TAG_NOISE
-  tag4.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag4.scope_type = c4004.RECTANGLE
   tag4.io_index = 0
   tag4.center_x = -100
   tag4.center_y = 620

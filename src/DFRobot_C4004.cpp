@@ -458,7 +458,7 @@ DFRobot_C4004::eTagSetStatus_t DFRobot_C4004::setTag(const sTagConfig_t &tag)
   uint8_t    data[8];
   sPacket_t &packet = _rxPacket;
 
-  if (tag.tagType > eTagNoise || tag.scopeType > eTagRangeRectangle) {
+  if (tag.tagType > eTagNoise || tag.scopeType > eRectangle) {
     return eTagSetCommError;
   }
   if (tag.ioIndex == 1 || tag.ioIndex > 6) {
@@ -553,7 +553,7 @@ bool DFRobot_C4004::setTagsFromConfig(const sTagConfig_t *pTags, uint8_t tagCoun
   }
 
   for (uint8_t i = 0; i < tagCount; i++) {
-    if (pTags[i].tagType > eTagNoise || pTags[i].scopeType > eTagRangeRectangle) {
+    if (pTags[i].tagType > eTagNoise || pTags[i].scopeType > eRectangle) {
       return false;
     }
     if (pTags[i].ioIndex == 1 || pTags[i].ioIndex > 6) {
@@ -795,7 +795,7 @@ DFRobot_C4004::eDetectionRangeMode_t DFRobot_C4004::getDetectionRangeMode(void)
   return _rangeMode;
 }
 
-uint8_t DFRobot_C4004::getPeopleCount(eGetDataMode_t mode)
+uint8_t DFRobot_C4004::getLiveCount(eGetDataMode_t mode)
 {
   uint8_t    data   = C4004_QUERY_DATA;
   sPacket_t &packet = _rxPacket;
@@ -806,49 +806,49 @@ uint8_t DFRobot_C4004::getPeopleCount(eGetDataMode_t mode)
   return _peopleCount;
 }
 
-bool DFRobot_C4004::setRealTimePeopleTime(uint32_t time)
+bool DFRobot_C4004::setRealTimeReportInterval(uint32_t time)
 {
   return setUint32(C4004_CTRL_PEOPLE_COUNT, C4004_CMD_PEOPLE_COUNT_SET_REPORT_INTERVAL, time);
 }
 
-bool DFRobot_C4004::getRealTimePeopleTime(uint32_t *pTime)
+bool DFRobot_C4004::getRealTimeReportInterval(uint32_t *pTime)
 {
   return queryUint32(C4004_CTRL_PEOPLE_COUNT, C4004_CMD_PEOPLE_COUNT_QUERY_REPORT_INTERVAL, pTime);
 }
 
-bool DFRobot_C4004::clearPeopleCount(void)
+bool DFRobot_C4004::clearLiveCount(void)
 {
   uint8_t    data   = C4004_QUERY_DATA;
   sPacket_t &packet = _rxPacket;
   return requestFrame(C4004_CTRL_PEOPLE_COUNT, C4004_CMD_PEOPLE_COUNT_CLEAR_COUNT, &data, 1, &packet);
 }
 
-bool DFRobot_C4004::setTrackMeters(uint32_t distanceCm)
+bool DFRobot_C4004::setTrajectoryGenerationDistance(uint32_t distanceCm)
 {
   return setUint32(C4004_CTRL_PEOPLE_COUNT, C4004_CMD_PEOPLE_COUNT_SET_TRAJECTORY_DISTANCE, distanceCm);
 }
 
-bool DFRobot_C4004::getTrackMeters(uint32_t *pDistanceCm)
+bool DFRobot_C4004::getTrajectoryGenerationDistance(uint32_t *pDistanceCm)
 {
   return queryUint32(C4004_CTRL_PEOPLE_COUNT, C4004_CMD_PEOPLE_COUNT_QUERY_TRAJECTORY_DISTANCE, pDistanceCm);
 }
 
-bool DFRobot_C4004::setTrackExistsTime(uint32_t time)
+bool DFRobot_C4004::setTrajectoryLifetime(uint32_t time)
 {
   return setUint32(C4004_CTRL_PEOPLE_COUNT, C4004_CMD_PEOPLE_COUNT_SET_TRAJECTORY_HOLD_TIME, time);
 }
 
-bool DFRobot_C4004::getTrackExistsTime(uint32_t *pTime)
+bool DFRobot_C4004::getTrajectoryLifetime(uint32_t *pTime)
 {
   return queryUint32(C4004_CTRL_PEOPLE_COUNT, C4004_CMD_PEOPLE_COUNT_QUERY_TRAJECTORY_HOLD_TIME, pTime);
 }
 
-bool DFRobot_C4004::setUnmannedTime(uint32_t delayTime)
+bool DFRobot_C4004::setUnoccupiedTime(uint32_t delayTime)
 {
   return setUint32(C4004_CTRL_PEOPLE_COUNT, C4004_CMD_PEOPLE_COUNT_SET_NO_PERSON_DELAY, delayTime);
 }
 
-bool DFRobot_C4004::getUnmannedTime(uint32_t *pDelayTime)
+bool DFRobot_C4004::getUnoccupiedTime(uint32_t *pDelayTime)
 {
   return queryUint32(C4004_CTRL_PEOPLE_COUNT, C4004_CMD_PEOPLE_COUNT_QUERY_NO_PERSON_DELAY, pDelayTime);
 }

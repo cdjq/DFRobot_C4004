@@ -174,41 +174,41 @@ def main():
   #   print('Current multi-point config query failed.')
 
   print('================People Count Param================')
-  if c4004.set_real_time_people_time(5):
-    print('Set RealTimePeopleTime success!')
+  if c4004.set_real_time_report_interval(5):
+    print('Set RealTimeReportInterval success!')
   else:
-    print('Set RealTimePeopleTime failed!')
+    print('Set RealTimeReportInterval failed!')
   time.sleep(0.05)
 
-  if c4004.set_track_meters(50):
-    print('Set TrackMeters success!')
+  if c4004.set_trajectory_generation_distance(50):
+    print('Set TrajectoryGenerationDistance success!')
   else:
-    print('Set TrackMeters failed!')
+    print('Set TrajectoryGenerationDistance failed!')
   time.sleep(0.05)
 
-  if c4004.set_track_exists_time(10):
-    print('Set TrackExistsTime success!')
+  if c4004.set_trajectory_lifetime(10):
+    print('Set TrajectoryLifetime success!')
   else:
-    print('Set TrackExistsTime failed!')
+    print('Set TrajectoryLifetime failed!')
   time.sleep(0.05)
 
-  if c4004.set_unmanned_time(30):
-    print('Set UnmannedTime success!')
+  if c4004.set_unoccupied_time(30):
+    print('Set UnoccupiedTime success!')
   else:
-    print('Set UnmannedTime failed!')
+    print('Set UnoccupiedTime failed!')
   time.sleep(0.05)
 
-  if c4004.clear_people_count():
+  if c4004.clear_live_count():
     print('Clear people count success!')
   else:
     print('Clear people count failed!')
   time.sleep(0.05)
 
-  print('Current RealTimePeopleTime(s):', c4004.get_real_time_people_time())
-  print('Current TrackMeters(cm):', c4004.get_track_meters())
-  print('Current TrackExistsTime(s):', c4004.get_track_exists_time())
-  print('Current UnmannedTime(s):', c4004.get_unmanned_time())
-  print('Current people count(active):', c4004.get_people_count(c4004.GET_DATA_ACTIVE))
+  print('Current RealTimeReportInterval(s):', c4004.get_real_time_report_interval())
+  print('Current TrajectoryGenerationDistance(cm):', c4004.get_trajectory_generation_distance())
+  print('Current TrajectoryLifetime(s):', c4004.get_trajectory_lifetime())
+  print('Current UnoccupiedTime(s):', c4004.get_unoccupied_time())
+  print('Current people count(active):', c4004.get_live_count(c4004.GET_DATA_ACTIVE))
 
   print('=======================Done=======================')
 

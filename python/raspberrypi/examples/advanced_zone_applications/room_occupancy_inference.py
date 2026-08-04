@@ -167,7 +167,7 @@ def setup_sensor_and_tags():
   living_room = DFRobot_TagConfig()
   living_room.tag_index = tag_living_room
   living_room.tag_type = c4004.TAG_PEOPLE_COUNTING
-  living_room.scope_type = c4004.TAG_RANGE_RECTANGLE
+  living_room.scope_type = c4004.RECTANGLE
   living_room.io_index = 0
   living_room.center_x = living_room_center_x_cm
   living_room.center_y = living_room_center_y_cm
@@ -178,7 +178,7 @@ def setup_sensor_and_tags():
   kitchen = DFRobot_TagConfig()
   kitchen.tag_index = tag_kitchen
   kitchen.tag_type = c4004.TAG_PEOPLE_COUNTING
-  kitchen.scope_type = c4004.TAG_RANGE_RECTANGLE
+  kitchen.scope_type = c4004.RECTANGLE
   kitchen.io_index = 0
   kitchen.center_x = kitchen_center_x_cm
   kitchen.center_y = kitchen_center_y_cm
@@ -189,7 +189,7 @@ def setup_sensor_and_tags():
   kitchen_door = DFRobot_TagConfig()
   kitchen_door.tag_index = tag_kitchen_door
   kitchen_door.tag_type = c4004.TAG_BOUNDARY
-  kitchen_door.scope_type = c4004.TAG_RANGE_RECTANGLE
+  kitchen_door.scope_type = c4004.RECTANGLE
   kitchen_door.io_index = 0
   kitchen_door.center_x = door_center_x_cm
   kitchen_door.center_y = door_center_y_cm
@@ -207,15 +207,15 @@ def setup_sensor_and_tags():
   else:
     print('Set trajectory track enable failed.')
 
-  if c4004.set_track_exists_time(track_exists_time_s):
-    print('Set TrackExistsTime success.')
+  if c4004.set_trajectory_lifetime(track_exists_time_s):
+    print('Set TrajectoryLifetime success.')
   else:
-    print('Set TrackExistsTime failed.')
+    print('Set TrajectoryLifetime failed.')
 
-  if c4004.set_unmanned_time(no_person_delay_s):
-    print('Set UnmannedTime success.')
+  if c4004.set_unoccupied_time(no_person_delay_s):
+    print('Set UnoccupiedTime success.')
   else:
-    print('Set UnmannedTime failed.')
+    print('Set UnoccupiedTime failed.')
 
   print('============================================================')
   print('Kitchen occupancy inference started.')

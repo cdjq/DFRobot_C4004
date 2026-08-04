@@ -26,7 +26,7 @@ DFRobot C4004 is a 60GHz 4T4R multi-zone presence mmWave radar for smart space m
 * Supports target trajectory tracking and target information report.
 * Supports tag zone configuration, tag clear, batch tag configuration and tag event report.
 * Supports four-side detection boundary and trajectory detection range mode settings.
-* Supports people count query/report, report interval, trajectory distance, hold time and no-person delay settings.
+* Supports live count query/report, real-time report interval, trajectory generation distance, trajectory lifetime and unoccupied time settings.
 
 ## Installation
 
@@ -425,97 +425,97 @@ pip3 install pyserial
   eDetectionRangeMode_t getDetectionRangeMode(void);
 
   /**
-   * @fn getPeopleCount
-   * @brief Get the real-time people count. Only confirmed real person targets are counted.
+   * @fn getLiveCount
+   * @brief Get the live count. Only confirmed real person targets are counted.
    * @param mode: Data acquisition mode.
    * @n          eGetDataActive: Query latest data and update cache.
    * @n          eGetDataReport: Return cached data directly.
-   * @return uint8_t: Real-time people count after filtering.
+   * @return uint8_t: Live count after filtering.
   */
-  uint8_t getPeopleCount(eGetDataMode_t mode = eGetDataActive);
+  uint8_t getLiveCount(eGetDataMode_t mode = eGetDataActive);
 
   /**
-   * @fn setRealTimePeopleTime
-   * @brief Set the people-count report interval.
-   * @param time: Report interval in seconds. Default: 1 s. Valid range: 1-3600 seconds.
+   * @fn setRealTimeReportInterval
+   * @brief Set the real-time report interval.
+   * @param time: Real-time report interval in seconds. Default: 1 s. Valid range: 1-3600 seconds.
    * @return true: Set succeeded, false: Set failed.
   */
-  bool setRealTimePeopleTime(uint32_t time);
+  bool setRealTimeReportInterval(uint32_t time);
 
   /**
-   * @fn getRealTimePeopleTime
-   * @brief Get the people-count report interval.
-   * @param time: Pointer to receive the report interval in seconds.
+   * @fn getRealTimeReportInterval
+   * @brief Get the real-time report interval.
+   * @param time: Pointer to receive the real-time report interval in seconds.
    * @return true: Get succeeded, false: Get failed.
   */
-  bool getRealTimePeopleTime(uint32_t *time);
+  bool getRealTimeReportInterval(uint32_t *time);
 
   /**
-   * @fn clearPeopleCount
-   * @brief Clear the people count detected by the sensor and restart detection/tracking from 0.
+   * @fn clearLiveCount
+   * @brief Clear the live count detected by the sensor and restart detection/tracking from 0.
    * @n Use this when an interference object remains in the detection range and the sensor
-   * @n cannot confirm or clear it by itself; call this API to refresh the people-count state.
+   * @n cannot confirm or clear it by itself; call this API to refresh the live-count state.
    * @return true: Clear succeeded, false: Clear failed.
   */
-  bool clearPeopleCount(void);
+  bool clearLiveCount(void);
 
   /**
-   * @fn setTrackMeters
-   * @brief Set trajectory movement distance threshold.
+   * @fn setTrajectoryGenerationDistance
+   * @brief Set the trajectory generation distance.
    * @n After a trajectory is generated, the distance the track must move before it is confirmed as a person.
-   * @n Adjusts the judgment conditions of the real-time people-count interface.
-   * @param distanceCm: Distance threshold, in cm. Default is 0 cm, valid range: 0-1000 cm.
+   * @n Adjusts the judgment conditions of the live-count interface.
+   * @param distanceCm: Trajectory generation distance, in cm. Default is 0 cm, valid range: 0-1000 cm.
    * @return true: Set succeeded, false: Set failed.
   */
-  bool setTrackMeters(uint32_t distanceCm);
+  bool setTrajectoryGenerationDistance(uint32_t distanceCm);
 
   /**
-   * @fn getTrackMeters
-   * @brief Get trajectory movement distance threshold.
+   * @fn getTrajectoryGenerationDistance
+   * @brief Get the trajectory generation distance.
    * @n After a trajectory is generated, the distance the track must move before it is confirmed as a person.
-   * @n Adjusts the judgment conditions of the real-time people-count interface.
-   * @param distanceCm: Pointer to receive distance threshold, in cm.
+   * @n Adjusts the judgment conditions of the live-count interface.
+   * @param distanceCm: Pointer to receive trajectory generation distance, in cm.
    * @return true: Get succeeded, false: Get failed.
   */
-  bool getTrackMeters(uint32_t *distanceCm);
+  bool getTrajectoryGenerationDistance(uint32_t *distanceCm);
 
   /**
-   * @fn setTrackExistsTime
-   * @brief Set trajectory hold time.
-   * @n Adjusts the judgment conditions of the real-time people-count interface.
-   * @param time: Hold time, in seconds. Default is 0 seconds, valid range: 0-600 seconds.
+   * @fn setTrajectoryLifetime
+   * @brief Set the trajectory lifetime.
+   * @n Adjusts the judgment conditions of the live-count interface.
+   * @param time: Trajectory lifetime, in seconds. Default is 0 seconds, valid range: 0-600 seconds.
    * @return true: Set succeeded, false: Set failed.
   */
-  bool setTrackExistsTime(uint32_t time);
+  bool setTrajectoryLifetime(uint32_t time);
 
   /**
-   * @fn getTrackExistsTime
-   * @brief Get trajectory hold time.
-   * @n Adjusts the judgment conditions of the real-time people-count interface.
-   * @param time: Pointer to receive hold time, in seconds.
+   * @fn getTrajectoryLifetime
+   * @brief Get the trajectory lifetime.
+   * @n Adjusts the judgment conditions of the live-count interface.
+   * @param time: Pointer to receive trajectory lifetime, in seconds.
    * @return true: Get succeeded, false: Get failed.
   */
-  bool getTrackExistsTime(uint32_t *time);
+  bool getTrajectoryLifetime(uint32_t *time);
 
   /**
-   * @fn setUnmannedTime
-   * @brief Set unmanned delay time.
+   * @fn setUnoccupiedTime
+   * @brief Set the unoccupied time.
    * @n Period used to judge whether a point is a real person target.
    * @n If it is not a real person target, the target is automatically cleared after this period.
-   * @param delayTime: Period time, in seconds. Default is 30 seconds, valid range: 5-3600 seconds.
+   * @param delayTime: Unoccupied time, in seconds. Default is 30 seconds, valid range: 5-3600 seconds.
    * @return true: Set succeeded, false: Set failed.
   */
-  bool setUnmannedTime(uint32_t delayTime);
+  bool setUnoccupiedTime(uint32_t delayTime);
 
   /**
-   * @fn getUnmannedTime
-   * @brief Get unmanned delay time.
+   * @fn getUnoccupiedTime
+   * @brief Get the unoccupied time.
    * @n Period used to judge whether a point is a real person target.
    * @n If it is not a real person target, the target is automatically cleared after this period.
    * @param delayTime: Pointer to receive period time, in seconds.
    * @return true: Get succeeded, false: Get failed.
   */
-  bool getUnmannedTime(uint32_t *delayTime);
+  bool getUnoccupiedTime(uint32_t *delayTime);
 ```
 
 ## Compatibility

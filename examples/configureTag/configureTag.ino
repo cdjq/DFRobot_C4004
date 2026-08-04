@@ -232,9 +232,9 @@ void handleSetTag(void)
     printMenu();
     return;
   }
-  tag.scopeType = (choice == '2') ? DFRobot_C4004::eTagRangeCircle : DFRobot_C4004::eTagRangeRectangle;
+  tag.scopeType = (choice == '2') ? DFRobot_C4004::eCircle : DFRobot_C4004::eRectangle;
 
-  if (tag.scopeType == DFRobot_C4004::eTagRangeRectangle) {
+  if (tag.scopeType == DFRobot_C4004::eRectangle) {
     if (!readUint16Value(F("Enter width (cm), then Enter: "), &value, true)) {
       Serial.println(F("setTag canceled."));
       printMenu();
@@ -572,7 +572,7 @@ void printTagList(const __FlashStringHelper *title, DFRobot_C4004::sTagConfig_t 
   for (uint8_t i = 0; i < count; i++) {
     printCol((long)tags[i].tagIndex, 5);
     printCol(tagTypeText(tags[i].tagType), 16);
-    printCol(tags[i].scopeType == DFRobot_C4004::eTagRangeCircle ? F("Circle") : F("Rectangle"), 11);
+    printCol(tags[i].scopeType == DFRobot_C4004::eCircle ? F("Circle") : F("Rectangle"), 11);
     printCol((long)tags[i].ioIndex, 4);
     printCol((long)tags[i].centerX, 9);
     printCol((long)tags[i].centerY, 9);

@@ -179,7 +179,7 @@ def print_tag_list(title, tags):
   print('---- ---------------- ---------- --  -------  -------  -----  ------')
   for tag in tags:
     type_text = tag_type_to_string(tag.tag_type)
-    range_text = 'Circle' if tag.scope_type == c4004.TAG_RANGE_CIRCLE else 'Rectangle'
+    range_text = 'Circle' if tag.scope_type == c4004.CIRCLE else 'Rectangle'
     print(
       '%-4d %-16s %-10s %-2d  %-7d  %-7d  %-5d  %d'
       % (
@@ -294,7 +294,7 @@ def handle_set_tag():
     return
 
   if choice == '1':
-    tag.scope_type = c4004.TAG_RANGE_RECTANGLE
+    tag.scope_type = c4004.RECTANGLE
     value = read_line_value('Enter width (cm), then Enter: ')
     if value is None:
       print('setTag canceled.')
@@ -308,7 +308,7 @@ def handle_set_tag():
       return
     tag.height = value
   else:
-    tag.scope_type = c4004.TAG_RANGE_CIRCLE
+    tag.scope_type = c4004.CIRCLE
     value = read_line_value('Enter radius (cm), then Enter: ')
     if value is None:
       print('setTag canceled.')

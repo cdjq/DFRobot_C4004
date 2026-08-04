@@ -87,7 +87,7 @@ def main():
   tag0 = DFRobot_TagConfig()
   tag0.tag_index = 0
   tag0.tag_type = c4004.TAG_PEOPLE_COUNTING
-  tag0.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag0.scope_type = c4004.RECTANGLE
   tag0.io_index = 2
   tag0.center_x = 0
   tag0.center_y = 100
@@ -98,7 +98,7 @@ def main():
   tag1 = DFRobot_TagConfig()
   tag1.tag_index = 1
   tag1.tag_type = c4004.TAG_PEOPLE_COUNTING
-  tag1.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag1.scope_type = c4004.RECTANGLE
   tag1.io_index = 3
   tag1.center_x = 100
   tag1.center_y = 220
@@ -109,7 +109,7 @@ def main():
   tag2 = DFRobot_TagConfig()
   tag2.tag_index = 2
   tag2.tag_type = c4004.TAG_PEOPLE_COUNTING
-  tag2.scope_type = c4004.TAG_RANGE_CIRCLE
+  tag2.scope_type = c4004.CIRCLE
   tag2.io_index = 4
   tag2.center_x = -80
   tag2.center_y = 350
@@ -123,7 +123,7 @@ def main():
   tag3 = DFRobot_TagConfig()
   tag3.tag_index = 3
   tag3.tag_type = c4004.TAG_PEOPLE_COUNTING
-  tag3.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag3.scope_type = c4004.RECTANGLE
   tag3.io_index = 5
   tag3.center_x = 0
   tag3.center_y = 500
@@ -134,7 +134,7 @@ def main():
   tag4 = DFRobot_TagConfig()
   tag4.tag_index = 4
   tag4.tag_type = c4004.TAG_PEOPLE_COUNTING
-  tag4.scope_type = c4004.TAG_RANGE_RECTANGLE
+  tag4.scope_type = c4004.RECTANGLE
   tag4.io_index = 6
   tag4.center_x = -100
   tag4.center_y = 620
@@ -152,10 +152,10 @@ def main():
   else:
     print('Set occupancy LED failed.')
 
-  if c4004.set_real_time_people_time(5):
-    print('Set RealTimePeopleTime success.')
+  if c4004.set_real_time_report_interval(5):
+    print('Set RealTimeReportInterval success.')
   else:
-    print('Set RealTimePeopleTime failed.')
+    print('Set RealTimeReportInterval failed.')
 
   try:
     last_print = 0

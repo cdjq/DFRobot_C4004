@@ -143,7 +143,7 @@ void printTagList(const __FlashStringHelper *title, DFRobot_C4004::sTagConfig_t 
   for (uint8_t i = 0; i < count; i++) {
     printCol((long)tags[i].tagIndex, 5);
     printCol(tagTypeText(tags[i].tagType), 16);
-    printCol(tags[i].scopeType == DFRobot_C4004::eTagRangeCircle ? F("Circle") : F("Rectangle"), 11);
+    printCol(tags[i].scopeType == DFRobot_C4004::eCircle ? F("Circle") : F("Rectangle"), 11);
     printCol((long)tags[i].ioIndex, 4);
     printCol((long)tags[i].centerX, 9);
     printCol((long)tags[i].centerY, 9);
@@ -218,7 +218,7 @@ void setup()
   // eTagNone: invalid/unused tag, does not generate meaningful tag events.
   setTags[0].tagIndex  = 0;
   setTags[0].tagType   = DFRobot_C4004::eTagNone;
-  setTags[0].scopeType = DFRobot_C4004::eTagRangeRectangle;
+  setTags[0].scopeType = DFRobot_C4004::eRectangle;
   setTags[0].ioIndex   = 0;
   setTags[0].centerX   = 0;
   setTags[0].centerY   = 100;
@@ -229,7 +229,7 @@ void setup()
   // eTagBoundary: edge tag; reports Enter/Exit when a person crosses this zone.
   setTags[1].tagIndex  = 1;
   setTags[1].tagType   = DFRobot_C4004::eTagBoundary;
-  setTags[1].scopeType = DFRobot_C4004::eTagRangeRectangle;
+  setTags[1].scopeType = DFRobot_C4004::eRectangle;
   setTags[1].ioIndex   = 0;
   setTags[1].centerX   = 100;
   setTags[1].centerY   = 220;
@@ -240,7 +240,7 @@ void setup()
   // eTagApproachAway: reports Approach/Away relative to this tag zone.
   setTags[2].tagIndex  = 2;
   setTags[2].tagType   = DFRobot_C4004::eTagApproachAway;
-  setTags[2].scopeType = DFRobot_C4004::eTagRangeCircle;
+  setTags[2].scopeType = DFRobot_C4004::eCircle;
   setTags[2].ioIndex   = 0;
   setTags[2].centerX   = -80;
   setTags[2].centerY   = 350;
@@ -251,7 +251,7 @@ void setup()
   // eTagPeopleCounting: counts moving and stationary people inside the tag zone.
   setTags[3].tagIndex  = 3;
   setTags[3].tagType   = DFRobot_C4004::eTagPeopleCounting;
-  setTags[3].scopeType = DFRobot_C4004::eTagRangeRectangle;
+  setTags[3].scopeType = DFRobot_C4004::eRectangle;
   setTags[3].ioIndex   = 0;
   setTags[3].centerX   = 0;
   setTags[3].centerY   = 500;
@@ -262,7 +262,7 @@ void setup()
   // eTagNoise: marks this zone as an interference/noise area.
   setTags[4].tagIndex  = 4;
   setTags[4].tagType   = DFRobot_C4004::eTagNoise;
-  setTags[4].scopeType = DFRobot_C4004::eTagRangeRectangle;
+  setTags[4].scopeType = DFRobot_C4004::eRectangle;
   setTags[4].ioIndex   = 0;
   setTags[4].centerX   = -100;
   setTags[4].centerY   = 620;
