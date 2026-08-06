@@ -18,6 +18,8 @@ from collections import deque
 class DFRobot_InstallInfo(object):
   '''!
   @brief Complete installation information.
+  @n Recommended: side-mount height about 180±20 cm; optimal detection coverage about 4 m × 7 m
+  @n (e.g. four-side boundary x ±200 cm, y 0~700 cm).
   @n Sensor coordinate system (origin at the sensor, unit: cm):
   @n - Target and tag positions (x, y) are reported in this same horizontal plane.
   @n - z_angle: sensor pitch tilt in degrees (rotation that tips the forward beam from horizontal toward the floor).
