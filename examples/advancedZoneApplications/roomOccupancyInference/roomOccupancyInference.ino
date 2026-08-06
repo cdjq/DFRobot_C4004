@@ -43,11 +43,11 @@ const uint8_t  checkToActiveFrames = 2;
 const uint32_t noPersonDelayS      = 5;
 const uint32_t trackExistsTimeS    = 1;
 
-const int16_t  livingRoomCenterXCm = 0;
-const int16_t  livingRoomCenterYCm = 200;
+const int16_t livingRoomCenterXCm = 0;
+const int16_t livingRoomCenterYCm = 200;
 /* Rectangle SizeX/SizeY map to tag width/height: width along X-axis, height along Y-axis (cm). */
-const uint16_t livingRoomSizeXCm   = 400;
-const uint16_t livingRoomSizeYCm   = 400;
+const uint16_t livingRoomSizeXCm = 400;
+const uint16_t livingRoomSizeYCm = 400;
 
 const int16_t  kitchenCenterXCm = 0;
 const int16_t  kitchenCenterYCm = 600;
@@ -243,7 +243,7 @@ void setup()
 
 void loop()
 {
-  uint32_t         nowMs = millis();
+  uint32_t                        nowMs = millis();
   DFRobot_C4004::eReportedEvent_t event = c4004.getReportedEvent(50);
 
   if (event == DFRobot_C4004::eEventTag) {

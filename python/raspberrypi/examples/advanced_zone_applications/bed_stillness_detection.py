@@ -1,21 +1,22 @@
 # -*- coding: utf-8 -*
 '''!
-  @file bed_stillness_detection.py
-  @brief Bed-zone stillness lighting control using active polling APIs.
-  @details Rule summary:
-  @n 1) If any static person exists in bed area for over 5s, turn room light OFF.
-  @n 2) While rule 1 is active, new people entering room keeps light OFF.
-  @n 3) If bed area has no static person, keep light ON when room has people.
-  @n 4) After room transitions from occupied to empty, wait 5s then turn light OFF.
-  @n Usage environment:
-  @n - Please install the sensor at a height of 180 cm for use.
-  @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
-  @license The MIT License (MIT)
-  @author JiaLi(jia.li@dfrobot.com)
-  @version V1.0.0
-  @date 2026-05-22
-  @url https://github.com/DFRobot/DFRobot_C4004
+@file bed_stillness_detection.py
+@brief Bed-zone stillness lighting control using active polling APIs.
+@details Rule summary:
+@n 1) If any static person exists in bed area for over 5s, turn room light OFF.
+@n 2) While rule 1 is active, new people entering room keeps light OFF.
+@n 3) If bed area has no static person, keep light ON when room has people.
+@n 4) After room transitions from occupied to empty, wait 5s then turn light OFF.
+@n Usage environment:
+@n - Please install the sensor at a height of 180 cm for use.
+@copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
+@license The MIT License (MIT)
+@author JiaLi(jia.li@dfrobot.com)
+@version V1.0.0
+@date 2026-05-22
+@url https://github.com/DFRobot/DFRobot_C4004
 '''
+
 import os
 import sys
 import time
@@ -44,8 +45,8 @@ light_ctrl_pin = 3
 
 # Users can adjust these times according to their own preferences, needs,
 # application scenarios, etc. The default time is 5 seconds.
-bed_static_hold_s = 5.0       # Time required to keep the bed state static.
-bedroom_empty_hold_s = 5.0    # Time required to keep the bedroom state empty.
+bed_static_hold_s = 5.0  # Time required to keep the bed state static.
+bedroom_empty_hold_s = 5.0  # Time required to keep the bedroom state empty.
 
 light_off_level = 1
 light_on_level = 0

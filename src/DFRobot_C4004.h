@@ -1,7 +1,7 @@
 /*!
  * @file DFRobot_C4004.h
- * @brief Arduino driver for the sensor module.
- * @details Provides common configuration, query, and report parsing APIs.
+ * @brief Header file of the sensor module Arduino library: declares enums, structs, classes, and API methods.
+ * @details Provides common configuration, query, and report parsing API declarations.
  * @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
  * @license The MIT License (MIT)
  * @author JiaLi(jia.li@dfrobot.com)
@@ -135,10 +135,8 @@
 #define C4004_CMD_PEOPLE_COUNT_SET_NO_PERSON_DELAY        0x17
 #define C4004_CMD_PEOPLE_COUNT_QUERY_NO_PERSON_DELAY      0x97
 
-
 class DFRobot_C4004 {
 public:
-
   /**
    * @enum eReportedEvent_t
    * @brief Reported event type returned by getReportedEvent().
@@ -161,8 +159,8 @@ public:
    * @brief Data acquisition mode used by getter APIs.
    */
   typedef enum {
-    eGetDataActive = 0x00, ///> Active mode: get data from the sensor immediately
-    eGetDataReport = 0x01  ///> Report mode: get data from the sensor after a report is received
+    eGetDataActive = 0x00,    ///> Active mode: get data from the sensor immediately
+    eGetDataReport = 0x01     ///> Report mode: get data from the sensor after a report is received
   } eGetDataMode_t;
 
   /**
@@ -286,27 +284,25 @@ public:
    * @struct sInstallInfo_t
    * @brief Complete installation information.
    * @n Sensor coordinate system (origin at the sensor, unit: cm):
-   * @n - +Y: forward detection direction (away from the sensor face); object depth in front of the sensor.
-   * @n - +X / -X: left / right lateral offset relative to the forward (+Y) direction.
    * @n - Target and tag positions (x, y) are reported in this same horizontal plane.
-   * @n - zAngle: sensor pitch tilt in degrees (rotation that tips the +Y beam from horizontal toward the floor).
-   * @n   0° = side mount (looking along +Y); 90° = top mount (looking down).
+   * @n - zAngle: sensor pitch tilt in degrees (rotation that tips the forward beam from horizontal toward the floor).
+   * @n   0° = side mount (looking forward); 90° = top mount (looking down).
    */
   typedef struct {
-    eInstallMode_t mode;      ///> Mounting mode, eSide or eTop (keep consistent with zAngle)
-    uint16_t       heightCm;  ///> Side: default 180 cm, recommended 180±20 cm; Top: 220-280 cm (2.2-2.8 m)
-    int16_t        xAngle;    ///> Unused and can be ignored
-    int16_t        yAngle;    ///> Unused and can be ignored
-    int16_t        zAngle;    ///> Pitch tilt in degrees. Default 0°. 0° = side (+Y horizontal), 90° = top
+    eInstallMode_t mode;        ///> Mounting mode, eSide or eTop (keep consistent with zAngle)
+    uint16_t       heightCm;    ///> Side: default 180 cm, recommended 180±20 cm; Top: 220-280 cm (2.2-2.8 m)
+    int16_t        xAngle;      ///> Unused and can be ignored
+    int16_t        yAngle;      ///> Unused and can be ignored
+    int16_t        zAngle;      ///> Pitch tilt in degrees. Default 0°. 0° = side (forward horizontal), 90° = top
   } sInstallInfo_t;
 
   /**
    * @struct sPoint_t
-   * @brief One point used by polygon/config boundary modes (X/Y in cm; see sInstallInfo_t).
+   * @brief One point used by polygon/config boundary modes (unit: cm; see sInstallInfo_t).
    */
   typedef struct {
-    int16_t x;    ///> X (cm), left/right relative to +Y
-    int16_t y;    ///> Y (cm), depth in front of the sensor
+    int16_t x;
+    int16_t y;
   } sPoint_t;
 
   /**
@@ -323,8 +319,8 @@ public:
     uint8_t          index;            ///> Target index
     uint8_t          kinesia;          ///> Quantified human motion amplitude, range 0~100
     eTargetFeature_t targetFeature;    ///> Target feature type
-    int16_t          x;                ///> Target X coordinate (cm), left/right relative to +Y
-    int16_t          y;                ///> Target Y coordinate (cm), depth in front of the sensor (+Y)
+    int16_t          x;                ///> Target X coordinate (cm), left/right lateral offset
+    int16_t          y;                ///> Target Y coordinate (cm), depth in front of the sensor
     int16_t          height;           ///> Unused and can be ignored
     int16_t          speed;            ///> Target speed, unit: cm/s. Positive: approaching the sensor; negative: leaving the sensor
   } sTargetInfo_t;
@@ -334,14 +330,14 @@ public:
    * @brief Tag configuration used by tag query and batch config APIs.
    */
   typedef struct {
-    uint8_t         tagIndex;       ///> Tag index
-    eTagType_t      tagType;        ///> Tag type
-    eTagRangeType_t scopeType;      ///> Tag range type
-    uint8_t         ioIndex;        ///> IO index, 0: unused; 2-6: IO2-IO6 linkage. IO1 is fixed to the overall detection range and cannot be bound to a specific tag zone
-    int16_t         centerX;        ///> Tag center X (cm), left/right relative to +Y
-    int16_t         centerY;        ///> Tag center Y (cm), depth in front of the sensor (+Y)
-    uint16_t        width;          ///> Rectangle: size along X-axis (cm); Circle: radius (cm)
-    uint16_t        height;         ///> Rectangle: size along Y-axis (cm); Circle: ignored
+    uint8_t         tagIndex;     ///> Tag index
+    eTagType_t      tagType;      ///> Tag type
+    eTagRangeType_t scopeType;    ///> Tag range type
+    uint8_t         ioIndex;      ///> IO index, 0: unused; 2-6: IO2-IO6 linkage. IO1 is fixed to the overall detection range and cannot be bound to a specific tag zone
+    int16_t         centerX;      ///> Tag center X (cm), left/right lateral offset
+    int16_t         centerY;      ///> Tag center Y (cm), depth in front of the sensor
+    uint16_t        width;        ///> Rectangle: size along X-axis (cm); Circle: radius (cm)
+    uint16_t        height;       ///> Rectangle: size along Y-axis (cm); Circle: ignored
   } sTagConfig_t;
 
   /**
@@ -355,15 +351,15 @@ public:
    * @note When tagType is eTagNone, enterExit, motionDir, motionNum and staticNum are invalid.
    */
   typedef struct {
-    uint8_t                  tagIndex;    ///> Tag index
-    eTagType_t               tagType;     ///> Tag type
-    uint8_t                  ioIndex;     ///> IO index
-    int16_t                  centerX;     ///> Tag center X (cm), left/right relative to +Y
-    int16_t                  centerY;     ///> Tag center Y (cm), depth in front of the sensor (+Y)
-    eBoundaryDirection_t     enterExit;   ///> Enter/exit direction
-    eApproachAwayDirection_t motionDir;   ///> Approach/away direction
-    uint8_t                  motionNum;   ///> Moving number
-    uint8_t                  staticNum;   ///> Static number
+    uint8_t                  tagIndex;     ///> Tag index
+    eTagType_t               tagType;      ///> Tag type
+    uint8_t                  ioIndex;      ///> IO index
+    int16_t                  centerX;      ///> Tag center X (cm), left/right lateral offset
+    int16_t                  centerY;      ///> Tag center Y (cm), depth in front of the sensor
+    eBoundaryDirection_t     enterExit;    ///> Enter/exit direction
+    eApproachAwayDirection_t motionDir;    ///> Approach/away direction
+    uint8_t                  motionNum;    ///> Moving number
+    uint8_t                  staticNum;    ///> Static number
   } sTagInfo_t;
 
   /**
@@ -372,8 +368,8 @@ public:
    * @n Boundaries are in the sensor X/Y plane (see sInstallInfo_t): X left/right, Y forward depth.
    */
   typedef struct {
-    int16_t xMax;    ///> Maximum X boundary (cm), right side relative to +Y
-    int16_t xMin;    ///> Minimum X boundary (cm), left side relative to +Y
+    int16_t xMax;    ///> Maximum X boundary (cm), right side
+    int16_t xMin;    ///> Minimum X boundary (cm), left side
     int16_t yMax;    ///> Maximum Y boundary (cm), far end of forward detection
     int16_t yMin;    ///> Minimum Y boundary (cm), near end (usually 0 at the sensor)
   } sFourSidedRange_t;
@@ -471,12 +467,12 @@ public:
    * @fn setInstallInfo
    * @brief Set the installation information of the sensor.
    * @param info: Installation information.
-   * @n          mode: Mounting mode, eSide or eTop. 
+   * @n          mode: Mounting mode, eSide or eTop.
    * @n          heightCm: Installation height in cm.
    * @n            - Side (zAngle 0°): default 180 cm, recommended 180±20 cm (too low is easily blocked).
    * @n            - Top (zAngle 90°): recommended 220-280 cm (2.2-2.8 m).
-   * @n          zAngle: Pitch tilt in degrees (default 0°). 0° = side (looking along +Y), 90° = top (looking down).
-   * @n            See sInstallInfo_t for the sensor X/Y coordinate system relative to object positions.
+   * @n          zAngle: Pitch tilt in degrees (default 0°). 0° = side (looking forward), 90° = top (looking down).
+   * @n            See sInstallInfo_t for the sensor coordinate system relative to object positions.
    * @return true: Set succeeded, false: Set failed.
    * @note Invalid mode or height returns false. Out-of-range angles are clamped.
    * @note If the installation height is too low, it is easy to be blocked
@@ -820,6 +816,8 @@ public:
    * @brief Clear the live count detected by the sensor and restart detection/tracking from 0.
    * @n Use this when an interference object remains in the detection range and the sensor
    * @n cannot confirm or clear it by itself; call this API to refresh the live-count state.
+   * @n Example: when the actual number of people does not match the live count, call this API
+   * @n to clear and refresh; the sensor will re-identify people.
    * @return true: Clear succeeded, false: Clear failed.
   */
   bool clearLiveCount(void);
@@ -945,32 +943,32 @@ private:
 #else
   HardwareSerial *_serial;
 #endif
-  uint32_t          _baud;
-  uint8_t           _rxpin;
-  uint8_t           _txpin;
-  sPacket_t         _rxPacket;
-  bool              _heartbeat;
-  bool              _initFinished;
-  ePresenceState_t  _presence;
-  eMotionState_t    _motionState;
-  uint8_t           _trajectoryLed;
-  uint8_t           _motionLed;
-  sTargetInfo_t     _targets[C4004_MAX_TARGETS];
-  uint8_t           _targetCount;
-  sTagInfo_t        _tagInfo;
-  bool              _tagInfoValid;
+  uint32_t              _baud;
+  uint8_t               _rxpin;
+  uint8_t               _txpin;
+  sPacket_t             _rxPacket;
+  bool                  _heartbeat;
+  bool                  _initFinished;
+  ePresenceState_t      _presence;
+  eMotionState_t        _motionState;
+  uint8_t               _trajectoryLed;
+  uint8_t               _motionLed;
+  sTargetInfo_t         _targets[C4004_MAX_TARGETS];
+  uint8_t               _targetCount;
+  sTagInfo_t            _tagInfo;
+  bool                  _tagInfoValid;
   eDetectionRangeMode_t _rangeMode;
-  sFourSidedRange_t _rangeInfo;
-  uint8_t           _peopleCount;
-  uint8_t           _rxRing[C4004_RX_RING_SIZE];
-  uint16_t          _rxHead;
-  uint16_t          _rxTail;
-  eRxAsmState_t     _asmState;
-  uint8_t           _asmChecksum;
-  uint16_t          _asmIdx;
-  uint8_t           _asmRecvChecksum;
-  sPacket_t         _pendingPacket;
-  bool              _pendingValid;
+  sFourSidedRange_t     _rangeInfo;
+  uint8_t               _peopleCount;
+  uint8_t               _rxRing[C4004_RX_RING_SIZE];
+  uint16_t              _rxHead;
+  uint16_t              _rxTail;
+  eRxAsmState_t         _asmState;
+  uint8_t               _asmChecksum;
+  uint16_t              _asmIdx;
+  uint8_t               _asmRecvChecksum;
+  sPacket_t             _pendingPacket;
+  bool                  _pendingValid;
 };
 
 #endif

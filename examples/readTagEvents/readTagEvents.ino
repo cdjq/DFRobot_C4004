@@ -244,8 +244,8 @@ void setup()
   setTags[2].ioIndex   = 0;
   setTags[2].centerX   = -80;
   setTags[2].centerY   = 350;
-  setTags[2].width     = 80;     // Circle radius (cm)
-  setTags[2].height    = 0;      // Ignored for circle
+  setTags[2].width     = 80;    // Circle radius (cm)
+  setTags[2].height    = 0;     // Ignored for circle
 
   // Set tag 3, type is PeopleCounting, range is Rectangle, center is (0, 500), width/height is (160, 160)
   // eTagPeopleCounting: counts moving and stationary people inside the tag zone.

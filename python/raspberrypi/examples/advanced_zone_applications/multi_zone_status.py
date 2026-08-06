@@ -1,20 +1,21 @@
 # -*- coding: utf-8 -*
 '''!
-  @file multi_zone_status.py
-  @brief Read multi-zone tag events and print living-room scene linkage status.
-  @details This routine can use tags configured by the PC tool or optionally configure
-  @n tags in code. It keeps the last event result for each tag, prints a summary table
-  @n every 3 seconds or when a tag event arrives, and drives outputs based on
-  @n game-area and sofa-area people counting results.
-  @n Usage environment:
-  @n - Please install the sensor at a height of 180 cm for use.
-  @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
-  @license The MIT License (MIT)
-  @author JiaLi(jia.li@dfrobot.com)
-  @version V1.0.0
-  @date 2026-05-22
-  @url https://github.com/DFRobot/DFRobot_C4004
+@file multi_zone_status.py
+@brief Read multi-zone tag events and print living-room scene linkage status.
+@details This routine can use tags configured by the PC tool or optionally configure
+@n tags in code. It keeps the last event result for each tag, prints a summary table
+@n every 3 seconds or when a tag event arrives, and drives outputs based on
+@n game-area and sofa-area people counting results.
+@n Usage environment:
+@n - Please install the sensor at a height of 180 cm for use.
+@copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
+@license The MIT License (MIT)
+@author JiaLi(jia.li@dfrobot.com)
+@version V1.0.0
+@date 2026-05-22
+@url https://github.com/DFRobot/DFRobot_C4004
 '''
+
 import os
 import sys
 import time
@@ -50,10 +51,10 @@ tag_total = 7
 
 # Users can adjust these times according to their own preferences, needs,
 # application scenarios, etc. The default time is 5 seconds.
-game_no_person_delay_s = 5.0   # Delay before the game area is treated as empty.
-sofa_static_delay_s = 5.0      # Delay before the sofa area is treated as static.
-sofa_motion_delay_s = 5.0      # Delay before the sofa area is treated as motion.
-sofa_empty_delay_s = 5.0       # Delay before the sofa area is treated as empty.
+game_no_person_delay_s = 5.0  # Delay before the game area is treated as empty.
+sofa_static_delay_s = 5.0  # Delay before the sofa area is treated as static.
+sofa_motion_delay_s = 5.0  # Delay before the sofa area is treated as motion.
+sofa_empty_delay_s = 5.0  # Delay before the sofa area is treated as empty.
 light_pwm_low = 0
 light_pwm_dim = 150
 light_pwm_high = 255

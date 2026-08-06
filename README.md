@@ -455,6 +455,8 @@ pip3 install pyserial
    * @brief Clear the live count detected by the sensor and restart detection/tracking from 0.
    * @n Use this when an interference object remains in the detection range and the sensor
    * @n cannot confirm or clear it by itself; call this API to refresh the live-count state.
+   * @n Example: when the actual number of people does not match the live count, call this API
+   * @n to clear and refresh; the sensor will re-identify people.
    * @return true: Clear succeeded, false: Clear failed.
   */
   bool clearLiveCount(void);

@@ -452,6 +452,7 @@ pip3 install pyserial
    * @brief 清除传感器检测到的实时人数(Live Count)，并从 0 重新开始检测/跟踪。
    * @n 当检测范围内仍有干扰物存在、传感器无法自行确认或清除时，
    * @n 可调用本接口刷新实时人数(Live Count)状态。
+   * @n 示例：当实际人数与实时人数不符时，可通过该接口进行清除和刷新，传感器会重新识别人。
    * @return true: 清除成功，false: 清除失败。
   */
   bool clearLiveCount(void);

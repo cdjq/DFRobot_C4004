@@ -168,8 +168,8 @@ def main():
   tag0.io_index = 0
   tag0.center_x = 0
   tag0.center_y = 100
-  tag0.width = 120    # X-axis size (cm)
-  tag0.height = 120   # Y-axis size (cm)
+  tag0.width = 120  # X-axis size (cm)
+  tag0.height = 120  # Y-axis size (cm)
   set_tags.append(tag0)
 
   # tag1 TAG_BOUNDARY: edge tag; reports Enter/Exit when a person crosses this zone.
@@ -180,8 +180,8 @@ def main():
   tag1.io_index = 0
   tag1.center_x = 100
   tag1.center_y = 220
-  tag1.width = 120    # X-axis size (cm)
-  tag1.height = 120   # Y-axis size (cm)
+  tag1.width = 120  # X-axis size (cm)
+  tag1.height = 120  # Y-axis size (cm)
   set_tags.append(tag1)
 
   # tag2 TAG_APPROACH_AWAY: reports Approach/Away relative to this tag zone.
@@ -192,8 +192,8 @@ def main():
   tag2.io_index = 0
   tag2.center_x = -80
   tag2.center_y = 350
-  tag2.width = 80     # Circle radius (cm)
-  tag2.height = 0     # Ignored for circle
+  tag2.width = 80  # Circle radius (cm)
+  tag2.height = 0  # Ignored for circle
   set_tags.append(tag2)
 
   # tag3 TAG_PEOPLE_COUNTING: counts moving and stationary people inside the tag zone.
@@ -204,8 +204,8 @@ def main():
   tag3.io_index = 0
   tag3.center_x = 0
   tag3.center_y = 500
-  tag3.width = 160    # X-axis size (cm)
-  tag3.height = 160   # Y-axis size (cm)
+  tag3.width = 160  # X-axis size (cm)
+  tag3.height = 160  # Y-axis size (cm)
   set_tags.append(tag3)
 
   # tag4 TAG_NOISE: marks this zone as an interference/noise area.
@@ -216,8 +216,8 @@ def main():
   tag4.io_index = 0
   tag4.center_x = -100
   tag4.center_y = 620
-  tag4.width = 100    # X-axis size (cm)
-  tag4.height = 120   # Y-axis size (cm)
+  tag4.width = 100  # X-axis size (cm)
+  tag4.height = 120  # Y-axis size (cm)
   set_tags.append(tag4)
 
   if c4004.set_tags_from_config(set_tags):

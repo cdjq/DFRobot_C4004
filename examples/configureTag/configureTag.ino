@@ -40,24 +40,24 @@ static const uint8_t  singleTrackConfirmTimes = 5;
 static const uint16_t trackQueryIntervalMs    = 1000;
 static const uint8_t  kMaxTags                = 32;
 
-void printMenu(void);
-void handleSetTag(void);
-void handleClearTag(void);
-void handleClearAllTags(void);
-void handleGetTags(void);
-void handleWatchTagEvents(void);
-bool waitForSingleTrack(void);
-bool readUint16Value(const __FlashStringHelper *prompt, uint16_t *pValue, bool allowCancel);
-bool readChoice(const __FlashStringHelper *prompt, char minChoice, char maxChoice, char *pChoice, bool allowCancel);
-char readCommand(void);
-char waitCommand(void);
-void flushSerialInput(void);
-void printCol(const __FlashStringHelper *text, uint8_t width);
-void printCol(long value, uint8_t width);
+void                       printMenu(void);
+void                       handleSetTag(void);
+void                       handleClearTag(void);
+void                       handleClearAllTags(void);
+void                       handleGetTags(void);
+void                       handleWatchTagEvents(void);
+bool                       waitForSingleTrack(void);
+bool                       readUint16Value(const __FlashStringHelper *prompt, uint16_t *pValue, bool allowCancel);
+bool                       readChoice(const __FlashStringHelper *prompt, char minChoice, char maxChoice, char *pChoice, bool allowCancel);
+char                       readCommand(void);
+char                       waitCommand(void);
+void                       flushSerialInput(void);
+void                       printCol(const __FlashStringHelper *text, uint8_t width);
+void                       printCol(long value, uint8_t width);
 const __FlashStringHelper *tagTypeText(DFRobot_C4004::eTagType_t type);
 const __FlashStringHelper *tagSetStatusText(DFRobot_C4004::eTagSetStatus_t status);
-void printTagList(const __FlashStringHelper *title, DFRobot_C4004::sTagConfig_t *tags, uint8_t count);
-void printTagEvent(const DFRobot_C4004::sTagInfo_t &info);
+void                       printTagList(const __FlashStringHelper *title, DFRobot_C4004::sTagConfig_t *tags, uint8_t count);
+void                       printTagEvent(const DFRobot_C4004::sTagInfo_t &info);
 
 void setup()
 {
@@ -170,8 +170,8 @@ void printMenu(void)
 void handleSetTag(void)
 {
   DFRobot_C4004::sTagConfig_t tag;
-  uint16_t value = 0;
-  char choice = 0;
+  uint16_t                    value  = 0;
+  char                        choice = 0;
 
   memset(&tag, 0, sizeof(tag));
 
@@ -319,7 +319,7 @@ void handleClearAllTags(void)
 void handleGetTags(void)
 {
   DFRobot_C4004::sTagConfig_t tags[kMaxTags];
-  uint8_t count = c4004.getTags(tags, kMaxTags);
+  uint8_t                     count = c4004.getTags(tags, kMaxTags);
   printTagList(F("Configured tag list:"), tags, count);
   printMenu();
 }

@@ -291,7 +291,7 @@ void setUseTrajectoryRangeMode(void)
 void queryTrajectoryRange(void)
 {
   DFRobot_C4004::sPoint_t points[C4004_MAX_POINTS];
-  uint16_t pointCount = 0;
+  uint16_t                pointCount = 0;
 
   Serial.println();
   Serial.println(F(" ==============Query Trajectory Range=============="));

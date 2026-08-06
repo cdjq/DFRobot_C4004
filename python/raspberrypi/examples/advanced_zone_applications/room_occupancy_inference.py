@@ -1,20 +1,21 @@
 # -*- coding: utf-8 -*
 '''!
-  @file room_occupancy_inference.py
-  @brief Infer kitchen occupancy from kitchen-door boundary tag events.
-  @details This example configures living-room, kitchen, and kitchen-door tags.
-  @n The kitchen-door tag is Boundary relative to the living-room range.
-  @n Enter-living-room events decrement the kitchen people count, and
-  @n exit-living-room events increment it.
-  @n Usage environment:
-  @n - Please install the sensor at a height of 180 cm for use.
-  @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
-  @license The MIT License (MIT)
-  @author JiaLi(jia.li@dfrobot.com)
-  @version V1.0.0
-  @date 2026-05-22
-  @url https://github.com/DFRobot/DFRobot_C4004
+@file room_occupancy_inference.py
+@brief Infer kitchen occupancy from kitchen-door boundary tag events.
+@details This example configures living-room, kitchen, and kitchen-door tags.
+@n The kitchen-door tag is Boundary relative to the living-room range.
+@n Enter-living-room events decrement the kitchen people count, and
+@n exit-living-room events increment it.
+@n Usage environment:
+@n - Please install the sensor at a height of 180 cm for use.
+@copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
+@license The MIT License (MIT)
+@author JiaLi(jia.li@dfrobot.com)
+@version V1.0.0
+@date 2026-05-22
+@url https://github.com/DFRobot/DFRobot_C4004
 '''
+
 import os
 import sys
 import time
@@ -32,7 +33,7 @@ port = '/dev/ttyAMA0'
 c4004 = DFRobot_C4004(port, 115200)
 
 tag_living_room = 0
-tag_kitchen = 1       # Configured only; kitchen people count uses door enter/exit events.
+tag_kitchen = 1  # Configured only; kitchen people count uses door enter/exit events.
 tag_kitchen_door = 2
 
 check_to_active_frames_cfg = 2

@@ -109,8 +109,8 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
       @n          height_cm: Installation height in cm.
       @n            - Side (z_angle 0°): default 180 cm, recommended 180±20 cm (too low is easily blocked).
       @n            - Top (z_angle 90°): recommended 220-280 cm (2.2-2.8 m).
-      @n          z_angle: Pitch tilt in degrees (default 0°). 0° = side (looking along +Y), 90° = top (looking down).
-      @n            See DFRobot_InstallInfo for the sensor X/Y coordinate system relative to object positions.
+      @n          z_angle: Pitch tilt in degrees (default 0°). 0° = side (looking forward), 90° = top (looking down).
+      @n            See DFRobot_InstallInfo for the sensor coordinate system relative to object positions.
       @return True: Set succeeded, False: Set failed.
       @note Invalid mode or height returns False. Out-of-range angles are clamped.
       @note If the installation height is too low, it is easy to be blocked
@@ -416,6 +416,8 @@ The default serial port in examples is `/dev/ttyAMA0`, baudrate `115200`.
       @brief Clear the live count detected by the sensor and restart detection/tracking from 0.
       @n Use this when an interference object remains in the detection range and the sensor
       @n cannot confirm or clear it by itself; call this API to refresh the live-count state.
+      @n Example: when the actual number of people does not match the live count, call this API
+      @n to clear and refresh; the sensor will re-identify people.
       @return True: Clear succeeded, False: Clear failed.
     '''
 

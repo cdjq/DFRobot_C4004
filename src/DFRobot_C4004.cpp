@@ -1,6 +1,7 @@
 /*!
  * @file DFRobot_C4004.cpp
- * @brief Implementation of the sensor module driver.
+ * @brief Implementation file of the sensor module Arduino library: implements the APIs declared in DFRobot_C4004.h.
+ * @details Provides common configuration, query, and report parsing API implementations.
  * @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
  * @license The MIT License (MIT)
  * @author JiaLi(jia.li@dfrobot.com)
@@ -56,11 +57,11 @@ void DFRobot_C4004::initObject(void)
   memset(&_tagInfo, 0, sizeof(_tagInfo));
   _tagInfoValid = false;
   memset(&_rangeInfo, 0, sizeof(_rangeInfo));
-  _peopleCount = 0;
-  _rangeMode   = eRangeUnknown;
-  _rxHead      = 0;
-  _rxTail         = 0;
-  _pendingValid   = false;
+  _peopleCount  = 0;
+  _rangeMode    = eRangeUnknown;
+  _rxHead       = 0;
+  _rxTail       = 0;
+  _pendingValid = false;
   memset(&_pendingPacket, 0, sizeof(_pendingPacket));
   resetRxParser();
 }
@@ -739,8 +740,8 @@ bool DFRobot_C4004::getTrajectoryRangeMode(sPoint_t *pPoints, uint16_t *pPointCo
 
   for (uint16_t i = 0; i < count; i++) {
     uint16_t offset = (uint16_t)(3 + i * 4);
-    pPoints[i].x     = readSignBitInt16(&packet.data[offset]);
-    pPoints[i].y     = readSignBitInt16(&packet.data[offset + 2]);
+    pPoints[i].x    = readSignBitInt16(&packet.data[offset]);
+    pPoints[i].y    = readSignBitInt16(&packet.data[offset + 2]);
   }
   *pPointCount = count;
   return true;
@@ -777,8 +778,8 @@ bool DFRobot_C4004::getConfigFileModePoints(sPoint_t *pPoints, uint16_t *pPointC
 
   for (uint16_t i = 0; i < count; i++) {
     uint16_t offset = (uint16_t)(3 + i * 4);
-    pPoints[i].x     = readSignBitInt16(&packet.data[offset]);
-    pPoints[i].y     = readSignBitInt16(&packet.data[offset + 2]);
+    pPoints[i].x    = readSignBitInt16(&packet.data[offset]);
+    pPoints[i].y    = readSignBitInt16(&packet.data[offset + 2]);
   }
   *pPointCount = count;
   return true;
@@ -952,7 +953,7 @@ bool DFRobot_C4004::rxPopByte(uint8_t *pValue)
   if (pValue == NULL || _rxTail == _rxHead) {
     return false;
   }
-  *pValue  = _rxRing[_rxTail];
+  *pValue = _rxRing[_rxTail];
   _rxTail = (uint16_t)((_rxTail + 1) % C4004_RX_RING_SIZE);
   return true;
 }
@@ -1383,7 +1384,7 @@ uint8_t DFRobot_C4004::parseTagList(const uint8_t *pData, uint16_t len, sTagConf
     }
 
     for (uint8_t i = 0; i < copyCount; i++) {
-      uint16_t offset   = 2 + i * tagLen;
+      uint16_t offset    = 2 + i * tagLen;
       pTags[i].tagIndex  = pData[offset];
       pTags[i].tagType   = (eTagType_t)pData[offset + 1];
       pTags[i].scopeType = (eTagRangeType_t)pData[offset + 2];

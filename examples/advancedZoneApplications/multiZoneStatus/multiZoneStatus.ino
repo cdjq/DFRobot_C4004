@@ -38,14 +38,14 @@ DFRobot_C4004 c4004(&Serial1, 115200);
 const uint8_t tvCtrlPin    = 2;    // HIGH: turn off TV
 const uint8_t lightCtrlPin = 3;    // HIGH: dim lights
 
-const uint8_t tagGame         = 0;
-const uint8_t tagSofa         = 1;
-const uint8_t tagHomeDoor     = 2;
-const uint8_t tagKitchenDoor  = 3;
-const uint8_t tagDining       = 4;
-const uint8_t tagCurtain      = 5;
-const uint8_t tagPlant        = 6;
-const uint8_t tagTotal        = 7;
+const uint8_t tagGame        = 0;
+const uint8_t tagSofa        = 1;
+const uint8_t tagHomeDoor    = 2;
+const uint8_t tagKitchenDoor = 3;
+const uint8_t tagDining      = 4;
+const uint8_t tagCurtain     = 5;
+const uint8_t tagPlant       = 6;
+const uint8_t tagTotal       = 7;
 
 // Users can adjust these times according to their own preferences, needs, application scenarios, etc. The default time is 5 seconds
 const uint32_t gameNoPersonDelayMs = 5000;    // The game area becomes a time for no one to delay
@@ -60,13 +60,13 @@ const uint8_t lightPwmHigh = 255;
 const char *tagNames[tagTotal] = { "Game", "Sofa", "HomeDoor", "KitchenDoor", "Dining", "CurtainNoise", "PlantNoise" };
 
 DFRobot_C4004::sTagInfo_t tagCache[tagTotal];
-bool       tagPrintPending     = false;
-bool       tvOutputHigh        = false;
-uint8_t    lightOutputValue    = lightPwmLow;
-uint32_t   gameNoPersonStartMs = 0;
-uint32_t   sofaStaticStartMs   = 0;
-uint32_t   sofaMotionStartMs   = 0;
-uint32_t   sofaEmptyStartMs    = 0;
+bool                      tagPrintPending     = false;
+bool                      tvOutputHigh        = false;
+uint8_t                   lightOutputValue    = lightPwmLow;
+uint32_t                  gameNoPersonStartMs = 0;
+uint32_t                  sofaStaticStartMs   = 0;
+uint32_t                  sofaMotionStartMs   = 0;
+uint32_t                  sofaEmptyStartMs    = 0;
 
 const char *tagTypeToText(DFRobot_C4004::eTagType_t type)
 {
@@ -110,7 +110,7 @@ void initTagCacheFromConfig(const DFRobot_C4004::sTagConfig_t *tags, uint8_t cou
 bool initTagCacheFromDevice()
 {
   DFRobot_C4004::sTagConfig_t tags[tagTotal];
-  uint8_t      count = c4004.getTags(tags, (uint8_t)(sizeof(tags) / sizeof(tags[0])));
+  uint8_t                     count = c4004.getTags(tags, (uint8_t)(sizeof(tags) / sizeof(tags[0])));
 
   initTagCacheFromConfig(tags, count);
 

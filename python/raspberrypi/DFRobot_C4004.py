@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*
 '''!
 @file DFRobot_C4004.py
-@brief Raspberry Pi library for the sensor module (SKU:SEN0753).
-@details Uses the UART frame protocol 0x53 0x59 ... checksum 0x54 0x43.
+@brief Raspberry Pi library for the sensor module: defines classes, constants, and API method implementations.
 @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
 @license The MIT License (MIT)
 @author JiaLi(jia.li@dfrobot.com)
@@ -20,19 +19,17 @@ class DFRobot_InstallInfo(object):
   '''!
   @brief Complete installation information.
   @n Sensor coordinate system (origin at the sensor, unit: cm):
-  @n - +Y: forward detection direction (away from the sensor face); object depth in front of the sensor.
-  @n - +X / -X: left / right lateral offset relative to the forward (+Y) direction.
   @n - Target and tag positions (x, y) are reported in this same horizontal plane.
-  @n - z_angle: sensor pitch tilt in degrees (rotation that tips the +Y beam from horizontal toward the floor).
-  @n   0° = side mount (looking along +Y); 90° = top mount (looking down).
+  @n - z_angle: sensor pitch tilt in degrees (rotation that tips the forward beam from horizontal toward the floor).
+  @n   0° = side mount (looking forward); 90° = top mount (looking down).
   '''
 
   def __init__(self, mode=0, height_cm=0, x_angle=0, y_angle=0, z_angle=0):
-    self.mode = mode            # Mounting mode: INSTALL_MODE_SIDE or INSTALL_MODE_TOP (keep consistent with z_angle)
+    self.mode = mode  # Mounting mode: INSTALL_MODE_SIDE or INSTALL_MODE_TOP (keep consistent with z_angle)
     self.height_cm = height_cm  # Side: default 180 cm, recommended 180±20 cm; Top: 220-280 cm (2.2-2.8 m)
-    self.x_angle = x_angle      # Unused and can be ignored
-    self.y_angle = y_angle      # Unused and can be ignored
-    self.z_angle = z_angle      # Pitch tilt in degrees. Default 0°. 0° = side (+Y horizontal), 90° = top
+    self.x_angle = x_angle  # Unused and can be ignored
+    self.y_angle = y_angle  # Unused and can be ignored
+    self.z_angle = z_angle  # Pitch tilt in degrees. Default 0°. 0° = side (forward horizontal), 90° = top
 
 
 class DFRobot_TargetInfo(object):
@@ -47,13 +44,13 @@ class DFRobot_TargetInfo(object):
   '''
 
   def __init__(self):
-    self.index = 0              # Target index
-    self.kinesia = 0            # Quantified human motion amplitude, range 0~100
-    self.target_feature = 0     # Target feature type: STATIC / MOTION / UNCERTAIN
-    self.pos_x = 0              # Target X coordinate (cm), left/right relative to +Y
-    self.pos_y = 0              # Target Y coordinate (cm), depth in front of the sensor (+Y)
-    self.height = 0             # Unused and can be ignored
-    self.speed = 0              # Target speed, unit: cm/s. Positive: approaching; negative: leaving
+    self.index = 0  # Target index
+    self.kinesia = 0  # Quantified human motion amplitude, range 0~100
+    self.target_feature = 0  # Target feature type: STATIC / MOTION / UNCERTAIN
+    self.pos_x = 0  # Target X coordinate (cm), left/right lateral offset
+    self.pos_y = 0  # Target Y coordinate (cm), depth in front of the sensor
+    self.height = 0  # Unused and can be ignored
+    self.speed = 0  # Target speed, unit: cm/s. Positive: approaching; negative: leaving
 
 
 class DFRobot_TagConfig(object):
@@ -62,14 +59,14 @@ class DFRobot_TagConfig(object):
   '''
 
   def __init__(self):
-    self.tag_index = 0          # Tag index
-    self.tag_type = 0           # Tag type
-    self.scope_type = 1         # Tag range type
-    self.io_index = 0           # IO index, 0: unused; 2-6: IO2-IO6. IO1 cannot be bound to a tag zone
-    self.center_x = 0           # Tag center X (cm), left/right relative to +Y
-    self.center_y = 0           # Tag center Y (cm), depth in front of the sensor (+Y)
-    self.width = 0              # Rectangle: size along X-axis (cm); Circle: radius (cm)
-    self.height = 0             # Rectangle: size along Y-axis (cm); Circle: ignored
+    self.tag_index = 0  # Tag index
+    self.tag_type = 0  # Tag type
+    self.scope_type = 1  # Tag range type
+    self.io_index = 0  # IO index, 0: unused; 2-6: IO2-IO6. IO1 cannot be bound to a tag zone
+    self.center_x = 0  # Tag center X (cm), left/right lateral offset
+    self.center_y = 0  # Tag center Y (cm), depth in front of the sensor
+    self.width = 0  # Rectangle: size along X-axis (cm); Circle: radius (cm)
+    self.height = 0  # Rectangle: size along Y-axis (cm); Circle: ignored
 
 
 class DFRobot_TagInfo(object):
@@ -84,15 +81,15 @@ class DFRobot_TagInfo(object):
   '''
 
   def __init__(self):
-    self.tag_index = 0          # Tag index
-    self.tag_type = 0           # Tag type
-    self.io_index = 0           # IO index
-    self.center_x = 0           # Tag center X (cm), left/right relative to +Y
-    self.center_y = 0           # Tag center Y (cm), depth in front of the sensor (+Y)
+    self.tag_index = 0  # Tag index
+    self.tag_type = 0  # Tag type
+    self.io_index = 0  # IO index
+    self.center_x = 0  # Tag center X (cm), left/right lateral offset
+    self.center_y = 0  # Tag center Y (cm), depth in front of the sensor
     self.enter_exit = DFRobot_C4004.DIR_NONE  # Enter/exit direction
     self.motion_dir = DFRobot_C4004.DIR_NONE  # Approach/away direction
-    self.motion_num = 0         # Moving number
-    self.static_num = 0         # Static number
+    self.motion_num = 0  # Moving number
+    self.static_num = 0  # Static number
 
 
 class FourSidedRange(object):
@@ -102,20 +99,20 @@ class FourSidedRange(object):
   '''
 
   def __init__(self):
-    self.x_max = 0              # Maximum X boundary (cm), right side relative to +Y
-    self.x_min = 0              # Minimum X boundary (cm), left side relative to +Y
-    self.y_max = 0              # Maximum Y boundary (cm), far end of forward detection
-    self.y_min = 0              # Minimum Y boundary (cm), near end (usually 0 at the sensor)
+    self.x_max = 0  # Maximum X boundary (cm), right side
+    self.x_min = 0  # Minimum X boundary (cm), left side
+    self.y_max = 0  # Maximum Y boundary (cm), far end of forward detection
+    self.y_min = 0  # Minimum Y boundary (cm), near end (usually 0 at the sensor)
 
 
 class DFRobot_Point(object):
   '''!
-  @brief One point used by polygon/config boundary modes (X/Y in cm; see DFRobot_InstallInfo).
+  @brief One point used by polygon/config boundary modes (unit: cm; see DFRobot_InstallInfo).
   '''
 
   def __init__(self, pos_x=0, pos_y=0):
-    self.pos_x = pos_x          # X (cm), left/right relative to +Y
-    self.pos_y = pos_y          # Y (cm), depth in front of the sensor
+    self.pos_x = pos_x
+    self.pos_y = pos_y
 
 
 class DFRobot_Packet(object):
@@ -231,67 +228,67 @@ class DFRobot_C4004(object):
   CMD_PEOPLE_COUNT_SET_NO_PERSON_DELAY = 0x17
   CMD_PEOPLE_COUNT_QUERY_NO_PERSON_DELAY = 0x97
 
-  EVENT_NONE = 0x00              # No complete frame in this round (including wait timeout)
-  EVENT_TRAJECTORY = 0x01        # Trajectory event
-  EVENT_PRESENCE = 0x02          # Presence event, used for presence detection
-  EVENT_MOTION = 0x03            # Motion event, used for motion detection
-  EVENT_TAG = 0x04               # Tag event, used for tag detection
-  EVENT_HEARTBEAT = 0x05         # Heartbeat event, used for heartbeat detection
-  EVENT_INIT_FINISHED = 0x06     # Initialization finished event
-  EVENT_PEOPLE_COUNT = 0x07      # People count event, used for people count detection
-  EVENT_UNKNOWN = 0xFE           # Complete frame received, but event type is unrecognized
-  EVENT_ERROR = 0xFF             # Internal error (e.g. null pointer); rare at application layer
+  EVENT_NONE = 0x00  # No complete frame in this round (including wait timeout)
+  EVENT_TRAJECTORY = 0x01  # Trajectory event
+  EVENT_PRESENCE = 0x02  # Presence event, used for presence detection
+  EVENT_MOTION = 0x03  # Motion event, used for motion detection
+  EVENT_TAG = 0x04  # Tag event, used for tag detection
+  EVENT_HEARTBEAT = 0x05  # Heartbeat event, used for heartbeat detection
+  EVENT_INIT_FINISHED = 0x06  # Initialization finished event
+  EVENT_PEOPLE_COUNT = 0x07  # People count event, used for people count detection
+  EVENT_UNKNOWN = 0xFE  # Complete frame received, but event type is unrecognized
+  EVENT_ERROR = 0xFF  # Internal error (e.g. null pointer); rare at application layer
 
-  GET_DATA_ACTIVE = 0x00         # Active mode: get data from the sensor immediately
-  GET_DATA_REPORT = 0x01         # Report mode: get data from the sensor after a report is received
+  GET_DATA_ACTIVE = 0x00  # Active mode: get data from the sensor immediately
+  GET_DATA_REPORT = 0x01  # Report mode: get data from the sensor after a report is received
 
-  INSTALL_MODE_UNKNOWN = 0x00    # Corresponds to C++ eUnknown
-  INSTALL_MODE_SIDE = 0x01       # Side mount (z_angle 0°). Default height 180 cm, recommended 180±20 cm
-  INSTALL_MODE_TOP = 0x02        # Top/ceiling mount (z_angle 90° only). Recommended height 220-280 cm
+  INSTALL_MODE_UNKNOWN = 0x00  # Corresponds to C++ eUnknown
+  INSTALL_MODE_SIDE = 0x01  # Side mount (z_angle 0°). Default height 180 cm, recommended 180±20 cm
+  INSTALL_MODE_TOP = 0x02  # Top/ceiling mount (z_angle 90° only). Recommended height 220-280 cm
 
-  NO_PRESENCE = 0x00             # No presence detected
-  PRESENCE = 0x01                # Presence detected
+  NO_PRESENCE = 0x00  # No presence detected
+  PRESENCE = 0x01  # Presence detected
 
-  MOTION_NONE = 0x00             # No motion state
-  MOTION_STATIC = 0x01           # Stationary
-  MOTION_ACTIVE = 0x02           # Active motion
+  MOTION_NONE = 0x00  # No motion state
+  MOTION_STATIC = 0x01  # Stationary
+  MOTION_ACTIVE = 0x02  # Active motion
 
-  STATIC = 0x00                  # Static target
-  MOTION = 0x01                  # Moving target
-  UNCERTAIN = 0x02               # Uncertain target feature
+  STATIC = 0x00  # Static target
+  MOTION = 0x01  # Moving target
+  UNCERTAIN = 0x02  # Uncertain target feature
 
-  TAG_NONE = 0x00                # Invalid/unused tag type
-  TAG_BOUNDARY = 0x01            # Edge/boundary tag: reports Enter/Exit when a person passes through
-  TAG_APPROACH_AWAY = 0x02       # Approach/away tag: reports Approach/Away relative to the tag zone
-  TAG_PEOPLE_COUNTING = 0x03     # People-counting tag: reports moving and stationary people counts in the zone
-  TAG_NOISE = 0x04               # Noise tag: marks the zone as an interference area
+  TAG_NONE = 0x00  # Invalid/unused tag type
+  TAG_BOUNDARY = 0x01  # Edge/boundary tag: reports Enter/Exit when a person passes through
+  TAG_APPROACH_AWAY = 0x02  # Approach/away tag: reports Approach/Away relative to the tag zone
+  TAG_PEOPLE_COUNTING = 0x03  # People-counting tag: reports moving and stationary people counts in the zone
+  TAG_NOISE = 0x04  # Noise tag: marks the zone as an interference area
 
-  ENTER = 0x00                   # Enter the detection range area
-  EXIT = 0x01                    # Exit the detection range area
-  DIR_NONE = 0x02                # No boundary / approach-away direction
-  APPROACH = 0x00                # Approach direction, approaching the tag area
-  AWAY = 0x01                    # Away direction, leaving the tag area
+  ENTER = 0x00  # Enter the detection range area
+  EXIT = 0x01  # Exit the detection range area
+  DIR_NONE = 0x02  # No boundary / approach-away direction
+  APPROACH = 0x00  # Approach direction, approaching the tag area
+  AWAY = 0x01  # Away direction, leaving the tag area
 
-  CIRCLE = 0x00                  # Circle range
-  RECTANGLE = 0x01               # Rectangle range
+  CIRCLE = 0x00  # Circle range
+  RECTANGLE = 0x01  # Rectangle range
 
-  TAG_SET_COMM_ERROR = 0x00      # Communication failed or response mismatch
-  TAG_SET_SUCCESS = 0x01         # Tag set succeeded
+  TAG_SET_COMM_ERROR = 0x00  # Communication failed or response mismatch
+  TAG_SET_SUCCESS = 0x01  # Tag set succeeded
   TAG_SET_TRACK_COUNT_ERROR = 0x02  # Track count is not equal to 1
-  TAG_SET_ALREADY_USED = 0x03    # Tag has been occupied
+  TAG_SET_ALREADY_USED = 0x03  # Tag has been occupied
   TAG_SET_INDEX_OUT_OF_RANGE = 0x04  # Tag index out of range
 
-  RANGE_FOUR_SIDE = 0x04         # Four-side detection boundary mode
-  RANGE_TRAJECTORY = 0x05        # Trajectory detection boundary mode
-  RANGE_CONFIG_FILE = 0x06       # Config-file detection boundary mode
-  RANGE_UNKNOWN = 0xFF           # Unknown detection boundary mode
+  RANGE_FOUR_SIDE = 0x04  # Four-side detection boundary mode
+  RANGE_TRAJECTORY = 0x05  # Trajectory detection boundary mode
+  RANGE_CONFIG_FILE = 0x06  # Config-file detection boundary mode
+  RANGE_UNKNOWN = 0xFF  # Unknown detection boundary mode
 
-  TRAJ_RANGE_ERR_COMM = 0x00     # Communication failed or response mismatch
-  TRAJ_RANGE_OK = 0x01           # Query succeeded
-  TRAJ_RANGE_ERR_PARAM = 0x02    # Invalid parameter
-  TRAJ_RANGE_ERR_MODE = 0x03     # Current detection range mode mismatch
-  TRAJ_RANGE_ERR_RES = 0x04      # Resource error
-  TRAJ_RANGE_ERR_DATA = 0x05     # Invalid or incomplete data
+  TRAJ_RANGE_ERR_COMM = 0x00  # Communication failed or response mismatch
+  TRAJ_RANGE_OK = 0x01  # Query succeeded
+  TRAJ_RANGE_ERR_PARAM = 0x02  # Invalid parameter
+  TRAJ_RANGE_ERR_MODE = 0x03  # Current detection range mode mismatch
+  TRAJ_RANGE_ERR_RES = 0x04  # Resource error
+  TRAJ_RANGE_ERR_DATA = 0x05  # Invalid or incomplete data
 
   def __init__(self, port='/dev/ttyAMA0', baudrate=115200, timeout=0.2):
     '''!
@@ -450,8 +447,8 @@ class DFRobot_C4004(object):
     @n          height_cm: Installation height in cm.
     @n            - Side (z_angle 0°): default 180 cm, recommended 180±20 cm (too low is easily blocked).
     @n            - Top (z_angle 90°): recommended 220-280 cm (2.2-2.8 m).
-    @n          z_angle: Pitch tilt in degrees (default 0°). 0° = side (looking along +Y), 90° = top (looking down).
-    @n            See DFRobot_InstallInfo for the sensor X/Y coordinate system relative to object positions.
+    @n          z_angle: Pitch tilt in degrees (default 0°). 0° = side (looking forward), 90° = top (looking down).
+    @n            See DFRobot_InstallInfo for the sensor coordinate system relative to object positions.
     @return True: Set succeeded, False: Set failed.
     @note Invalid mode or height returns False. Out-of-range angles are clamped.
     @note If the installation height is too low, it is easy to be blocked
@@ -1120,6 +1117,8 @@ class DFRobot_C4004(object):
     @brief Clear the live count detected by the sensor and restart detection/tracking from 0.
     @n Use this when an interference object remains in the detection range and the sensor
     @n cannot confirm or clear it by itself; call this API to refresh the live-count state.
+    @n Example: when the actual number of people does not match the live count, call this API
+    @n to clear and refresh; the sensor will re-identify people.
     @return True: Clear succeeded, False: Clear failed.
     '''
     return self._request_frame(self.CTRL_PEOPLE_COUNT, self.CMD_PEOPLE_COUNT_CLEAR_COUNT, [self.QUERY_DATA]) is not None

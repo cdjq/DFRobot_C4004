@@ -48,10 +48,10 @@ const __FlashStringHelper *targetFeatureToString(DFRobot_C4004::eTargetFeature_t
 
 void printTrajectoryData(DFRobot_C4004::eGetDataMode_t dataMode)
 {
-  const __FlashStringHelper *title    = NULL;
-  const __FlashStringHelper *modeText = NULL;
-  DFRobot_C4004::sTargetInfo_t              targets[C4004_MAX_TARGETS];
-  uint8_t                    count = c4004.getTargetList(targets, C4004_MAX_TARGETS, dataMode);
+  const __FlashStringHelper   *title    = NULL;
+  const __FlashStringHelper   *modeText = NULL;
+  DFRobot_C4004::sTargetInfo_t targets[C4004_MAX_TARGETS];
+  uint8_t                      count = c4004.getTargetList(targets, C4004_MAX_TARGETS, dataMode);
 
   if (dataMode == DFRobot_C4004::eGetDataActive) {
     title    = F("======================TrajectoryActive=======================");
