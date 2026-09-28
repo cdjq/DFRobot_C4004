@@ -297,9 +297,6 @@ void setup()
     Serial.println(F("Read current UnoccupiedTime failed."));
   }
 
-  Serial.print(F("Current people count(active): "));
-  Serial.println(c4004.getLiveCount(DFRobot_C4004::eGetDataActive));
-
   Serial.println(F("=======================Done======================="));
 }
 

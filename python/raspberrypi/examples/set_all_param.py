@@ -208,7 +208,6 @@ def main():
   print('Current TrajectoryGenerationDistance(cm):', c4004.get_trajectory_generation_distance())
   print('Current TrajectoryLifetime(s):', c4004.get_trajectory_lifetime())
   print('Current UnoccupiedTime(s):', c4004.get_unoccupied_time())
-  print('Current people count(active):', c4004.get_live_count(c4004.GET_DATA_ACTIVE))
 
   print('=======================Done=======================')
 

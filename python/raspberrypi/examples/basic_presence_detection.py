@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*
 '''!
 @file basic_presence_detection.py
-@brief Quickly check whether someone is in range, still or moving, and how many people are counted.
+@brief Quickly check whether someone is in range, and whether they are still or moving.
 @details Use this example to quickly verify that the sensor can detect whether someone is in the
-@n detection range, whether they are static or moving, and how many people are counted.
+@n detection range, and whether they are static or moving.
 @n Run in a terminal to view live status prints.
 @n Usage environment:
 @n - Please install the sensor at a height of 180 cm for use.
@@ -110,14 +110,10 @@ def main():
         print('Motion state: Motion')
       else:
         print('Motion state: No Target Detected')
-    elif event == c4004.EVENT_PEOPLE_COUNT:
-      count = c4004.get_live_count(c4004.GET_DATA_REPORT)
-      print('Live Count:', count)
 
-    # Every 3 s, actively poll and print people count / presence / motion (not event-driven).
+    # Every 3 s, actively poll and print presence / motion (not event-driven).
     if time.time() - last_query > 3:
       last_query = time.time()
-      print('Live Count:', c4004.get_live_count(c4004.GET_DATA_REPORT))
 
       query_presence = c4004.get_presence_state(c4004.GET_DATA_ACTIVE)
       if query_presence == c4004.NO_PRESENCE:

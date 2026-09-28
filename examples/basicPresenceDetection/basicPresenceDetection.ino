@@ -1,8 +1,8 @@
 /*!
  * @file basicPresenceDetection.ino
- * @brief Quickly check whether someone is in range, still or moving, and how many people are counted.
+ * @brief Quickly check whether someone is in range, and whether they are still or moving.
  * @details Use this example to quickly verify that the sensor can detect whether someone is in the
- * @n detection range, whether they are static or moving, and how many people are counted.
+ * @n detection range, and whether they are static or moving.
  * @n Usage environment:
  * @n - Please install the sensor at a height of 180 cm for use.
  * @copyright Copyright (c) 2026 DFRobot Co.Ltd (http://www.dfrobot.com)
@@ -134,19 +134,12 @@ void loop()
     } else {
       Serial.println(F("No Target Detected"));
     }
-  } else if (event == DFRobot_C4004::eEventPeopleCount) {
-    uint8_t count = c4004.getLiveCount(DFRobot_C4004::eGetDataReport);
-    Serial.print(F("Live Count: "));
-    Serial.println(count);
   }
 
   static uint32_t lastQuery = 0;
-  // Every 3000 ms, actively poll and print people count / presence / motion (not event-driven).
+  // Every 3000 ms, actively poll and print presence / motion (not event-driven).
   if (millis() - lastQuery > 3000) {
     lastQuery = millis();
-    Serial.print(F("Live Count: "));
-    //Serial.println(c4004.getLiveCount(DFRobot_C4004::eGetDataActive)); // Query active data
-    Serial.println(c4004.getLiveCount(DFRobot_C4004::eGetDataReport));    // Query report data
 
     DFRobot_C4004::ePresenceState_t queryPresence = c4004.getPresenceState(DFRobot_C4004::eGetDataActive);
     Serial.print(F("Presence state: "));
